@@ -47,22 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function updateWorkspaceContents(tabId) {
-    // Hide all workspace tab contents
-    document.querySelectorAll('.workspace-tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
-    
-    // Show content for selected tab
-    const activeContent = {
-        'tab-claude': 'workspace-subagents-actions',
-        'tab-cursor': 'workspace-mcps-actions'
-    };
-    
-    const contentId = activeContent[tabId];
-    if (contentId) {
-        document.getElementById(contentId).classList.remove('hidden');
-    }
-    
     // Update file system and editor content based on tab
     updateWorkspaceFileSystem(tabId);
     updateWorkspaceEditor(tabId);
@@ -142,7 +126,7 @@ function initializeQuickActionHandlers() {
     });
     
     // Add handlers for workspace panel QuickAction buttons
-    const workspaceActionButtons = document.querySelectorAll('.workspace-tab-content button');
+    const workspaceActionButtons = document.querySelectorAll('.qa-tab-content button');
     workspaceActionButtons.forEach(button => {
         button.addEventListener('click', function() {
             const label = getButtonLabel(this);
