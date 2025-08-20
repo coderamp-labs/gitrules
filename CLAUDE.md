@@ -15,15 +15,6 @@ This project uses [uv](https://github.com/astral-sh/uv) as the package manager i
 
 ---
 
-## Python Good Practices
-
-### Code Style
-- Follow PEP 8 for formatting.  
-- Use black for auto-formatting: black .
-
-### Type Hints
-- Always use type hints for clarity.  
-
 ### Project Structure
 Recommended layout:
 
@@ -33,18 +24,15 @@ app/
   models/        # Pydantic models  
   services/      # Business logic  
   utils/         # Helpers  
-tests/  
-  test_*.py      # Unit tests  
 requirements.txt  
 CLAUDE.md  
 
-### Environment Variables
+- Never write unit tests
+- Always keep code SUPER minimal, never introduce features I've not explicitely mentionned
 - Store secrets in a .env file (never commit it).  
-- Load them with python-dotenv or FastAPI settings.
-
-### Testing
-- Use pytest for unit tests: pytest
-
----
-
 - Keep dependencies minimal and updated.
+
+
+### Frontend:
+- Refer to @frontend.md when designing frontend components.
+- Keep frontend split in multiple components.
