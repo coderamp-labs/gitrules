@@ -1,17 +1,11 @@
-# Project Setup Instructions
-
-This project uses [uv](https://github.com/astral-sh/uv) as the package manager instead of pip or pip3.
-
----
-
 ## This project uses UV
 
-
-2. Install Dependencies  
+1. Install Dependencies  
    uv pip install -r requirements.txt
 
-3. Run Development Server  
+2. Run Development Server  
    uvicorn app.main:app --reload
+   (don't do it by default, just know that it's how it runs)
 
 ---
 
@@ -27,11 +21,12 @@ app/
 requirements.txt  
 CLAUDE.md  
 
+### Guidelines
+- Update CLAUDE.md when it's relevant.
 - Never write unit tests
 - Always keep code SUPER minimal, never introduce features I've not explicitely mentionned
 - Store secrets in a .env file (never commit it).  
 - Keep dependencies minimal and updated.
-
 
 ### Frontend:
 - Refer to @frontend.md when designing frontend components.
