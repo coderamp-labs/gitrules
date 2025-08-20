@@ -568,10 +568,28 @@ async function openFile(path) {
         const content = await loadFile(path);
         workspaceMonacoEditor.setValue(content);
         
+        // Update file path label
+        updateFilePathLabel(path);
+        
         // Refresh tree to show selection
         renderFileTree();
     } catch (error) {
         workspaceMonacoEditor.setValue(`⚠️ Failed to load "${path}"\n\nError: ${error.message}`);
+        updateFilePathLabel(null);
+    }
+}
+
+// Update file path label
+function updateFilePathLabel(path) {
+    const filePathElement = document.getElementById('current-file-path');
+    if (!filePathElement) return;
+    
+    if (path) {
+        filePathElement.textContent = path;
+        filePathElement.className = 'text-xs text-gray-600 font-mono bg-gray-50 px-2 py-1 border border-gray-300 rounded';
+    } else {
+        filePathElement.textContent = 'No file selected';
+        filePathElement.className = 'text-xs text-gray-400 font-mono bg-gray-50 px-2 py-1 border border-gray-300 rounded';
     }
 }
 
@@ -594,6 +612,7 @@ async function deleteFile(path) {
         if (workspaceMonacoEditor) {
             workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
         }
+        updateFilePathLabel(null);
     }
     
     // Remove file content
@@ -686,8 +705,11 @@ function initializeFileTree() {
     // Auto-open last selected file
     if (selectedFilePath && fileContent[selectedFilePath] && !deletedFiles.has(selectedFilePath)) {
         setTimeout(() => openFile(selectedFilePath), 200);
-    } else if (workspaceMonacoEditor) {
-        workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
+    } else {
+        if (workspaceMonacoEditor) {
+            workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
+        }
+        updateFilePathLabel(null);
     }
 }
 

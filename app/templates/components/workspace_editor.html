@@ -2,13 +2,20 @@
 <div class="lg:col-span-1 border-r-2 border-black">
     <!-- Integrated monaco editor without card styling -->
     <div class="p-4 bg-white h-full">
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between items-center mb-2">
             <h3 class="text-lg font-black text-black">Editor</h3>
             <div class="flex gap-2">
                 <button id="copy-workspace-editor" 
                         class="px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs">
                     Copy
                 </button>
+            </div>
+        </div>
+        
+        <!-- File path label -->
+        <div class="mb-4">
+            <div id="current-file-path" class="text-xs text-gray-600 font-mono bg-gray-50 px-2 py-1 border border-gray-300 rounded">
+                No file selected
             </div>
         </div>
         
