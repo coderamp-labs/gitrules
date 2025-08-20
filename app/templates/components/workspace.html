@@ -19,25 +19,12 @@
                 <h3 class="text-lg font-black text-black mb-3">Files</h3>
                 
                 <div class="bg-white border-2 border-black p-3 h-48 overflow-y-auto mb-3">
-                    <div class="space-y-2" id="file-list">
+                    <div id="file-tree" class="text-sm">
                         <!-- File tree will be populated here -->
-                        <div class="file-item flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer" data-file="researcher.md">
-                            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4z"></path>
-                            </svg>
-                            <span class="text-sm font-medium">researcher.md</span>
-                        </div>
-                        
-                        <div class="file-item flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer" data-file="memory_manager.md">
-                            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4z"></path>
-                            </svg>
-                            <span class="text-sm font-medium">memory_manager.md</span>
-                        </div>
                     </div>
                 </div>
                 
-                <button class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 text-sm">
+                <button id="new-file-button" class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 text-sm">
                     <span class="text-lg font-black">+</span>
                     New File
                 </button>
@@ -164,32 +151,9 @@ function updateWorkspaceContents(tabId) {
 }
 
 function updateWorkspaceFileSystem(tabId) {
-    // Update file system based on selected tab
-    const fileList = document.getElementById('file-list');
-    if (!fileList) return;
-    
-    const fileData = {
-        'tab-claude': [
-            { name: 'subagent_researcher.md', icon: '📄' },
-            { name: 'memory_manager.md', icon: '📄' },
-            { name: 'python_guidelines.md', icon: '📄' }
-        ],
-        'tab-cursor': [
-            { name: 'cursor_rules.txt', icon: '📄' },
-            { name: 'vscode_settings.json', icon: '📄' },
-            { name: 'copilot_config.yml', icon: '📄' }
-        ]
-    };
-    
-    const files = fileData[tabId] || [];
-    fileList.innerHTML = files.map(file => `
-        <div class="file-item flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer" data-file="${file.name}">
-            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4z"></path>
-            </svg>
-            <span class="text-sm font-medium">${file.name}</span>
-        </div>
-    `).join('');
+    // File system now uses the persistent file tree
+    // This function can be used to filter visible files based on tab context
+    renderFileTree();
 }
 
 let workspaceMonacoEditor;
@@ -324,9 +288,513 @@ function updateWorkspaceEditor(tabId) {
     }
 }
 
+// File tree data structure
+const fileTreeData = [
+    {
+        type: 'folder',
+        path: 'subagents',
+        name: 'subagents',
+        children: [
+            { type: 'file', path: 'subagents/researcher.md', name: 'researcher.md' },
+            { type: 'file', path: 'subagents/memory_manager.md', name: 'memory_manager.md' },
+            { type: 'file', path: 'subagents/code_reviewer.md', name: 'code_reviewer.md' }
+        ]
+    },
+    {
+        type: 'folder',
+        path: 'mcps',
+        name: 'mcps',
+        children: [
+            { type: 'file', path: 'mcps/supabase_mcp.json', name: 'supabase_mcp.json' },
+            { type: 'file', path: 'mcps/github_mcp.json', name: 'github_mcp.json' },
+            { type: 'file', path: 'mcps/filesystem_mcp.json', name: 'filesystem_mcp.json' }
+        ]
+    },
+    {
+        type: 'folder',
+        path: 'guidelines',
+        name: 'guidelines',
+        children: [
+            { type: 'file', path: 'guidelines/python_style.md', name: 'python_style.md' },
+            { type: 'file', path: 'guidelines/typescript_rules.md', name: 'typescript_rules.md' },
+            { type: 'file', path: 'guidelines/security.md', name: 'security.md' }
+        ]
+    },
+    { type: 'file', path: 'README.md', name: 'README.md' },
+    { type: 'file', path: 'config.yaml', name: 'config.yaml' }
+];
+
+// File content mock data
+const fileContent = {
+    'subagents/researcher.md': `# Researcher Agent
+
+A specialized subagent for information gathering and analysis.
+
+## Capabilities
+- Web search and analysis
+- Document research
+- Data compilation and synthesis
+
+## Usage
+\`\`\`
+@researcher find information about [topic]
+\`\`\`
+
+## Configuration
+- Search depth: 3 levels
+- Sources: Academic, News, Documentation
+- Output format: Structured markdown`,
+
+    'subagents/memory_manager.md': `# Memory Manager Agent
+
+Handles context and conversation history management.
+
+## Features
+- Long-term context preservation
+- Conversation summarization
+- Knowledge base integration
+
+## Usage
+\`\`\`
+@memory store this information about [topic]
+@memory recall information about [topic]
+\`\`\``,
+
+    'subagents/code_reviewer.md': `# Code Reviewer Agent
+
+Automated code review and quality assessment.
+
+## Review Areas
+- Code quality and style
+- Security vulnerabilities
+- Performance optimization
+- Best practices compliance
+
+## Configuration
+- Languages: Python, TypeScript, JavaScript
+- Severity levels: Error, Warning, Info
+- Auto-fix: Enabled for style issues`,
+
+    'mcps/supabase_mcp.json': `{
+  "name": "supabase-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol for Supabase integration",
+  "tools": [
+    {
+      "name": "query_database",
+      "description": "Execute SQL queries on Supabase database",
+      "parameters": {
+        "query": "string",
+        "params": "array"
+      }
+    },
+    {
+      "name": "insert_record",
+      "description": "Insert new record into table",
+      "parameters": {
+        "table": "string",
+        "data": "object"
+      }
+    }
+  ]
+}`,
+
+    'mcps/github_mcp.json': `{
+  "name": "github-mcp",
+  "version": "1.0.0", 
+  "description": "Model Context Protocol for GitHub API integration",
+  "tools": [
+    {
+      "name": "create_issue",
+      "description": "Create a new GitHub issue",
+      "parameters": {
+        "title": "string",
+        "body": "string",
+        "labels": "array"
+      }
+    },
+    {
+      "name": "get_repository",
+      "description": "Get repository information",
+      "parameters": {
+        "owner": "string",
+        "repo": "string"
+      }
+    }
+  ]
+}`,
+
+    'guidelines/python_style.md': `# Python Style Guidelines
+
+## Code Formatting
+- Use PEP 8 style guide
+- Line length: 88 characters (Black formatter)
+- Use type hints for all functions
+
+## Best Practices
+- Use meaningful variable names
+- Add docstrings to all functions and classes
+- Prefer list comprehensions over loops when appropriate
+- Use f-strings for string formatting
+
+## Example
+\`\`\`python
+def calculate_total(items: List[Item]) -> float:
+    """Calculate the total price of items."""
+    return sum(item.price for item in items)
+\`\`\``,
+
+    'guidelines/typescript_rules.md': `# TypeScript Coding Rules
+
+## Type Safety
+- Always use strict mode
+- No \`any\` type unless absolutely necessary
+- Define interfaces for all data structures
+
+## Code Style
+- Use Prettier for formatting
+- Prefer const over let
+- Use arrow functions for callbacks
+
+## Example
+\`\`\`typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+const processUser = (user: User): string => {
+  return \`Processing user: \${user.name}\`;
+};
+\`\`\``,
+
+    'README.md': `# My Agent Configuration
+
+This directory contains configuration files for various agents and tools.
+
+## Structure
+- \`subagents/\` - AI subagent configurations
+- \`mcps/\` - Model Context Protocol definitions  
+- \`guidelines/\` - Coding standards and guidelines
+
+## Getting Started
+1. Choose your agent configuration from the subagents folder
+2. Set up any required MCPs
+3. Apply the relevant coding guidelines
+
+Click any file in the left panel to view its contents.`,
+
+    'config.yaml': `# Global Configuration
+version: "1.0"
+environment: development
+
+# Agent Settings
+agents:
+  researcher:
+    enabled: true
+    max_search_depth: 3
+  
+  memory_manager:
+    enabled: true
+    retention_days: 30
+
+# MCP Settings
+mcps:
+  supabase:
+    url: "https://your-project.supabase.co"
+    anon_key: "your-anon-key"
+  
+  github:
+    token: "ghp_your-token"
+    default_org: "your-org"`
+};
+
+// Persistence helpers
+function safeGet(key) {
+    try { return localStorage.getItem(key); } catch { return null; }
+}
+
+function safeSet(key, value) {
+    try { localStorage.setItem(key, value); } catch {}
+}
+
+function safeGetJSON(key, fallback) {
+    try { 
+        const value = localStorage.getItem(key); 
+        return value ? JSON.parse(value) : fallback; 
+    } catch { 
+        return fallback; 
+    }
+}
+
+// File tree state management
+let selectedFilePath = null;
+let expandedFolders = new Set();
+let userFiles = new Set(); // Track user-created files
+let deletedFiles = new Set(); // Track deleted files
+
+// Load file content
+async function loadFile(path) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (fileContent[path]) {
+                resolve(fileContent[path]);
+            } else {
+                reject(new Error(`File not found: ${path}`));
+            }
+        }, 50); // Simulate loading delay
+    });
+}
+
+// Render file tree
+function renderFileTree() {
+    const treeContainer = document.getElementById('file-tree');
+    if (!treeContainer) return;
+    
+    treeContainer.innerHTML = '';
+    
+    function renderNode(node, level = 0) {
+        const div = document.createElement('div');
+        div.style.paddingLeft = `${level * 16}px`;
+        
+        if (node.type === 'folder') {
+            const isExpanded = expandedFolders.has(node.path);
+            div.innerHTML = `
+                <div class="flex items-center gap-1 p-1 hover:bg-gray-100 cursor-pointer folder-toggle" data-path="${node.path}">
+                    <svg class="w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M7 7l3 3 3-3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+                    </svg>
+                    <span class="font-medium">${node.name}</span>
+                </div>
+            `;
+            
+            treeContainer.appendChild(div);
+            
+            if (isExpanded && node.children) {
+                node.children.forEach(child => renderNode(child, level + 1));
+            }
+        } else {
+            // Skip deleted files
+            if (deletedFiles.has(node.path)) return;
+            
+            const isSelected = selectedFilePath === node.path;
+            const isUserFile = userFiles.has(node.path);
+            div.innerHTML = `
+                <div class="flex items-center justify-between p-1 hover:bg-gray-100 cursor-pointer file-item ${isSelected ? 'bg-cyan-100 font-medium' : ''}" data-path="${node.path}">
+                    <div class="flex items-center gap-1">
+                        <span class="w-3"></span>
+                        <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4z"/>
+                        </svg>
+                        <span>${node.name}</span>
+                        ${isUserFile ? '<span class="text-xs text-blue-600 ml-1">✓</span>' : ''}
+                    </div>
+                    <button class="delete-file opacity-0 group-hover:opacity-100 hover:opacity-100 text-red-600 hover:text-red-800 p-1" data-path="${node.path}" title="Delete file">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            const fileDiv = div.querySelector('.file-item');
+            fileDiv.classList.add('group'); // For hover effects
+            treeContainer.appendChild(div);
+        }
+    }
+    
+    fileTreeData.forEach(node => renderNode(node));
+    
+    // Add user-created files to root level
+    userFiles.forEach(filePath => {
+        if (!deletedFiles.has(filePath)) {
+            const fileName = filePath.split('/').pop();
+            renderNode({ type: 'file', path: filePath, name: fileName }, 0);
+        }
+    });
+    
+    // Add event listeners
+    treeContainer.addEventListener('click', handleTreeClick);
+}
+
+// Handle tree clicks
+async function handleTreeClick(event) {
+    const deleteButton = event.target.closest('.delete-file');
+    const folderToggle = event.target.closest('.folder-toggle');
+    const fileItem = event.target.closest('.file-item');
+    
+    if (deleteButton) {
+        event.stopPropagation();
+        const path = deleteButton.dataset.path;
+        await deleteFile(path);
+    } else if (folderToggle) {
+        const path = folderToggle.dataset.path;
+        if (expandedFolders.has(path)) {
+            expandedFolders.delete(path);
+        } else {
+            expandedFolders.add(path);
+        }
+        
+        // Persist folder state
+        safeSet('app:fileTreeState', JSON.stringify({
+            expanded: Array.from(expandedFolders)
+        }));
+        
+        renderFileTree();
+    } else if (fileItem) {
+        const path = fileItem.dataset.path;
+        await openFile(path);
+    }
+}
+
+// Open file in editor
+async function openFile(path) {
+    if (!workspaceMonacoEditor) return;
+    
+    // Update selected file
+    selectedFilePath = path;
+    safeSet('app:selectedFilePath', path);
+    
+    // Show loading state
+    workspaceMonacoEditor.setValue('Loading...');
+    
+    try {
+        const content = await loadFile(path);
+        workspaceMonacoEditor.setValue(content);
+        
+        // Refresh tree to show selection
+        renderFileTree();
+    } catch (error) {
+        workspaceMonacoEditor.setValue(`⚠️ Failed to load "${path}"\n\nError: ${error.message}`);
+    }
+}
+
+// Delete file
+async function deleteFile(path) {
+    if (!confirm(`Are you sure you want to delete "${path.split('/').pop()}"?`)) {
+        return;
+    }
+    
+    // Add to deleted files
+    deletedFiles.add(path);
+    
+    // Remove from user files if it was user-created
+    userFiles.delete(path);
+    
+    // Clear editor if this file was selected
+    if (selectedFilePath === path) {
+        selectedFilePath = null;
+        safeSet('app:selectedFilePath', '');
+        if (workspaceMonacoEditor) {
+            workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
+        }
+    }
+    
+    // Remove file content
+    delete fileContent[path];
+    
+    // Persist state
+    persistUserFileState();
+    
+    // Refresh tree
+    renderFileTree();
+}
+
+// Create new file
+async function createNewFile() {
+    const fileName = prompt('Enter file name (with extension):');
+    if (!fileName || fileName.trim() === '') {
+        return;
+    }
+    
+    const filePath = fileName.trim();
+    
+    // Check if file already exists
+    if (fileContent[filePath] || userFiles.has(filePath)) {
+        alert('File already exists!');
+        return;
+    }
+    
+    // Create file with default content
+    const defaultContent = filePath.endsWith('.md') ? 
+        `# ${filePath.replace('.md', '').replace(/[_-]/g, ' ')}\n\nYour content here...` :
+        filePath.endsWith('.json') ?
+        '{\n  "name": "new-file",\n  "version": "1.0.0"\n}' :
+        filePath.endsWith('.yaml') || filePath.endsWith('.yml') ?
+        'name: new-file\nversion: 1.0.0\n' :
+        '# New file\n\nContent goes here...';
+    
+    // Add to user files and content
+    userFiles.add(filePath);
+    fileContent[filePath] = defaultContent;
+    
+    // Persist state
+    persistUserFileState();
+    
+    // Open the new file
+    await openFile(filePath);
+}
+
+// Persist user file state
+function persistUserFileState() {
+    safeSet('app:userFiles', JSON.stringify(Array.from(userFiles)));
+    safeSet('app:deletedFiles', JSON.stringify(Array.from(deletedFiles)));
+    
+    // Save user file contents
+    const userFileContents = {};
+    userFiles.forEach(path => {
+        if (fileContent[path]) {
+            userFileContents[path] = fileContent[path];
+        }
+    });
+    safeSet('app:userFileContents', JSON.stringify(userFileContents));
+}
+
+// Initialize file tree system
+function initializeFileTree() {
+    // Load persisted state
+    selectedFilePath = safeGet('app:selectedFilePath');
+    const treeState = safeGetJSON('app:fileTreeState', { expanded: [] });
+    expandedFolders = new Set(treeState.expanded || []);
+    
+    // Load user files and deleted files
+    const savedUserFiles = safeGetJSON('app:userFiles', []);
+    const savedDeletedFiles = safeGetJSON('app:deletedFiles', []);
+    const savedUserFileContents = safeGetJSON('app:userFileContents', {});
+    
+    userFiles = new Set(savedUserFiles);
+    deletedFiles = new Set(savedDeletedFiles);
+    
+    // Restore user file contents
+    Object.assign(fileContent, savedUserFileContents);
+    
+    // Wire up New File button
+    const newFileButton = document.getElementById('new-file-button');
+    if (newFileButton) {
+        newFileButton.addEventListener('click', createNewFile);
+    }
+    
+    // Render initial tree
+    renderFileTree();
+    
+    // Auto-open last selected file
+    if (selectedFilePath && fileContent[selectedFilePath] && !deletedFiles.has(selectedFilePath)) {
+        setTimeout(() => openFile(selectedFilePath), 200);
+    } else if (workspaceMonacoEditor) {
+        workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
+    }
+}
+
 // Initialize workspace editor when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(initializeWorkspaceEditor, 100);
+    setTimeout(() => {
+        initializeWorkspaceEditor();
+        setTimeout(initializeFileTree, 200);
+    }, 100);
 });
 </script>
 
