@@ -1,0 +1,11 @@
+dev.gitrules.com {
+	reverse_proxy localhost:8000
+	encode gzip
+	log
+}
+
+gitrules.com {
+	reverse_proxy localhost:9000
+	encode gzip
+	log
+}
