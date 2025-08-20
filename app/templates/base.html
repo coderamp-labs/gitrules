@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="GitRules">
+    <meta name="description" content="Pastable superpowers for your codebases">
+    <meta property="og:title" content="GitRules">
+    <meta property="og:description" content="Pastable superpowers for your codebases">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GitRules">
+    <meta name="twitter:description" content="Pastable superpowers for your codebases">
+    <title>{% block title %}GitRules - Pastable superpowers for your codebases{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% include 'components/styles.html' %}
+</head>
+<body class="bg-[#FFFDF8] min-h-screen flex flex-col">
+    {% include 'components/navbar.html' %}
+    
+    <main class="flex-1 w-full">
+        <div class="max-w-4xl mx-auto px-4 py-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    {% include 'components/footer.html' %}
+</body>
+</html>
