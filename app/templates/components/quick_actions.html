@@ -95,9 +95,6 @@
                 Back
             </button>
         </div>
-        <button id="proceed-btn" class="px-6 py-3 bg-pink-400 border-2 border-black text-black font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-            Proceed
-        </button>
     </div>
 </div>
 
@@ -150,30 +147,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const radioButtons = document.querySelectorAll('input[name="template"]');
-    const proceedButton = document.getElementById('proceed-btn');
     const backButton = document.getElementById('back-btn');
     const quickActionsSection = document.getElementById('quick-actions-section');
     
-    // Enable proceed button when a template is selected
+    // Handle template selection - instantly switch to workspace
     radioButtons.forEach(radio => {
         radio.addEventListener('change', function() {
-            proceedButton.disabled = false;
+            if (this.checked) {
+                selectedTemplateValue = this.value;
+                selectedTemplateActions = TEMPLATES[selectedTemplateValue];
+                
+                // Apply quick actions sequentially
+                applyQuickActionsSequentially(selectedTemplateActions);
+                
+                // Fade out quick actions and show workspace
+                showWorkspace();
+            }
         });
-    });
-    
-    // Handle proceed button click
-    proceedButton.addEventListener('click', function() {
-        const selectedTemplate = document.querySelector('input[name="template"]:checked');
-        if (selectedTemplate) {
-            selectedTemplateValue = selectedTemplate.value;
-            selectedTemplateActions = TEMPLATES[selectedTemplateValue];
-            
-            // Apply quick actions sequentially
-            applyQuickActionsSequentially(selectedTemplateActions);
-            
-            // Fade out quick actions and show workspace
-            showWorkspace();
-        }
     });
     
     // Handle back button click
