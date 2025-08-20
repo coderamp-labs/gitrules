@@ -27,6 +27,15 @@
         .btn-brutalist {
             @apply bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all;
         }
+        .delimiter-column {
+            @apply relative;
+        }
+        .delimiter-column::before {
+            @apply content-[''] absolute left-0 top-1/2 -translate-y-1/2 w-px h-16 bg-gray-300 hidden md:block;
+        }
+        .delimiter-column::after {
+            @apply content-[''] absolute right-0 top-1/2 -translate-y-1/2 w-px h-16 bg-gray-300 hidden md:block;
+        }
     }
     @layer utilities {
         .no-drag {
