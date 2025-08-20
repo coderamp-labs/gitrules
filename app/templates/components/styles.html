@@ -1,28 +1,31 @@
 <style type="text/tailwindcss">
     @layer components {
         .badge-new {
-            @apply inline-block -rotate-6 -translate-y-1 mx-1 px-1 bg-[#FE4A60] border border-gray-900 text-white text-[10px] font-bold shadow-[2px_2px_0_0_rgba(0,0,0,1)];
+            @apply inline-block -rotate-6 -translate-y-1 mx-1 px-2 py-1 bg-pink-400 border-2 border-black text-black text-[10px] font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)];
         }
         .landing-page-title {
-            @apply inline-block w-full relative text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl sm:pt-20 lg:pt-5 font-bold tracking-tighter;
+            @apply inline-block w-full relative text-center text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight;
         }
         .intro-text {
-            @apply text-center text-gray-600 text-lg max-w-2xl mx-auto;
+            @apply text-center text-black text-sm max-w-2xl mx-auto font-medium leading-relaxed;
         }
-        .sparkle-blue {
-            @apply absolute flex-shrink-0 h-auto w-14 sm:w-20 md:w-24 p-2 left-0 lg:ml-32 -translate-x-2 md:translate-x-10 lg:-translate-x-full -translate-y-4 sm:-translate-y-8 md:-translate-y-0 lg:-translate-y-10;
+        .sparkle-cyan {
+            @apply absolute flex-shrink-0 w-8 h-8 bg-cyan-400 border-2 border-black flex items-center justify-center rotate-12 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] left-0 lg:ml-20 -translate-x-2 md:translate-x-6 lg:-translate-x-full -translate-y-2 sm:-translate-y-4 md:-translate-y-0 lg:-translate-y-6;
         }
-        .sparkle-purple {
-            @apply absolute flex-shrink-0 right-0 bottom-0 w-10 sm:w-16 lg:w-20 -translate-x-10 lg:-translate-x-12 translate-y-4 sm:translate-y-10 md:translate-y-2 lg:translate-y-4;
+        .sparkle-pink {
+            @apply absolute flex-shrink-0 w-8 h-8 bg-pink-400 border-2 border-black flex items-center justify-center -rotate-12 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] right-0 bottom-0 -translate-x-6 lg:-translate-x-8 translate-y-2 sm:translate-y-6 md:translate-y-2 lg:translate-y-4;
         }
         .card {
             @apply relative;
         }
         .card::before {
-            @apply content-[''] absolute inset-0 bg-gray-900 translate-y-2 translate-x-2;
+            @apply content-[''] absolute inset-0 bg-black translate-y-1 translate-x-1;
         }
         .card-inner {
-            @apply relative z-20 border-[3px] border-gray-900;
+            @apply relative z-20 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)];
+        }
+        .btn-brutalist {
+            @apply bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all;
         }
     }
     @layer utilities {
@@ -31,7 +34,7 @@
             -webkit-user-drag: none;
         }
         .link-bounce {
-            @apply transition-transform hover:-translate-y-0.5;
+            @apply transition-all hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px];
         }
     }
 </style>
