@@ -1,0 +1,343 @@
+<div class="mt-16">
+    <!-- Tabs floating above container -->
+    <div class="flex gap-1 mb-0">
+        <button id="tab-claude" class="tab-button active px-4 py-2 bg-cyan-400 border-2 border-black border-b-0 text-black font-bold shadow-[2px_0px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_0px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_0px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm rounded-t-lg relative z-10">
+            CLAUDE
+        </button>
+        <button id="tab-cursor" class="tab-button px-4 py-2 bg-gray-100 border-2 border-gray-400 border-b-0 text-gray-700 font-medium shadow-[1px_0px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[2px_0px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm rounded-t-lg relative z-5">
+            Cursor/others..
+        </button>
+    </div>
+
+    <!-- Editor Container -->
+    <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative z-0">
+
+        <!-- Three-panel layout inside container -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 h-96">
+            <!-- Left Panel: File System -->
+            <div class="bg-cyan-50 border-r-2 border-black p-4">
+                <h3 class="text-lg font-black text-black mb-3">Files</h3>
+                
+                <div class="bg-white border-2 border-black p-3 h-48 overflow-y-auto mb-3">
+                    <div class="space-y-2" id="file-list">
+                        <!-- File tree will be populated here -->
+                        <div class="file-item flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer" data-file="researcher.md">
+                            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4z"></path>
+                            </svg>
+                            <span class="text-sm font-medium">researcher.md</span>
+                        </div>
+                        
+                        <div class="file-item flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer" data-file="memory_manager.md">
+                            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4z"></path>
+                            </svg>
+                            <span class="text-sm font-medium">memory_manager.md</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 text-sm">
+                    <span class="text-lg font-black">+</span>
+                    New File
+                </button>
+            </div>
+
+            <!-- Center Panel: Monaco Editor -->
+            <div class="lg:col-span-1 border-r-2 border-black">
+                <!-- Integrated monaco editor without card styling -->
+                <div class="p-4 bg-white h-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-black text-black">Editor</h3>
+                        <div class="flex gap-2">
+                            <button id="copy-workspace-editor" 
+                                    class="px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs">
+                                Copy
+                            </button>
+                            <span class="px-2 py-1 bg-gray-100 border-2 border-gray-400 text-gray-700 text-xs font-medium">
+                                Markdown
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="w-full h-full bg-gray-900 translate-y-1 translate-x-1 absolute inset-0 z-0"></div>
+                        <div id="workspace-monaco-editor" 
+                             class="relative z-10 border-2 border-black bg-white" 
+                             style="height: 280px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Quick Actions -->
+            <div class="bg-pink-50 p-4">
+            <h3 class="text-lg font-black text-black mb-3">Quick Actions</h3>
+            
+            <div class="space-y-3">
+                <!-- Current tab specific actions -->
+                <div id="workspace-subagents-actions" class="workspace-tab-content">
+                    <div class="space-y-2">
+                        <button class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm">
+                            <span class="text-xl font-black">+</span>
+                            <span class="text-sm">🔍</span>
+                            <span class="font-bold text-xs">Researcher</span>
+                        </button>
+                        <button class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm">
+                            <span class="text-xl font-black">+</span>
+                            <span class="text-sm">🧠</span>
+                            <span class="font-bold text-xs">Memory Manager</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="workspace-mcps-actions" class="workspace-tab-content hidden">
+                    <div class="space-y-2">
+                        <button class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm">
+                            <span class="text-xl font-black">+</span>
+                            <span class="text-sm">🗃️</span>
+                            <span class="font-bold text-xs">Supabase MCP</span>
+                        </button>
+                        <button class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm">
+                            <span class="text-xl font-black">+</span>
+                            <span class="text-sm">🐙</span>
+                            <span class="font-bold text-xs">Github MCP</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="workspace-guidelines-actions" class="workspace-tab-content hidden">
+                    <div class="space-y-2">
+                        <button class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm">
+                            <span class="text-xl font-black">+</span>
+                            <span class="text-sm">🐍</span>
+                            <span class="font-bold text-xs">Python</span>
+                        </button>
+                        <button class="w-full px-3 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm">
+                            <span class="text-xl font-black">+</span>
+                            <span class="text-sm">⚡</span>
+                            <span class="font-bold text-xs">TypeScript</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const workspaceTabs = document.querySelectorAll('.tab-button');
+    
+    workspaceTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active state from all tabs
+            workspaceTabs.forEach(t => {
+                t.classList.remove('active', 'bg-cyan-400', 'border-black', 'text-black', 'font-bold', 'z-10');
+                t.classList.add('bg-gray-100', 'border-gray-400', 'text-gray-700', 'font-medium', 'z-5');
+                t.classList.remove('shadow-[2px_0px_0px_0px_rgba(0,0,0,1)]');
+                t.classList.add('shadow-[1px_0px_0px_0px_rgba(0,0,0,0.3)]');
+            });
+            
+            // Add active state to clicked tab
+            this.classList.add('active', 'bg-cyan-400', 'border-black', 'text-black', 'font-bold', 'z-10');
+            this.classList.remove('bg-gray-100', 'border-gray-400', 'text-gray-700', 'font-medium', 'z-5');
+            this.classList.remove('shadow-[1px_0px_0px_0px_rgba(0,0,0,0.3)]');
+            this.classList.add('shadow-[2px_0px_0px_0px_rgba(0,0,0,1)]');
+            
+                    // Update panel contents based on selected tab
+            updateWorkspaceContents(this.id);
+        });
+    });
+});
+
+function updateWorkspaceContents(tabId) {
+    // Hide all workspace tab contents
+    document.querySelectorAll('.workspace-tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Show content for selected tab
+    const activeContent = {
+        'tab-claude': 'workspace-subagents-actions',
+        'tab-cursor': 'workspace-mcps-actions'
+    };
+    
+    const contentId = activeContent[tabId];
+    if (contentId) {
+        document.getElementById(contentId).classList.remove('hidden');
+    }
+    
+    // Update file system and editor content based on tab
+    updateWorkspaceFileSystem(tabId);
+    updateWorkspaceEditor(tabId);
+}
+
+function updateWorkspaceFileSystem(tabId) {
+    // Update file system based on selected tab
+    const fileList = document.getElementById('file-list');
+    if (!fileList) return;
+    
+    const fileData = {
+        'tab-claude': [
+            { name: 'subagent_researcher.md', icon: '📄' },
+            { name: 'memory_manager.md', icon: '📄' },
+            { name: 'python_guidelines.md', icon: '📄' }
+        ],
+        'tab-cursor': [
+            { name: 'cursor_rules.txt', icon: '📄' },
+            { name: 'vscode_settings.json', icon: '📄' },
+            { name: 'copilot_config.yml', icon: '📄' }
+        ]
+    };
+    
+    const files = fileData[tabId] || [];
+    fileList.innerHTML = files.map(file => `
+        <div class="file-item flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer" data-file="${file.name}">
+            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4z"></path>
+            </svg>
+            <span class="text-sm font-medium">${file.name}</span>
+        </div>
+    `).join('');
+}
+
+let workspaceMonacoEditor;
+
+function initializeWorkspaceEditor() {
+    require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@0.44.0/min/vs' } });
+    
+    require(['vs/editor/editor.main'], function () {
+        workspaceMonacoEditor = monaco.editor.create(document.getElementById('workspace-monaco-editor'), {
+            value: `# My Agent Configuration
+
+Click any QuickAction button to add it here...`,
+            language: 'markdown',
+            theme: 'vs',
+            fontSize: 12,
+            lineNumbers: 'on',
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            wordWrap: 'on'
+        });
+        
+        // Copy functionality
+        document.getElementById('copy-workspace-editor').addEventListener('click', function() {
+            const content = workspaceMonacoEditor.getValue();
+            navigator.clipboard.writeText(content);
+        });
+        
+        // Initialize QuickAction button handlers after editor is ready
+        setTimeout(initializeQuickActionHandlers, 100);
+    });
+}
+
+function insertTextAtCursor(text) {
+    if (!workspaceMonacoEditor) return;
+    
+    const selection = workspaceMonacoEditor.getSelection();
+    const position = selection.getStartPosition();
+    
+    workspaceMonacoEditor.executeEdits('quickaction-insert', [{
+        range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+        text: text
+    }]);
+    
+    // Move cursor to end of inserted text
+    const newPosition = new monaco.Position(position.lineNumber, position.column + text.length);
+    workspaceMonacoEditor.setPosition(newPosition);
+    workspaceMonacoEditor.focus();
+}
+
+function initializeQuickActionHandlers() {
+    // Helper function to extract button label
+    function getButtonLabel(button) {
+        const labelSpan = button.querySelector('span.font-bold');
+        return labelSpan ? labelSpan.textContent.trim() : 'Unknown';
+    }
+    
+    // Add handlers for main QuickAction buttons (above workspace)
+    const mainQuickActionButtons = document.querySelectorAll('#quick-actions-section button');
+    mainQuickActionButtons.forEach(button => {
+        // Skip "See all..." buttons
+        if (button.textContent.includes('See all')) return;
+        
+        button.addEventListener('click', function() {
+            const label = getButtonLabel(this);
+            insertTextAtCursor(label);
+        });
+    });
+    
+    // Add handlers for workspace panel QuickAction buttons
+    const workspaceActionButtons = document.querySelectorAll('.workspace-tab-content button');
+    workspaceActionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const label = getButtonLabel(this);
+            insertTextAtCursor(label);
+        });
+    });
+}
+
+function updateWorkspaceEditor(tabId) {
+    if (!workspaceMonacoEditor) return;
+    
+    const editorContent = {
+        'tab-claude': {
+            content: `# Claude Configuration
+
+## Subagents
+- Researcher: Information gathering specialist
+- Memory Manager: Context and history management
+
+## Guidelines
+- Python: PEP 8 compliance, type hints
+- Code quality: Clean, documented, tested
+
+## MCPs (Model Context Protocols)
+- Database integration
+- File system access
+- API connections`,
+            language: 'markdown'
+        },
+        'tab-cursor': {
+            content: `// Cursor/VS Code Configuration
+
+{
+  "rules": [
+    "Always use TypeScript for new files",
+    "Prefer functional components in React",
+    "Use meaningful variable names",
+    "Add JSDoc comments for functions"
+  ],
+  "preferences": {
+    "tabSize": 2,
+    "insertSpaces": true,
+    "trimTrailingWhitespace": true
+  },
+  "extensions": [
+    "Prettier",
+    "ESLint",
+    "GitLens",
+    "Auto Rename Tag"
+  ]
+}`,
+            language: 'json'
+        }
+    };
+    
+    const config = editorContent[tabId];
+    if (config) {
+        workspaceMonacoEditor.setValue(config.content);
+        monaco.editor.setModelLanguage(workspaceMonacoEditor.getModel(), config.language);
+        document.getElementById('workspace-language-select').value = config.language;
+    }
+}
+
+// Initialize workspace editor when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initializeWorkspaceEditor, 100);
+});
+</script>
+
+<!-- Monaco Editor CDN -->
+<script src="https://unpkg.com/monaco-editor@0.44.0/min/vs/loader.js"></script>

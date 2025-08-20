@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 
-app = FastAPI(title="GitRules", version="0.1.0")
+app = FastAPI(title="Gitrules", version="0.1.0")
 
 templates = Jinja2Templates(directory="app/templates")
 

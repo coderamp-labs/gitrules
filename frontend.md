@@ -5,7 +5,7 @@ globals.css:
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color tokens to match GitRules design brief */
+  /* Updated color tokens to match Gitrules design brief */
   --background: oklch(1 0 0); /* #ffffff */
   --foreground: oklch(0.35 0 0); /* #4b5563 */
   --card: oklch(0.98 0 0); /* #f9fafb */
@@ -148,7 +148,7 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "GitRules - Pastable powers for coding agents",
+  title: "Gitrules - Pastable powers for coding agents",
   description:
     "Augment your agents capabilities just by dropping files in your codebase. Easily add MCPs, subagents and coding guidelines to your coding context.",
   generator: "v0.app",
@@ -171,7 +171,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Github, FileText, Plus, Search, Brain, Database, Code2, Zap } from "lucide-react"
 
-export default function GitRulesLanding() {
+export default function GitrulesLanding() {
   return (
     <div className="min-h-screen bg-pink-50">
       {/* Header */}
@@ -181,7 +181,7 @@ export default function GitRulesLanding() {
             <div className="w-8 h-8 bg-cyan-400 border-2 border-black rounded-none flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <Zap className="w-5 h-5 text-black" />
             </div>
-            <span className="text-xl font-bold text-black">GitRules</span>
+            <span className="text-xl font-bold text-black">Gitrules</span>
           </div>
           <nav className="flex items-center gap-6">
             <Badge className="bg-pink-400 text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold">
@@ -535,7 +535,7 @@ export default function GitRulesLanding() {
             <div className="w-6 h-6 bg-cyan-400 border-2 border-black rounded-none flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <Zap className="w-4 h-4 text-black" />
             </div>
-            <span className="text-lg font-black text-black">GitRules</span>
+            <span className="text-lg font-black text-black">Gitrules</span>
           </div>
           <p className="text-sm text-black font-medium">Empowering developers with pastable AI agent capabilities</p>
         </div>
