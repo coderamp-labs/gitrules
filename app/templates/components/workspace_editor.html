@@ -1,0 +1,22 @@
+<!-- Center Panel: Monaco Editor -->
+<div class="lg:col-span-1 border-r-2 border-black">
+    <!-- Integrated monaco editor without card styling -->
+    <div class="p-4 bg-white h-full">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-black text-black">Editor</h3>
+            <div class="flex gap-2">
+                <button id="copy-workspace-editor" 
+                        class="px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs">
+                    Copy
+                </button>
+            </div>
+        </div>
+        
+        <div class="relative">
+            <div class="w-full h-full bg-gray-900 translate-y-1 translate-x-1 absolute inset-0 z-0"></div>
+            <div id="workspace-monaco-editor" 
+                 class="relative z-10 border-2 border-black bg-white" 
+                 style="height: 280px;"></div>
+        </div>
+    </div>
+</div>
