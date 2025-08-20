@@ -84,6 +84,72 @@ Click any QuickAction button to add it here...`,
             navigator.clipboard.writeText(content);
         });
         
+        // Share functionality
+        document.getElementById('share-ruleset').addEventListener('click', async function() {
+            // Collect all files from the file system
+            const allFiles = {};
+            
+            // Helper function to collect files from tree structure
+            function collectFilesFromTree(nodes, collected) {
+                nodes.forEach(node => {
+                    if (node.type === 'file' && !deletedFiles.has(node.path)) {
+                        if (fileContent[node.path]) {
+                            collected[node.path] = fileContent[node.path];
+                        }
+                    } else if (node.type === 'folder' && node.children) {
+                        collectFilesFromTree(node.children, collected);
+                    }
+                });
+            }
+            
+            // Collect default files from tree
+            collectFilesFromTree(fileTreeData, allFiles);
+            
+            // Add user-created files
+            userFiles.forEach(filePath => {
+                if (!deletedFiles.has(filePath) && fileContent[filePath]) {
+                    allFiles[filePath] = fileContent[filePath];
+                }
+            });
+            
+            try {
+                // Send files to API to generate install script
+                const response = await fetch('/api/ruleset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ files: allFiles })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create ruleset');
+                }
+                
+                const data = await response.json();
+                const installCommand = `sh -c "$(curl -fsSL ${window.location.origin}/api/ruleset/${data.hash}.sh)"`;
+                
+                // Copy to clipboard
+                await navigator.clipboard.writeText(installCommand);
+                
+                // Show feedback
+                const button = document.getElementById('share-ruleset');
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.remove('bg-pink-400');
+                button.classList.add('bg-green-400');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('bg-green-400');
+                    button.classList.add('bg-pink-400');
+                }, 2000);
+            } catch (error) {
+                console.error('Error sharing ruleset:', error);
+                alert('Failed to share ruleset. Please try again.');
+            }
+        });
+        
         // Initialize QuickAction button handlers after editor is ready
         setTimeout(initializeQuickActionHandlers, 100);
     });

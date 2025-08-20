@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
+from app.routes import ruleset
 
 app = FastAPI(title="Gitrules", version="0.1.0")
 
@@ -10,6 +11,9 @@ templates = Jinja2Templates(directory="app/templates")
 
 static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+# Include ruleset routes
+app.include_router(ruleset.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
