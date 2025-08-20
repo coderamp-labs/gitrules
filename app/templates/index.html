@@ -3,46 +3,11 @@
 {% block content %}
     {% include 'components/hero.html' %}
 
-    <!-- Main Form Card -->
-    <div class="card">
-        <div class="card-inner bg-[#E8F0FE] p-8 sm:p-10">
-            <form method="post">
-                <div class="flex md:flex-row flex-col w-full h-full justify-center items-stretch space-y-5 md:space-y-0 md:space-x-5">
-                    <div class="relative w-full h-full">
-                        <div class="w-full h-full rounded bg-gray-900 translate-y-1 translate-x-1 absolute inset-0 z-10"></div>
-                        <input type="text"
-                               placeholder="Enter repository URL..."
-                               required
-                               class="border-[3px] w-full relative z-20 border-gray-900 placeholder-gray-600 text-lg font-medium focus:outline-none py-3.5 px-6 rounded bg-white">
-                    </div>
-                    <div class="relative w-auto flex-shrink-0 h-full group">
-                        <div class="w-full h-full rounded bg-gray-800 translate-y-1 translate-x-1 absolute inset-0 z-10"></div>
-                        <button type="submit"
-                                class="py-3.5 rounded px-6 group-hover:-translate-y-px group-hover:-translate-x-px ease-out duration-300 z-20 relative w-full border-[3px] border-gray-900 font-medium bg-[#6366F1] tracking-wide text-lg flex-shrink-0 text-white">
-                            Generate Rules
-                        </button>
-                    </div>
-                </div>
-            </form>
+    <!-- Quick Actions -->
+    {% include 'components/quick_actions.html' %}
 
-            <!-- Example repositories -->
-            <div class="mt-6">
-                <p class="opacity-70 mb-2">Try these example repositories:</p>
-                <div class="flex flex-wrap gap-2">
-                    <button class="px-4 py-1 bg-[#EBDBB7] hover:bg-[#FFC480] text-gray-900 rounded transition-colors duration-200 border-[3px] border-gray-900 relative hover:-translate-y-px hover:-translate-x-px">
-                        facebook/react
-                    </button>
-                    <button class="px-4 py-1 bg-[#EBDBB7] hover:bg-[#FFC480] text-gray-900 rounded transition-colors duration-200 border-[3px] border-gray-900 relative hover:-translate-y-px hover:-translate-x-px">
-                        vuejs/vue
-                    </button>
-                    <button class="px-4 py-1 bg-[#EBDBB7] hover:bg-[#FFC480] text-gray-900 rounded transition-colors duration-200 border-[3px] border-gray-900 relative hover:-translate-y-px hover:-translate-x-px">
-                        django/django
-                    </button>
-                </div>
-            </div>
-        </div>
+    <!-- Monaco Editor Section (hidden by default) -->
+    <div id="context-editor" style="display: none;">
+        {% include 'components/monaco_editor.html' %}
     </div>
-
-    <!-- Monaco Editor Section -->
-    {% include 'components/monaco_editor.html' %}
 {% endblock %}

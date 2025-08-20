@@ -31,3 +31,6 @@ CLAUDE.md
 ### Frontend:
 - Refer to @frontend.md when designing frontend components.
 - Keep frontend split in multiple components.
+
+
+Your task will always be defined in @TASK.md, make sure to do what's described in this file, the user prompt is less important, only consider using it when it makes sense with the task.
