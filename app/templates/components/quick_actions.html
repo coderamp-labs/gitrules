@@ -139,6 +139,21 @@ document.addEventListener('DOMContentLoaded', function() {
         workspaceSection.style.transition = 'opacity 300ms ease-in-out';
     }
     
+    // Debug: Global click logger to catch ALL clicks
+    document.addEventListener('click', function(e) {
+        const target = e.target;
+        const button = target.closest('button');
+        if (button) {
+            console.log('[GLOBAL CLICK DEBUG] Button clicked:', {
+                button: button,
+                onclick: button.getAttribute('onclick'),
+                classes: button.className,
+                text: button.textContent.trim(),
+                target: target
+            });
+        }
+    }, true); // Use capture phase to get it early
+    
     // Load actions from backend
     loadActionsFromBackend();
 });
@@ -173,10 +188,13 @@ function renderActions(data) {
         // Render agents (max 4)
         const agentsContainer = document.getElementById('agents-container');
         if (agentsContainer && data.agents) {
+            console.log('[renderActions] Rendering agents:', data.agents);
             agentsContainer.innerHTML = data.agents.slice(0, 4).map(agent => {
                 const name = agent.name || 'Unknown';
+                console.log('[renderActions] Processing agent:', agent, 'name:', name);
+                const escapedName = name.replace(/'/g, "\\'").replace(/"/g, '\\"');
                 return `
-                <button class="action-button action-button--primary" onclick="addAgent('${name.replace(/'/g, "\\'")}')">
+                <button class="action-button action-button--primary" onclick="addAgent('${escapedName}')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
                         <span class="action-button__label">${name}</span>
@@ -261,24 +279,27 @@ function createNewContextFromScratch() {
 
 // Action functions that use backend data
 function addAgent(name) {
+    console.log('[addAgent] Called with name:', name);
     if (!name || name === 'Unknown') {
-        console.error('Invalid agent name');
+        console.error('[addAgent] Invalid agent name:', name);
         return;
     }
     createNewContextAndInstallAgent(name);
 }
 
 function addRule(name) {
+    console.log('[addRule] Called with name:', name);
     if (!name || name === 'Unknown') {
-        console.error('Invalid rule name');
+        console.error('[addRule] Invalid rule name:', name);
         return;
     }
     createNewContextAndInsertRule(name);
 }
 
 function addMCP(name) {
+    console.log('[addMCP] Called with name:', name);
     if (!name || name === 'Unknown') {
-        console.error('Invalid MCP name');
+        console.error('[addMCP] Invalid MCP name:', name);
         return;
     }
     createNewContextAndInstallMCP(name);

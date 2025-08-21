@@ -50,16 +50,31 @@ function initializeWorkspaceEditor() {
 }
 
 function insertTextAtCursor(text) {
-    if (!workspaceMonacoEditor) return;
+    console.log('[insertTextAtCursor] Called with text:', text);
+    console.log('[insertTextAtCursor] Type of text:', typeof text);
+    console.trace('Stack trace for insertTextAtCursor');
+    
+    if (!workspaceMonacoEditor) {
+        console.error('[insertTextAtCursor] No workspace editor available');
+        return;
+    }
+    
+    if (text === 'Unknown' || text === undefined || text === null || text === 'undefined') {
+        console.error('[insertTextAtCursor] WARNING: Attempting to insert problematic text:', text);
+        console.trace('Stack trace for problematic insertion');
+        // Block insertion of "Unknown"
+        return;
+    }
     
     const selection = workspaceMonacoEditor.getSelection();
     const position = selection.getStartPosition();
     
+    console.log('[insertTextAtCursor] Executing edit at position:', position);
     workspaceMonacoEditor.executeEdits('quickaction-insert', [{
         range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
         text: text
     }]);
-    console.log("Inserted text:", text);
+    console.log("[insertTextAtCursor] Successfully inserted text:", text);
 
     // Move cursor to end of inserted text
     const newPosition = new monaco.Position(position.lineNumber, position.column + text.length);

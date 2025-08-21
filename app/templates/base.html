@@ -26,6 +26,22 @@
     {% include 'components/styles.html' %}
 </head>
 <body class="bg-gradient-to-br from-pink-50 to-cyan-50 min-h-screen flex flex-col" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+    <script>
+        // Global debug for Unknown issue
+        console.log('[DEBUG] Page loaded at', new Date().toISOString());
+        
+        // Monitor for Unknown text being added
+        let checkInterval = setInterval(() => {
+            if (window.workspaceMonacoEditor && window.workspaceMonacoEditor.getValue) {
+                const value = window.workspaceMonacoEditor.getValue();
+                if (value && value.includes('Unknown')) {
+                    console.error('[MONITOR] Found "Unknown" in editor!');
+                    console.trace('Stack trace when Unknown detected');
+                    clearInterval(checkInterval); // Stop checking once found
+                }
+            }
+        }, 500);
+    </script>
     {% include 'components/navbar.html' %}
     
     <main class="flex-1 w-full">
