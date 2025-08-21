@@ -330,6 +330,84 @@ Handles context and conversation history management.
 @memory store this information about [topic]
 @memory recall information about [topic]
 \`\`\``
+        },
+        'Code Reviewer': {
+            path: 'subagents/code_reviewer.md',
+            content: `# Code Reviewer Agent
+
+Specialized agent for code review and quality assessment.
+
+## Capabilities
+- Code quality analysis
+- Security vulnerability detection
+- Best practices compliance
+- Performance optimization suggestions
+
+## Usage
+\`\`\`
+@reviewer analyze this code for issues
+@reviewer check security vulnerabilities
+\`\`\``
+        },
+        'React Guidelines': {
+            path: 'guidelines/react_rules.md',
+            content: `# React Development Guidelines
+
+## Component Structure
+- Use functional components with hooks
+- Prefer composition over inheritance
+- Keep components small and focused
+
+## State Management
+- Use useState for local state
+- Use useContext for shared state
+- Consider useReducer for complex state logic
+
+## Performance
+- Use React.memo for expensive components
+- Optimize re-renders with useMemo and useCallback
+- Lazy load components when appropriate`
+        },
+        'API Design Guidelines': {
+            path: 'guidelines/api_design.md',
+            content: `# API Design Guidelines
+
+## RESTful Principles
+- Use HTTP methods correctly (GET, POST, PUT, DELETE)
+- Use meaningful resource URLs
+- Return appropriate HTTP status codes
+
+## Request/Response Format
+- Use JSON for request and response bodies
+- Include proper Content-Type headers
+- Implement consistent error response format
+
+## Security
+- Use HTTPS for all endpoints
+- Implement proper authentication/authorization
+- Validate all input parameters`
+        },
+        'Database MCP': {
+            path: 'mcps/database_mcp.json',
+            content: `{
+  "name": "database-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol for database operations",
+  "tools": [
+    {
+      "name": "query_database",
+      "description": "Execute SQL queries on database"
+    },
+    {
+      "name": "create_table",
+      "description": "Create new database tables"
+    },
+    {
+      "name": "migrate_schema",
+      "description": "Run database migrations"
+    }
+  ]
+}`
         }
     };
     

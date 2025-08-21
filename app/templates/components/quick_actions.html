@@ -8,91 +8,90 @@
         <!-- <p class="text-black font-medium text-sm">Pick an add-on to start with</p> -->
     </div>
 
-    <!-- Three Categories in Columns -->
-    <div class="quick-start-grid mb-4">
-        
-        <!-- Add an Agent Column -->
-        <div class="bg-white border-2 border-black p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-            <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
+    <!-- Single Box with All Actions -->
+    <div class="bg-white border-2 border-black p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-4">
+        <!-- Agents Section -->
+        <div class="mb-4">
+            <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
                 <span class="text-sm">🤖</span> Agents
-            </h3>
-            <div class="space-y-2" style="margin: 4px;">
-                <button class="action-button action-button--primary action-button--full-width" onclick="addAgent('Researcher')">
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button class="action-button action-button--primary" onclick="addAgent('Researcher')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
                         <span class="action-button__label">Researcher</span>
                     </div>
                 </button>
-                
-                <button class="action-button action-button--primary action-button--full-width" onclick="addAgent('Memory Manager')">
+                <button class="action-button action-button--primary" onclick="addAgent('Memory Manager')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
                         <span class="action-button__label">Memory Manager</span>
                     </div>
                 </button>
-                
-                <button class="action-button action-button--neutral action-button--full-width" onclick="showFullAgentList()">
+                <button class="action-button action-button--primary" onclick="addAgent('Code Reviewer')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
-                        <span class="action-button__label">View all...</span>
+                        <span class="action-button__label">Code Reviewer</span>
                     </div>
                 </button>
             </div>
         </div>
-
-        <!-- Add a Rule Set Column -->
-        <div class="bg-white border-2 border-black p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-            <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
-                <span class="text-sm">📋</span> Rules
-            </h3>
-            <div class="space-y-2" style="margin: 4px;">
-                <button class="action-button action-button--accent action-button--full-width" onclick="addRule('Python')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Python</span>
-                    </div>
-                </button>
-                
-                <button class="action-button action-button--accent action-button--full-width" onclick="addRule('TypeScript')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">TypeScript</span>
-                    </div>
-                </button>
-                
-                <button class="action-button action-button--neutral action-button--full-width" onclick="showFullRulesList()">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">View all...</span>
-                    </div>
-                </button>
-            </div>
-        </div>
-
-        <!-- Add an MCP Column -->
-        <div class="bg-white border-2 border-black p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-            <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
+        
+        <!-- MCPs Section -->
+        <div class="mb-4">
+            <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
                 <span class="text-sm">🔌</span> MCPs
-            </h3>
-            <div class="space-y-2" style="margin: 4px;">
-                <button class="action-button action-button--secondary action-button--full-width" onclick="addMCP('Supabase')">
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button class="action-button action-button--secondary" onclick="addMCP('Supabase')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
                         <span class="action-button__label">Supabase</span>
                     </div>
                 </button>
-                
-                <button class="action-button action-button--secondary action-button--full-width" onclick="addMCP('GitHub')">
+                <button class="action-button action-button--secondary" onclick="addMCP('GitHub')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
                         <span class="action-button__label">GitHub</span>
                     </div>
                 </button>
-                
-                <button class="action-button action-button--neutral action-button--full-width" onclick="showFullMCPList()">
+                <button class="action-button action-button--secondary" onclick="addMCP('Database')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
-                        <span class="action-button__label">View all...</span>
+                        <span class="action-button__label">Database</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Rules Section -->
+        <div>
+            <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
+                <span class="text-sm">📋</span> Rules
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button class="action-button action-button--accent" onclick="addRule('Python')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">Python</span>
+                    </div>
+                </button>
+                <button class="action-button action-button--accent" onclick="addRule('TypeScript')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">TypeScript</span>
+                    </div>
+                </button>
+                <button class="action-button action-button--accent" onclick="addRule('React')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">React</span>
+                    </div>
+                </button>
+                <button class="action-button action-button--accent" onclick="addRule('API Design')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">API Design</span>
                     </div>
                 </button>
             </div>
@@ -141,19 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Simple action functions
-function addAgent(name) {
-    createNewContextAndApplyTemplate(name);
-}
-
-function addRule(name) {
-    createNewContextAndApplyTemplate(name);
-}
-
-function addMCP(name) {
-    const templateName = name === 'GitHub' ? 'Github MCP' : name + ' MCP';
-    createNewContextAndApplyTemplate(templateName);
-}
+// Action functions with template mapping
 
 
 // Start from scratch with empty context
@@ -214,17 +201,32 @@ function createNewContextFromScratch() {
     }
 }
 
-// Show full lists (placeholder functions)
-function showFullAgentList() {
-    alert('Full agent list coming soon!');
+// Additional template functions for new buttons
+function addAgent(name) {
+    if (name === 'Code Reviewer') {
+        createNewContextAndApplyTemplate('Code Reviewer');
+    } else {
+        createNewContextAndApplyTemplate(name);
+    }
 }
 
-function showFullRulesList() {
-    alert('Full rules list coming soon!');
+function addRule(name) {
+    if (name === 'React') {
+        createNewContextAndApplyTemplate('React Guidelines');
+    } else if (name === 'API Design') {
+        createNewContextAndApplyTemplate('API Design Guidelines');
+    } else {
+        createNewContextAndApplyTemplate(name);
+    }
 }
 
-function showFullMCPList() {
-    alert('Full MCP list coming soon!');
+function addMCP(name) {
+    if (name === 'Database') {
+        createNewContextAndApplyTemplate('Database MCP');
+    } else {
+        const templateName = name === 'GitHub' ? 'Github MCP' : name + ' MCP';
+        createNewContextAndApplyTemplate(templateName);
+    }
 }
 
 // Show workspace with fade transition
