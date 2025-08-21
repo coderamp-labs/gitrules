@@ -206,34 +206,6 @@ function startFromScratch() {
     createNewContextFromScratch();
 }
 
-// Create a new context and apply a template to it
-function createNewContextAndApplyTemplate(templateName) {
-    if (!window.workspaceManager) {
-        console.error('WorkspaceManager not available');
-        return;
-    }
-    
-    // Generate unique context ID
-    const timestamp = Date.now();
-    const contextId = `context-${timestamp}`;
-    const contextName = `${templateName} - ${new Date().toLocaleString()}`;
-    
-    // Create new context
-    if (workspaceManager.createContext(contextId, contextName)) {
-        // Switch to new context
-        workspaceManager.switchContext(contextId);
-        
-        // Apply template to new context
-        if (window.includeTemplate) {
-            window.includeTemplate(templateName);
-        }
-        
-        // Show workspace
-        showWorkspace();
-    } else {
-        console.error('Failed to create new context');
-    }
-}
 
 // Create a new empty context from scratch
 function createNewContextFromScratch() {
@@ -261,15 +233,172 @@ function createNewContextFromScratch() {
 
 // Action functions that use backend data
 function addAgent(name) {
-    createNewContextAndApplyTemplate(name);
+    createNewContextAndInstallAgent(name);
 }
 
 function addRule(name) {
-    createNewContextAndApplyTemplate(name);
+    createNewContextAndInsertRule(name);
 }
 
 function addMCP(name) {
-    createNewContextAndApplyTemplate(name + ' MCP');
+    createNewContextAndInstallMCP(name);
+}
+
+// New context creation functions that use the same API as workspace
+function createNewContextAndInstallAgent(agentName) {
+    if (!window.workspaceManager) {
+        console.error('WorkspaceManager not available');
+        return;
+    }
+    
+    // Generate unique context ID
+    const timestamp = Date.now();
+    const contextId = `agent-${timestamp}`;
+    const contextName = `${agentName} - ${new Date().toLocaleString()}`;
+    
+    // Create new context
+    if (workspaceManager.createContext(contextId, contextName)) {
+        // Switch to new context
+        workspaceManager.switchContext(contextId);
+        
+        // Install agent using the same function as workspace sidebar
+        installAgentInContext(agentName);
+        
+        // Show workspace
+        showWorkspace();
+    } else {
+        console.error('Failed to create new context');
+    }
+}
+
+function createNewContextAndInstallMCP(mcpName) {
+    if (!window.workspaceManager) {
+        console.error('WorkspaceManager not available');
+        return;
+    }
+    
+    // Generate unique context ID
+    const timestamp = Date.now();
+    const contextId = `mcp-${timestamp}`;
+    const contextName = `${mcpName} - ${new Date().toLocaleString()}`;
+    
+    // Create new context
+    if (workspaceManager.createContext(contextId, contextName)) {
+        // Switch to new context
+        workspaceManager.switchContext(contextId);
+        
+        // Install MCP using the same function as workspace sidebar
+        installMCPInContext(mcpName);
+        
+        // Show workspace
+        showWorkspace();
+    } else {
+        console.error('Failed to create new context');
+    }
+}
+
+function createNewContextAndInsertRule(ruleName) {
+    if (!window.workspaceManager) {
+        console.error('WorkspaceManager not available');
+        return;
+    }
+    
+    // Generate unique context ID
+    const timestamp = Date.now();
+    const contextId = `rule-${timestamp}`;
+    const contextName = `${ruleName} - ${new Date().toLocaleString()}`;
+    
+    // Create new context
+    if (workspaceManager.createContext(contextId, contextName)) {
+        // Switch to new context
+        workspaceManager.switchContext(contextId);
+        
+        // Insert rule text directly into editor
+        insertRuleInContext(ruleName);
+        
+        // Show workspace
+        showWorkspace();
+    } else {
+        console.error('Failed to create new context');
+    }
+}
+
+// Helper functions that use the same API as workspace sidebar
+async function installAgentInContext(agentName) {
+    try {
+        const response = await fetch(`/api/actions/agent-content/${encodeURIComponent(agentName)}`);
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            // Add to virtual workspace
+            if (window.workspaceManager && window.workspaceManager.currentState) {
+                window.workspaceManager.currentState.addFile(result.path, result.content);
+                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+                window.workspaceManager.render();
+            }
+        } else {
+            const error = await response.json();
+            console.error(`Error: ${error.detail}`);
+        }
+    } catch (error) {
+        console.error(`Error installing agent: ${error.message}`);
+    }
+}
+
+async function installMCPInContext(mcpName) {
+    try {
+        // Get current .mcp.json content from workspace
+        let currentConfig = {};
+        if (window.workspaceManager && window.workspaceManager.getState()) {
+            const mcpFile = window.workspaceManager.getState().files['.mcp.json'];
+            if (mcpFile) {
+                try {
+                    currentConfig = JSON.parse(mcpFile);
+                } catch (e) {
+                    currentConfig = {};
+                }
+            }
+        }
+        
+        const response = await fetch(`/api/actions/mcp-config/${encodeURIComponent(mcpName)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(currentConfig)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            // Add to virtual workspace
+            if (window.workspaceManager && window.workspaceManager.currentState) {
+                window.workspaceManager.currentState.addFile(result.path, result.content);
+                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+                window.workspaceManager.render();
+            }
+        } else {
+            const error = await response.json();
+            console.error(`Error: ${error.detail}`);
+        }
+    } catch (error) {
+        console.error(`Error installing MCP: ${error.message}`);
+    }
+}
+
+function insertRuleInContext(ruleName) {
+    // For rules, we just insert the text directly into the editor
+    // This matches the workspace sidebar behavior for rules
+    setTimeout(() => {
+        if (window.insertTextAtCursor) {
+            window.insertTextAtCursor(ruleName);
+        } else if (window.workspaceMonacoEditor) {
+            // Fallback: set editor value directly
+            window.workspaceMonacoEditor.setValue(ruleName);
+            window.workspaceMonacoEditor.focus();
+        }
+    }, 100);
 }
 
 // Show workspace with fade transition

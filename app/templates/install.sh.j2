@@ -42,11 +42,18 @@ mkdir -p "{{ dir }}"
 {% for path, content in files.items() -%}
 # Creating {{ path }}
 cat > "{{ path }}" << 'GITRULES_EOF'
-{{ content }}{% if not content.endswith('\n') %}
+{{ content|safe }}{% if not content.endswith('\n') %}
 {% endif %}GITRULES_EOF
 
 {% endfor -%}
 echo "Installation complete!"
 echo ""
 echo "Files have been created in your current directory."
+{% if env_vars %}
+echo ""
+echo "⚠️  Environment Variables Required:"
+{% for env_var in env_vars %}
+echo "  - {{ env_var }}"
+{% endfor %}
+{% endif %}
 echo ""

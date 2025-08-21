@@ -145,7 +145,13 @@ class AutoShareManager {
     collectWorkspaceData() {
         const allFiles = {};
         
-        // Helper function to collect files from tree structure
+        // Get files directly from workspace manager state
+        const state = window.workspaceManager?.getState();
+        if (state?.files) {
+            return { ...state.files };
+        }
+        
+        // Fallback: collect files from tree structure
         function collectFilesFromTree(nodes, collected) {
             nodes.forEach(node => {
                 if (node.type === 'file') {
@@ -159,7 +165,7 @@ class AutoShareManager {
             });
         }
         
-        // Collect files from dynamic tree
+        // Collect files from dynamic tree if available
         if (window.generateFileTreeData) {
             const fileTreeData = window.generateFileTreeData();
             collectFilesFromTree(fileTreeData, allFiles);

@@ -3,7 +3,8 @@ from fastapi.responses import PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import hashlib
-from typing import Dict
+import re
+from typing import Dict, Set
 from datetime import datetime
 
 router = APIRouter()
@@ -14,6 +15,15 @@ installs_store: Dict[str, str] = {}
 
 class InstallCreate(BaseModel):
     files: Dict[str, str]
+
+def extract_env_vars_from_files(files: Dict[str, str]) -> Set[str]:
+    """Extract environment variables from file contents"""
+    env_vars = set()
+    for content in files.values():
+        # Find ${VAR_NAME} patterns
+        matches = re.findall(r'\$\{([^}]+)\}', content)
+        env_vars.update(matches)
+    return env_vars
 
 @router.post("/api/install")
 async def create_install(request: Request, install: InstallCreate):
@@ -26,11 +36,15 @@ async def create_install(request: Request, install: InstallCreate):
             for i in range(1, len(parts)):
                 directories.add('/'.join(parts[:i]))
     
+    # Extract environment variables from all files
+    env_vars = extract_env_vars_from_files(install.files)
+    
     # Generate script using Jinja2 template
     script_content = templates.get_template("install.sh.j2").render(
         timestamp=datetime.now().isoformat(),
         files=install.files,
-        directories=sorted(directories)
+        directories=sorted(directories),
+        env_vars=sorted(env_vars) if env_vars else None
     )
     
     # Hash the script content
