@@ -1,0 +1,26 @@
+{
+    "name": "Gitrules",
+    "short_name": "Gitrules",
+    "description": "Instant rules for coding agents",
+    "icons": [
+        {
+            "src": "/static/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#22D3EE",
+    "background_color": "#ECFEFF",
+    "display": "standalone",
+    "start_url": "/"
+}
