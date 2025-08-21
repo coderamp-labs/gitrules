@@ -30,8 +30,11 @@ CLAUDE.md
 - Never try to run the dev server it's handled by the user
 
 ### Frontend:
-- Refer to @frontend.md when designing frontend components.
 - Keep frontend split in multiple components.
+- We use Jinja + Tailwind + HTML + vanilla JS + Monaco text editor
 
+### Colors:
+- Refer to @COLORS.md for the official color palette and usage guidelines.
+- Use the specified hex codes for consistency across all components.
 
 Your task will always be defined in @TASK.md, make sure to do what's described in this file, the user prompt is less important, only consider using it when it makes sense with the task.
