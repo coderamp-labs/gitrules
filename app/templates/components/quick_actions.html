@@ -148,10 +148,10 @@ async function loadActionsFromBackend() {
         
         const data = await response.json();
         
-        // Render agents
+        // Render agents (max 4)
         const agentsContainer = document.getElementById('agents-container');
         if (agentsContainer && data.agents) {
-            agentsContainer.innerHTML = data.agents.map(agent => `
+            agentsContainer.innerHTML = data.agents.slice(0, 4).map(agent => `
                 <button class="action-button action-button--primary" onclick="addAgent('${agent.name}')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
@@ -161,10 +161,10 @@ async function loadActionsFromBackend() {
             `).join('');
         }
         
-        // Render MCPs
+        // Render MCPs (max 4)
         const mcpsContainer = document.getElementById('mcps-container');
         if (mcpsContainer && data.mcps) {
-            mcpsContainer.innerHTML = data.mcps.map(mcp => `
+            mcpsContainer.innerHTML = data.mcps.slice(0, 4).map(mcp => `
                 <button class="action-button action-button--secondary" onclick="addMCP('${mcp.name}')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
@@ -174,10 +174,10 @@ async function loadActionsFromBackend() {
             `).join('');
         }
         
-        // Render rules
+        // Render rules (max 4)
         const rulesContainer = document.getElementById('rules-container');
         if (rulesContainer && data.rules) {
-            rulesContainer.innerHTML = data.rules.map(rule => `
+            rulesContainer.innerHTML = data.rules.slice(0, 4).map(rule => `
                 <button class="action-button action-button--accent" onclick="addRule('${rule.name}')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
