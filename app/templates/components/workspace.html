@@ -1,43 +1,45 @@
 <!-- Include ActionButton Component -->
 {% include 'components/ActionButton.html' %}
 
-<div class="mt-16" style="display: none;">
-    <!-- Context switcher and tabs container -->
-    <div class="flex justify-between items-end mb-0">
-        <!-- Tabs floating above container -->
-        <div class="flex gap-1 translate-x-1 translate-y-1">
-            <button id="tab-claude" class="tab-button active px-4 py-2 bg-cyan-400 border-2 border-black border-b-0 text-black font-bold shadow-[2px_0px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_0px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_0px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm relative z-10">
-                CLAUDE
-            </button>
-            <button id="tab-cursor" class="tab-button px-4 py-2 bg-gray-100 border-2 border-gray-400 border-b-0 text-gray-700 font-medium shadow-[1px_0px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[2px_0px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm relative z-5">
-                Cursor/others..
-            </button>
+<div class="workspace-container" style="display: none;">
+    <div class="workspace-inner">
+        <!-- Context switcher and tabs container -->
+        <div class="flex justify-between items-end mb-0">
+            <!-- Tabs floating above container -->
+            <div class="agent-tabs translate-x-1">
+                <button id="tab-claude" class="tab-button active px-4 py-2 bg-cyan-400 border-2 border-black border-b-0 text-black font-bold shadow-[2px_0px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_0px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_0px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm relative z-10">
+                    CLAUDE
+                </button>
+                <button id="tab-cursor" class="tab-button px-4 py-2 bg-gray-100 border-2 border-gray-400 border-b-0 text-gray-700 font-medium shadow-[1px_0px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[2px_0px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm relative z-5">
+                    Cursor/others..
+                </button>
+            </div>
+            
+            <!-- Context switcher -->
+            <div class="flex gap-2 items-center mb-1 mr-2">
+                <label class="text-sm font-bold text-black">Context:</label>
+                <select id="context-switcher" class="px-3 py-1 bg-white border-2 border-black text-black font-medium shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-2 focus:ring-cyan-400 text-sm">
+                    <!-- Options will be populated dynamically -->
+                </select>
+                <button id="new-context-btn" class="px-2 py-1 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm" title="New Context">
+                    +
+                </button>
+                <button id="delete-context-btn" class="px-2 py-1 bg-red-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm" title="Delete Context">
+                    ×
+                </button>
+            </div>
         </div>
-        
-        <!-- Context switcher -->
-        <div class="flex gap-2 items-center mb-1 mr-2">
-            <label class="text-sm font-bold text-black">Context:</label>
-            <select id="context-switcher" class="px-3 py-1 bg-white border-2 border-black text-black font-medium shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-2 focus:ring-cyan-400 text-sm">
-                <!-- Options will be populated dynamically -->
-            </select>
-            <button id="new-context-btn" class="px-2 py-1 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm" title="New Context">
-                +
-            </button>
-            <button id="delete-context-btn" class="px-2 py-1 bg-red-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm" title="Delete Context">
-                ×
-            </button>
+
+        <!-- Editor Container -->
+        <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative z-0">
+            <!-- Three-panel layout inside container -->
+            <div class="workspace-grid">
+                {% include 'components/workspace_files.html' %}
+                {% include 'components/workspace_editor.html' %}
+                {% include 'components/workspace_actions.html' %}
+            </div>
         </div>
     </div>
-
-    <!-- Editor Container -->
-    <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative z-0">
-
-        <!-- Three-panel layout inside container -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 h-96">
-            {% include 'components/workspace_files.html' %}
-            {% include 'components/workspace_editor.html' %}
-            {% include 'components/workspace_actions.html' %}
-        </div>
 </div>
 
 <script>
@@ -85,9 +87,7 @@ function initializeWorkspaceEditor() {
     
     require(['vs/editor/editor.main'], function () {
         workspaceMonacoEditor = monaco.editor.create(document.getElementById('workspace-monaco-editor'), {
-            value: `# My Agent Configuration
-
-Click any QuickAction button to add it here...`,
+            value: '',
             language: 'markdown',
             theme: 'vs',
             fontSize: 12,
@@ -97,6 +97,9 @@ Click any QuickAction button to add it here...`,
             automaticLayout: true,
             wordWrap: 'on'
         });
+        
+        // Expose globally for access from other components
+        window.workspaceMonacoEditor = workspaceMonacoEditor;
         
         // Copy functionality
         document.getElementById('copy-workspace-editor').addEventListener('click', function() {
@@ -1249,8 +1252,11 @@ Handles context and conversation history management.
     }
 }
 
-// Expose includeTemplate globally
+// Expose functions globally
 window.includeTemplate = includeTemplate;
+window.updateFilePathLabel = updateFilePathLabel;
+window.renderFileTree = renderFileTree;
+window.workspaceMonacoEditor = workspaceMonacoEditor;
 
 async function createNewFile() {
     const fileName = prompt('Enter file name (with extension):');

@@ -140,7 +140,7 @@ let isWorkspaceVisible = false;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const workspaceSection = document.querySelector('.mt-16');
+    const workspaceSection = document.querySelector('.workspace-container');
     if (workspaceSection) {
         workspaceSection.style.display = 'none';
         workspaceSection.style.transition = 'opacity 300ms ease-in-out';
@@ -236,7 +236,7 @@ function showFullMCPList() {
 // Show workspace with fade transition
 function showWorkspace() {
     const quickActionsSection = document.getElementById('quick-actions-section');
-    const workspaceSection = document.querySelector('.mt-16');
+    const workspaceSection = document.querySelector('.workspace-container');
     const backButtonContainer = document.getElementById('back-btn-container');
     
     if (!workspaceSection) {
@@ -253,6 +253,13 @@ function showWorkspace() {
         workspaceSection.style.display = 'block';
         workspaceSection.style.opacity = '0';
         
+        // Scroll to workspace to focus on it (with offset to show beginning)
+        setTimeout(() => {
+            const rect = workspaceSection.getBoundingClientRect();
+            const offsetTop = window.pageYOffset + rect.top - 20; // 20px offset from top
+            window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+        }, 100);
+        
         // Show back button
         if (backButtonContainer) {
             backButtonContainer.style.display = 'block';
@@ -262,14 +269,42 @@ function showWorkspace() {
         setTimeout(() => {
             workspaceSection.style.opacity = '1';
             isWorkspaceVisible = true;
+            
+            // Clear the editor and set focus
+            clearEditorAndFocus();
         }, 50);
     }, 300);
+}
+
+// Clear editor and set focus when workspace appears
+function clearEditorAndFocus() {
+    // Clear selected file in workspace manager
+    if (window.workspaceManager && window.workspaceManager.currentState) {
+        window.workspaceManager.currentState.selectedFile = null;
+        window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+    }
+    
+    // Clear and focus the monaco editor
+    if (window.workspaceMonacoEditor) {
+        window.workspaceMonacoEditor.setValue('');
+        window.workspaceMonacoEditor.focus();
+    }
+    
+    // Update file path label to show no file selected
+    if (window.updateFilePathLabel) {
+        window.updateFilePathLabel(null);
+    }
+    
+    // Re-render file tree to clear selection
+    if (window.renderFileTree) {
+        window.renderFileTree();
+    }
 }
 
 // Hide workspace with fade transition
 function hideWorkspace() {
     const quickActionsSection = document.getElementById('quick-actions-section');
-    const workspaceSection = document.querySelector('.mt-16');
+    const workspaceSection = document.querySelector('.workspace-container');
     const backButtonContainer = document.getElementById('back-btn-container');
     
     if (!workspaceSection) {
