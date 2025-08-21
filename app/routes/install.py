@@ -9,18 +9,18 @@ from datetime import datetime
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-# In-memory storage for rulesets
-rulesets_store: Dict[str, str] = {}
+# In-memory storage for installs
+installs_store: Dict[str, str] = {}
 
-class RulesetCreate(BaseModel):
+class InstallCreate(BaseModel):
     files: Dict[str, str]
 
-@router.post("/api/ruleset")
-async def create_ruleset(request: Request, ruleset: RulesetCreate):
+@router.post("/api/install")
+async def create_install(request: Request, install: InstallCreate):
     """Generate install script from files and store by hash"""
     # Extract unique directories
     directories = set()
-    for path in ruleset.files.keys():
+    for path in install.files.keys():
         parts = path.split('/')
         if len(parts) > 1:
             for i in range(1, len(parts)):
@@ -29,19 +29,19 @@ async def create_ruleset(request: Request, ruleset: RulesetCreate):
     # Generate script using Jinja2 template
     script_content = templates.get_template("install.sh.j2").render(
         timestamp=datetime.now().isoformat(),
-        files=ruleset.files,
+        files=install.files,
         directories=sorted(directories)
     )
     
     # Hash the script content
     content_hash = hashlib.sha256(script_content.encode()).hexdigest()[:12]
-    rulesets_store[content_hash] = script_content
+    installs_store[content_hash] = script_content
     
     return {"hash": content_hash}
 
-@router.get("/api/ruleset/{hash_id}.sh", response_class=PlainTextResponse)
-async def get_ruleset(hash_id: str):
-    """Retrieve ruleset by hash"""
-    if hash_id not in rulesets_store:
-        raise HTTPException(status_code=404, detail="Ruleset not found")
-    return rulesets_store[hash_id]
+@router.get("/api/install/{hash_id}.sh", response_class=PlainTextResponse)
+async def get_install(hash_id: str):
+    """Retrieve install by hash"""
+    if hash_id not in installs_store:
+        raise HTTPException(status_code=404, detail="Install not found")
+    return installs_store[hash_id]

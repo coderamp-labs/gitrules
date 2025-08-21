@@ -102,7 +102,7 @@ Click any QuickAction button to add it here...`,
         });
         
         // Share functionality
-        document.getElementById('share-ruleset').addEventListener('click', async function() {
+        document.getElementById('share-install').addEventListener('click', async function() {
             // Collect all files from the file system
             const allFiles = {};
             
@@ -131,7 +131,7 @@ Click any QuickAction button to add it here...`,
             
             try {
                 // Send files to API to generate install script
-                const response = await fetch('/api/ruleset', {
+                const response = await fetch('/api/install', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -140,17 +140,17 @@ Click any QuickAction button to add it here...`,
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Failed to create ruleset');
+                    throw new Error('Failed to create install');
                 }
                 
                 const data = await response.json();
-                const installCommand = `sh -c "$(curl -fsSL ${window.location.origin}/api/ruleset/${data.hash}.sh)"`;
+                const installCommand = `sh -c "$(curl -fsSL ${window.location.origin}/api/install/${data.hash}.sh)"`;
                 
                 // Copy to clipboard
                 await navigator.clipboard.writeText(installCommand);
                 
                 // Show feedback
-                const button = document.getElementById('share-ruleset');
+                const button = document.getElementById('share-install');
                 const originalText = button.textContent;
                 button.textContent = 'Copied!';
                 button.classList.remove('bg-pink-400');
@@ -162,8 +162,8 @@ Click any QuickAction button to add it here...`,
                     button.classList.add('bg-pink-400');
                 }, 2000);
             } catch (error) {
-                console.error('Error sharing ruleset:', error);
-                alert('Failed to share ruleset. Please try again.');
+                console.error('Error sharing install:', error);
+                alert('Failed to share install. Please try again.');
             }
         });
         
