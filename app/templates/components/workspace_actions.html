@@ -354,8 +354,22 @@ async function installRule(ruleName) {
                 }
             }
             
-            // Append rule content to CLAUDE.md
-            const newContent = currentContent + (currentContent ? '\n' : '') + result.content;
+            // Toggle behavior: if rule already exists, remove it; if not, add it
+            const ruleContent = result.content.trim();
+            let newContent;
+            
+            if (currentContent.includes(ruleContent)) {
+                // Remove the rule
+                newContent = currentContent
+                    .split('\n')
+                    .filter(line => line.trim() !== ruleContent)
+                    .join('\n')
+                    .replace(/\n\n+/g, '\n\n') // Clean up multiple newlines
+                    .trim();
+            } else {
+                // Add the rule
+                newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
+            }
             
             // Add to virtual workspace
             if (window.workspaceManager && window.workspaceManager.currentState) {
