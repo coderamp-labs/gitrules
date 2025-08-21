@@ -92,8 +92,8 @@ function renderFileTree() {
             const folderIcon = isExpanded ? 'mdi-folder-open' : 'mdi-folder';
             div.innerHTML = `
                 <div class="flex items-center gap-1 p-1 hover:bg-gray-100 cursor-pointer folder-toggle" data-path="${node.path}">
-                    <svg class="w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M7 7l3 3 3-3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <svg class="w-3 h-3 transition-transform ${isExpanded ? '' : '-rotate-90'}" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6 10l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"/>
                     </svg>
                     <span class="mdi ${folderIcon} text-blue-600 text-base"></span>
                     <span class="font-medium">${node.name}</span>
