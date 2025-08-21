@@ -1,7 +1,7 @@
 <!-- Center Panel: Monaco Editor -->
 <div class="workspace-center lg:col-span-1 border-r-2 border-black">
     <!-- Integrated monaco editor without card styling -->
-    <div class="p-4 bg-white h-full">
+    <div class="p-4 bg-white h-full flex flex-col">
         <div class="flex justify-between items-center mb-2">
             <h3 class="text-lg font-black text-black">Editor</h3>
             <div class="flex gap-2">
@@ -23,11 +23,11 @@
             </div>
         </div>
         
-        <div class="relative">
+        <div class="relative flex-1">
             <div class="w-full h-full bg-gray-900 translate-y-1 translate-x-1 absolute inset-0 z-0"></div>
             <div id="workspace-monaco-editor" 
-                 class="relative z-10 border-2 border-black bg-white" 
-                 style="height: 280px;"></div>
+                 class="relative z-10 border-2 border-black bg-white h-full" 
+                 style="min-height: 400px;"></div>
         </div>
     </div>
 </div>
