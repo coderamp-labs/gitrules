@@ -387,18 +387,39 @@ async function installMCPInContext(mcpName) {
     }
 }
 
-function insertRuleInContext(ruleName) {
-    // For rules, we just insert the text directly into the editor
-    // This matches the workspace sidebar behavior for rules
-    setTimeout(() => {
-        if (window.insertTextAtCursor) {
-            window.insertTextAtCursor(ruleName);
-        } else if (window.workspaceMonacoEditor) {
-            // Fallback: set editor value directly
-            window.workspaceMonacoEditor.setValue(ruleName);
-            window.workspaceMonacoEditor.focus();
+async function insertRuleInContext(ruleName) {
+    try {
+        const response = await fetch(`/api/actions/rule-content/${encodeURIComponent(ruleName)}`);
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            // Get current CLAUDE.md content from workspace
+            let currentContent = '';
+            if (window.workspaceManager && window.workspaceManager.getState()) {
+                const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
+                if (claudeFile) {
+                    currentContent = claudeFile;
+                }
+            }
+            
+            // Add rule content to CLAUDE.md (no toggle behavior for quick start)
+            const ruleContent = result.content.trim();
+            const newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
+            
+            // Add to virtual workspace
+            if (window.workspaceManager && window.workspaceManager.currentState) {
+                window.workspaceManager.currentState.addFile('CLAUDE.md', newContent);
+                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+                window.workspaceManager.render();
+            }
+        } else {
+            const error = await response.json();
+            console.error(`Error: ${error.detail}`);
         }
-    }, 100);
+    } catch (error) {
+        console.error(`Error installing rule: ${error.message}`);
+    }
 }
 
 // Show workspace with fade transition
