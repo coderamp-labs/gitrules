@@ -1,62 +1,209 @@
-<!-- Include ActionButton Component -->
-{% include 'components/ActionButton.html' %}
-
-<!-- Right Panel: Quick Actions -->
-<div class="workspace-actions bg-pink-50 p-4">
-    <h3 class="text-lg font-black text-black mb-3">Quick Actions</h3>
+<!-- Right Panel: Quick Actions with Dynamic Theme -->
+<div class="workspace-actions qa-sidebar-section relative overflow-hidden" data-qa-theme="yellow">
+    <!-- Background Layer -->
+    <div class="qa-sidebar-bg absolute inset-0 transition-colors duration-300"></div>
     
-    <!-- Quick Actions Tabs -->
-    <div class="flex gap-1 mb-3 border-b-2 border-black">
-        <button onclick="switchQuickActionTab('mcps')" id="qa-tab-mcps" class="px-2 py-1 bg-pink-400 border-2 border-black border-b-0 relative -mb-[2px] font-bold text-xs text-black">
-            MCPs
-        </button>
-        <button onclick="switchQuickActionTab('rules')" id="qa-tab-rules" class="px-2 py-1 bg-white border-2 border-black font-bold text-xs text-black hover:bg-gray-50">
-            Rules
-        </button>
-        <button onclick="switchQuickActionTab('subagents')" id="qa-tab-subagents" class="px-2 py-1 bg-white border-2 border-black font-bold text-xs text-black hover:bg-gray-50">
-            Subagents
-        </button>
-    </div>
-    
-    <div class="space-y-3">
-        <!-- MCPs Tab Content -->
-        <div id="qa-content-mcps" class="qa-tab-content">
-            <div id="sidebar-mcps-container" class="space-y-2" style="margin: 4px;">
-                <div class="text-xs text-gray-500">Loading...</div>
-            </div>
+    <!-- Content Container -->
+    <div class="relative z-10 p-4">
+        <h3 class="text-lg font-black text-black mb-3">Quick Actions</h3>
+        
+        <!-- Tabs -->
+        <div class="flex gap-1 mb-3 border-b-2 border-black" role="tablist">
+            <button 
+                role="tab"
+                aria-selected="true"
+                data-tab="mcps"
+                data-theme="yellow"
+                onclick="switchQuickActionTab('mcps', 'yellow')" 
+                id="qa-tab-mcps" 
+                class="qa-sidebar-tab px-2 py-1 font-bold text-xs transition-all active"
+            >
+                MCPs
+            </button>
+            <button 
+                role="tab"
+                aria-selected="false"
+                data-tab="rules"
+                data-theme="pink"
+                onclick="switchQuickActionTab('rules', 'pink')" 
+                id="qa-tab-rules" 
+                class="qa-sidebar-tab px-2 py-1 font-bold text-xs transition-all"
+            >
+                Rules
+            </button>
+            <button 
+                role="tab"
+                aria-selected="false"
+                data-tab="subagents"
+                data-theme="blue"
+                onclick="switchQuickActionTab('subagents', 'blue')" 
+                id="qa-tab-subagents" 
+                class="qa-sidebar-tab px-2 py-1 font-bold text-xs transition-all"
+            >
+                Subagents
+            </button>
         </div>
-
-        <!-- Rules Tab Content -->
-        <div id="qa-content-rules" class="qa-tab-content hidden">
-            <div id="sidebar-rules-container" class="space-y-2" style="margin: 4px;">
-                <div class="text-xs text-gray-500">Loading...</div>
+        
+        <!-- White Card Container -->
+        <div class="qa-sidebar-card bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-3">
+            <!-- MCPs Tab Content -->
+            <div id="qa-content-mcps" class="qa-tab-content" role="tabpanel">
+                <div id="sidebar-mcps-container" class="space-y-2">
+                    <div class="text-xs text-gray-500">Loading...</div>
+                </div>
             </div>
-        </div>
 
-        <!-- Subagents Tab Content -->
-        <div id="qa-content-subagents" class="qa-tab-content hidden">
-            <div id="sidebar-agents-container" class="space-y-2" style="margin: 4px;">
-                <div class="text-xs text-gray-500">Loading...</div>
+            <!-- Rules Tab Content -->
+            <div id="qa-content-rules" class="qa-tab-content hidden" role="tabpanel">
+                <div id="sidebar-rules-container" class="space-y-2">
+                    <div class="text-xs text-gray-500">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Subagents Tab Content -->
+            <div id="qa-content-subagents" class="qa-tab-content hidden" role="tabpanel">
+                <div id="sidebar-agents-container" class="space-y-2">
+                    <div class="text-xs text-gray-500">Loading...</div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Theme-specific CSS for Sidebar -->
+<style>
+/* CSS Variables for Sidebar Theming */
+.qa-sidebar-section {
+    --qa-sidebar-card-bg: #ffffff;
+    --qa-sidebar-card-border: #000000;
+    --qa-sidebar-shadow: rgba(0, 0, 0, 1);
+}
+
+/* Yellow Theme (MCPs) */
+.qa-sidebar-section[data-qa-theme="yellow"] {
+    --qa-sidebar-accent: #FDE047;
+    --qa-sidebar-accent-hover: #FACC15;
+    --qa-sidebar-contrast: #000000;
+    --qa-sidebar-bg: #FEFCE8;
+}
+
+/* Pink Theme (Rules) */
+.qa-sidebar-section[data-qa-theme="pink"] {
+    --qa-sidebar-accent: #F472B6;
+    --qa-sidebar-accent-hover: #EC4899;
+    --qa-sidebar-contrast: #000000;
+    --qa-sidebar-bg: #FCE7F3;
+}
+
+/* Blue Theme (Subagents) */
+.qa-sidebar-section[data-qa-theme="blue"] {
+    --qa-sidebar-accent: #22D3EE;
+    --qa-sidebar-accent-hover: #0EA5E9;
+    --qa-sidebar-contrast: #000000;
+    --qa-sidebar-bg: #ECFEFF;
+}
+
+/* Background Layer */
+.qa-sidebar-bg {
+    background-color: var(--qa-sidebar-bg);
+}
+
+/* Tab Styles */
+.qa-sidebar-tab {
+    background-color: white;
+    border: 2px solid black;
+    border-bottom: none;
+    position: relative;
+    margin-bottom: -2px;
+    color: black;
+}
+
+.qa-sidebar-tab:hover {
+    background-color: #f3f4f6;
+}
+
+.qa-sidebar-tab.active {
+    background-color: var(--qa-sidebar-accent);
+    color: var(--qa-sidebar-contrast);
+    z-index: 10;
+}
+
+/* Themed Buttons */
+.qa-sidebar-section .qa-sidebar-card .sidebar-themed-button {
+    background-color: white;
+    border: 2px solid black;
+    color: black;
+    font-weight: bold;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+    transition: all 150ms;
+    width: 100%;
+    text-align: left;
+    font-size: 0.75rem;
+}
+
+.qa-sidebar-section .qa-sidebar-card .sidebar-themed-button:hover {
+    box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
+    transform: translate(-1px, -1px);
+}
+
+.qa-sidebar-section .qa-sidebar-card .sidebar-themed-button:active {
+    box-shadow: 1px 1px 0px 0px rgba(0,0,0,1);
+    transform: translate(1px, 1px);
+}
+
+.qa-sidebar-section .qa-sidebar-card .sidebar-themed-button .button-accent-icon {
+    background-color: var(--qa-sidebar-accent);
+    color: var(--qa-sidebar-contrast);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.75rem;
+    border: 1px solid black;
+}
+</style>
+
 <script>
-function switchQuickActionTab(tabName) {
-    // Hide all content
-    document.querySelectorAll('.qa-tab-content').forEach(content => {
-        content.classList.add('hidden');
+// Current sidebar tab state
+let currentSidebarTab = 'mcps';
+let currentSidebarTheme = 'yellow';
+
+function switchQuickActionTab(tabName, theme) {
+    // Update current state
+    currentSidebarTab = tabName;
+    currentSidebarTheme = theme;
+    
+    // Update section theme
+    const section = document.querySelector('.qa-sidebar-section');
+    if (section) {
+        section.setAttribute('data-qa-theme', theme);
+    }
+    
+    // Update tabs
+    document.querySelectorAll('.qa-sidebar-tab').forEach(tab => {
+        if (tab.dataset.tab === tabName) {
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+        } else {
+            tab.classList.remove('active');
+            tab.setAttribute('aria-selected', 'false');
+        }
     });
     
-    // Reset all tab styles
-    document.querySelectorAll('[id^="qa-tab-"]').forEach(tab => {
-        tab.className = 'px-2 py-1 bg-white border-2 border-black font-bold text-xs text-black hover:bg-gray-50';
+    // Update panels
+    document.querySelectorAll('.qa-tab-content').forEach(panel => {
+        if (panel.id === `qa-content-${tabName}`) {
+            panel.classList.remove('hidden');
+        } else {
+            panel.classList.add('hidden');
+        }
     });
-    
-    // Show selected content and highlight tab
-    document.getElementById('qa-content-' + tabName).classList.remove('hidden');
-    document.getElementById('qa-tab-' + tabName).className = 'px-2 py-1 bg-pink-400 border-2 border-black border-b-0 relative -mb-[2px] font-bold text-xs text-black';
 }
 
 // Workspace sidebar action function - just inserts text, doesn't create contexts
@@ -80,11 +227,9 @@ async function loadSidebarActions() {
         const mcpsContainer = document.getElementById('sidebar-mcps-container');
         if (mcpsContainer && data.mcps) {
             mcpsContainer.innerHTML = data.mcps.map(mcp => `
-                <button class="action-button action-button--secondary action-button--full-width" onclick="insertTextAction('${mcp.name}')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">${mcp.name}</span>
-                    </div>
+                <button class="sidebar-themed-button" onclick="insertTextAction('${mcp.name}')">
+                    <span class="button-accent-icon">+</span>
+                    <span>${mcp.name}</span>
                 </button>
             `).join('');
         }
@@ -93,11 +238,9 @@ async function loadSidebarActions() {
         const rulesContainer = document.getElementById('sidebar-rules-container');
         if (rulesContainer && data.rules) {
             rulesContainer.innerHTML = data.rules.map(rule => `
-                <button class="action-button action-button--accent action-button--full-width" onclick="insertTextAction('${rule.name}')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">${rule.name}</span>
-                    </div>
+                <button class="sidebar-themed-button" onclick="insertTextAction('${rule.name}')">
+                    <span class="button-accent-icon">+</span>
+                    <span>${rule.name}</span>
                 </button>
             `).join('');
         }
@@ -106,11 +249,9 @@ async function loadSidebarActions() {
         const agentsContainer = document.getElementById('sidebar-agents-container');
         if (agentsContainer && data.agents) {
             agentsContainer.innerHTML = data.agents.map(agent => `
-                <button class="action-button action-button--primary action-button--full-width" onclick="insertTextAction('${agent.name}')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">${agent.name}</span>
-                    </div>
+                <button class="sidebar-themed-button" onclick="insertTextAction('${agent.name}')">
+                    <span class="button-accent-icon">+</span>
+                    <span>${agent.name}</span>
                 </button>
             `).join('');
         }
