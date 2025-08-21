@@ -19,9 +19,9 @@ echo ""
 echo "Total files: {{ files|length }}"
 echo ""
 if [ -t 0 ]; then
-    read -p "Do you want to proceed? (Y/n): " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! -z $REPLY ]]; then
+    printf "Do you want to proceed? (Y/n): "
+    read REPLY
+    if [ "$REPLY" != "Y" ] && [ "$REPLY" != "y" ] && [ -n "$REPLY" ]; then
         echo "Installation cancelled."
         exit 1
     fi
