@@ -27,6 +27,7 @@ CLAUDE.md
 - Always keep code SUPER minimal, never introduce features I've not explicitely mentionned
 - Store secrets in a .env file (never commit it).  
 - Keep dependencies minimal and updated.
+- Never try to run the dev server it's handled by the user
 
 ### Frontend:
 - Refer to @frontend.md when designing frontend components.
