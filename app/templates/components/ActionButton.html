@@ -1,0 +1,185 @@
+<!-- ActionButton CSS-Only Component -->
+
+<style>
+/* Neo-Brutalist ActionButton Design Tokens */
+:root {
+    /* Base tokens */
+    --ab-fg: #000000;                    /* Foreground text/icon color */
+    --ab-border: #000000;                /* Outline color */
+    --ab-shadow: #000000;                /* Backshadow color */
+    --ab-shadow-x: 4px;                  /* Backshadow X offset */
+    --ab-shadow-y: 4px;                  /* Backshadow Y offset */
+    --ab-border-width: 2px;              /* Outline thickness */
+    --ab-radius: 0;                      /* Corner radius (neo-brutalist = 0) */
+    --ab-gap: 8px;                       /* Spacing between + block and label */
+    --ab-focus-ring: #0891b2;            /* Focus ring color */
+    --ab-plus-size: 40px;                /* + block size */
+    --ab-height: 44px;                   /* Button height (accessibility) */
+}
+
+/* Base ActionButton styles */
+.action-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: var(--ab-height);
+    background: #ffffff; /* Main button area is white */
+    border: var(--ab-border-width) solid var(--ab-border);
+    border-radius: var(--ab-radius);
+    color: var(--ab-fg);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    
+    /* Neo-brutalist backshadow using box-shadow */
+    box-shadow: var(--ab-shadow-x) var(--ab-shadow-y) 0 0 var(--ab-shadow);
+    
+    /* No default margins/padding that could interfere */
+    margin: 0;
+    outline: none;
+}
+
+/* Left + Block */
+.action-button__plus {
+    width: var(--ab-plus-size);
+    height: var(--ab-plus-size);
+    background: var(--ab-bg);
+    border-right: var(--ab-border-width) solid var(--ab-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.action-button__plus-glyph {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--ab-fg);
+}
+
+/* Right Content Area */
+.action-button__content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--ab-gap);
+    padding: 0 12px;
+    min-height: var(--ab-plus-size);
+}
+
+.action-button__icon {
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.action-button__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.action-button__label {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.2;
+    color: var(--ab-fg);
+}
+
+.action-button__description {
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--ab-fg);
+    opacity: 0.8;
+}
+
+/* Interaction States */
+.action-button:hover {
+    transform: translate(-2px, -2px); /* Lift button up and away from shadow */
+    box-shadow: calc(var(--ab-shadow-x) + 2px) calc(var(--ab-shadow-y) + 2px) 0 0 var(--ab-shadow);
+}
+
+.action-button:active {
+    transform: translate(2px, 2px); /* Press button down towards shadow */
+    box-shadow: calc(var(--ab-shadow-x) - 2px) calc(var(--ab-shadow-y) - 2px) 0 0 var(--ab-shadow);
+}
+
+.action-button:focus {
+    outline: 2px solid var(--ab-focus-ring);
+    outline-offset: 2px;
+}
+
+/* Disabled State */
+.action-button--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Tone Variations (only affects + area color) */
+.action-button--primary {
+    --ab-bg: #0891b2; /* cyan-600 */
+}
+
+.action-button--accent {
+    --ab-bg: #ec4899; /* pink-500 */
+}
+
+.action-button--secondary {
+    --ab-bg: #eab308; /* yellow-500 */
+}
+
+.action-button--neutral {
+    --ab-bg: #e5e7eb; /* gray-200 */
+}
+
+/* Utility Classes */
+.action-button--full-width {
+    width: 100%;
+}
+
+.action-button--compact {
+    --ab-height: 36px;
+    --ab-plus-size: 32px;
+    font-size: 12px;
+}
+
+.action-button--large {
+    --ab-height: 52px;
+    --ab-plus-size: 48px;
+    font-size: 16px;
+}
+
+/* Template button with description */
+.action-button--template .action-button__content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.action-button--template .action-button__description {
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--ab-fg);
+    opacity: 0.8;
+}
+
+/* Ensure consistent typography */
+.action-button * {
+    font-family: inherit;
+}
+
+/* Override any external styles that might interfere */
+.action-button,
+.action-button *,
+.action-button::before,
+.action-button::after {
+    box-sizing: border-box;
+}
+</style>
