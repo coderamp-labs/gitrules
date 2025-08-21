@@ -21,58 +21,22 @@
     <div class="space-y-3">
         <!-- MCPs Tab Content -->
         <div id="qa-content-mcps" class="qa-tab-content">
-            <div class="space-y-2" style="margin: 4px;">
-                <button class="action-button action-button--secondary action-button--full-width" onclick="insertTextAction('Supabase MCP')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Supabase MCP</span>
-                    </div>
-                </button>
-                
-                <button class="action-button action-button--secondary action-button--full-width" onclick="insertTextAction('Github MCP')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Github MCP</span>
-                    </div>
-                </button>
+            <div id="sidebar-mcps-container" class="space-y-2" style="margin: 4px;">
+                <div class="text-xs text-gray-500">Loading...</div>
             </div>
         </div>
 
         <!-- Rules Tab Content -->
         <div id="qa-content-rules" class="qa-tab-content hidden">
-            <div class="space-y-2" style="margin: 4px;">
-                <button class="action-button action-button--accent action-button--full-width" onclick="insertTextAction('Python')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Python</span>
-                    </div>
-                </button>
-                
-                <button class="action-button action-button--accent action-button--full-width" onclick="insertTextAction('TypeScript')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">TypeScript</span>
-                    </div>
-                </button>
+            <div id="sidebar-rules-container" class="space-y-2" style="margin: 4px;">
+                <div class="text-xs text-gray-500">Loading...</div>
             </div>
         </div>
 
         <!-- Subagents Tab Content -->
         <div id="qa-content-subagents" class="qa-tab-content hidden">
-            <div class="space-y-2" style="margin: 4px;">
-                <button class="action-button action-button--primary action-button--full-width" onclick="insertTextAction('Researcher')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Researcher</span>
-                    </div>
-                </button>
-                
-                <button class="action-button action-button--primary action-button--full-width" onclick="insertTextAction('Memory Manager')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Memory Manager</span>
-                    </div>
-                </button>
+            <div id="sidebar-agents-container" class="space-y-2" style="margin: 4px;">
+                <div class="text-xs text-gray-500">Loading...</div>
             </div>
         </div>
     </div>
@@ -103,4 +67,60 @@ function insertTextAction(text) {
         console.error('insertTextAtCursor function not available');
     }
 }
+
+// Load sidebar actions from backend
+async function loadSidebarActions() {
+    try {
+        const response = await fetch('/api/actions/');
+        if (!response.ok) throw new Error('Failed to fetch actions');
+        
+        const data = await response.json();
+        
+        // Render MCPs
+        const mcpsContainer = document.getElementById('sidebar-mcps-container');
+        if (mcpsContainer && data.mcps) {
+            mcpsContainer.innerHTML = data.mcps.map(mcp => `
+                <button class="action-button action-button--secondary action-button--full-width" onclick="insertTextAction('${mcp.name}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">${mcp.name}</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+        
+        // Render rules
+        const rulesContainer = document.getElementById('sidebar-rules-container');
+        if (rulesContainer && data.rules) {
+            rulesContainer.innerHTML = data.rules.map(rule => `
+                <button class="action-button action-button--accent action-button--full-width" onclick="insertTextAction('${rule.name}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">${rule.name}</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+        
+        // Render agents
+        const agentsContainer = document.getElementById('sidebar-agents-container');
+        if (agentsContainer && data.agents) {
+            agentsContainer.innerHTML = data.agents.map(agent => `
+                <button class="action-button action-button--primary action-button--full-width" onclick="insertTextAction('${agent.name}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">${agent.name}</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading sidebar actions:', error);
+    }
+}
+
+// Load actions when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    loadSidebarActions();
+});
 </script>

@@ -15,25 +15,9 @@
             <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
                 <span class="text-sm">🤖</span> Agents
             </div>
-            <div class="flex flex-wrap gap-2">
-                <button class="action-button action-button--primary" onclick="addAgent('Researcher')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Researcher</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--primary" onclick="addAgent('Memory Manager')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Memory Manager</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--primary" onclick="addAgent('Code Reviewer')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Code Reviewer</span>
-                    </div>
-                </button>
+            <div id="agents-container" class="flex flex-wrap gap-2">
+                <!-- Agents will be loaded dynamically -->
+                <div class="text-xs text-gray-500">Loading...</div>
             </div>
         </div>
         
@@ -42,25 +26,9 @@
             <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
                 <span class="text-sm">🔌</span> MCPs
             </div>
-            <div class="flex flex-wrap gap-2">
-                <button class="action-button action-button--secondary" onclick="addMCP('Supabase')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Supabase</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--secondary" onclick="addMCP('GitHub')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">GitHub</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--secondary" onclick="addMCP('Database')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Database</span>
-                    </div>
-                </button>
+            <div id="mcps-container" class="flex flex-wrap gap-2">
+                <!-- MCPs will be loaded dynamically -->
+                <div class="text-xs text-gray-500">Loading...</div>
             </div>
         </div>
         
@@ -69,31 +37,9 @@
             <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
                 <span class="text-sm">📋</span> Rules
             </div>
-            <div class="flex flex-wrap gap-2">
-                <button class="action-button action-button--accent" onclick="addRule('Python')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">Python</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--accent" onclick="addRule('TypeScript')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">TypeScript</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--accent" onclick="addRule('React')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">React</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--accent" onclick="addRule('API Design')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">API Design</span>
-                    </div>
-                </button>
+            <div id="rules-container" class="flex flex-wrap gap-2">
+                <!-- Rules will be loaded dynamically -->
+                <div class="text-xs text-gray-500">Loading...</div>
             </div>
         </div>
     </div>
@@ -138,7 +84,68 @@ document.addEventListener('DOMContentLoaded', function() {
         workspaceSection.style.display = 'none';
         workspaceSection.style.transition = 'opacity 300ms ease-in-out';
     }
+    
+    // Load actions from backend
+    loadActionsFromBackend();
 });
+
+// Fetch and display actions from backend API
+async function loadActionsFromBackend() {
+    try {
+        const response = await fetch('/api/actions/');
+        if (!response.ok) throw new Error('Failed to fetch actions');
+        
+        const data = await response.json();
+        
+        // Render agents
+        const agentsContainer = document.getElementById('agents-container');
+        if (agentsContainer && data.agents) {
+            agentsContainer.innerHTML = data.agents.map(agent => `
+                <button class="action-button action-button--primary" onclick="addAgent('${agent.name}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">${agent.name}</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+        
+        // Render MCPs
+        const mcpsContainer = document.getElementById('mcps-container');
+        if (mcpsContainer && data.mcps) {
+            mcpsContainer.innerHTML = data.mcps.map(mcp => `
+                <button class="action-button action-button--secondary" onclick="addMCP('${mcp.name}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">${mcp.name}</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+        
+        // Render rules
+        const rulesContainer = document.getElementById('rules-container');
+        if (rulesContainer && data.rules) {
+            rulesContainer.innerHTML = data.rules.map(rule => `
+                <button class="action-button action-button--accent" onclick="addRule('${rule.name}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">${rule.name}</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading actions:', error);
+        // Show error state
+        ['agents-container', 'mcps-container', 'rules-container'].forEach(id => {
+            const container = document.getElementById(id);
+            if (container) {
+                container.innerHTML = '<div class="text-xs text-red-500">Failed to load</div>';
+            }
+        });
+    }
+}
 
 // Action functions with template mapping
 
@@ -201,32 +208,17 @@ function createNewContextFromScratch() {
     }
 }
 
-// Additional template functions for new buttons
+// Action functions that use backend data
 function addAgent(name) {
-    if (name === 'Code Reviewer') {
-        createNewContextAndApplyTemplate('Code Reviewer');
-    } else {
-        createNewContextAndApplyTemplate(name);
-    }
+    createNewContextAndApplyTemplate(name);
 }
 
 function addRule(name) {
-    if (name === 'React') {
-        createNewContextAndApplyTemplate('React Guidelines');
-    } else if (name === 'API Design') {
-        createNewContextAndApplyTemplate('API Design Guidelines');
-    } else {
-        createNewContextAndApplyTemplate(name);
-    }
+    createNewContextAndApplyTemplate(name);
 }
 
 function addMCP(name) {
-    if (name === 'Database') {
-        createNewContextAndApplyTemplate('Database MCP');
-    } else {
-        const templateName = name === 'GitHub' ? 'Github MCP' : name + ' MCP';
-        createNewContextAndApplyTemplate(templateName);
-    }
+    createNewContextAndApplyTemplate(name + ' MCP');
 }
 
 // Show workspace with fade transition

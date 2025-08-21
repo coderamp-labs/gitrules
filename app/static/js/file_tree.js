@@ -244,6 +244,23 @@ async function deleteFile(path) {
 
 // Include predefined content templates
 async function includeTemplate(templateName) {
+    // For any unrecognized template, create a basic placeholder
+    const defaultTemplate = {
+        path: `${templateName.toLowerCase().replace(/\s+/g, '_')}.md`,
+        content: `# ${templateName}
+
+## Description
+This is a ${templateName} configuration.
+
+## Usage
+Add your specific configuration and guidelines here.
+
+## Notes
+- Customize this template for your needs
+- Add relevant documentation
+- Include examples as needed`
+    };
+    
     const templates = {
         'Supabase MCP': {
             path: 'mcps/supabase_mcp.json',
@@ -414,13 +431,8 @@ Specialized agent for code review and quality assessment.
         }
     };
     
-    const template = templates[templateName];
-    if (template) {
-        return await includeFile(template.path, template.content);
-    } else {
-        console.error('Unknown template:', templateName);
-        return false;
-    }
+    const template = templates[templateName] || defaultTemplate;
+    return await includeFile(template.path, template.content);
 }
 
 // Initialize file tree system
