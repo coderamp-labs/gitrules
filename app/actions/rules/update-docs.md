@@ -1,0 +1,1 @@
+- Update CLAUDE.md when it's relevant

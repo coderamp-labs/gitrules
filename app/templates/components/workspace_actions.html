@@ -252,7 +252,7 @@ async function loadSidebarActions() {
         const rulesContainer = document.getElementById('sidebar-rules-container');
         if (rulesContainer && data.rules) {
             rulesContainer.innerHTML = data.rules.map(rule => `
-                <button class="sidebar-themed-button" onclick="insertTextAction('${rule.name}')">
+                <button class="sidebar-themed-button" onclick="installRule('${rule.name}')">
                     <span class="button-accent-icon">+</span>
                     <span>${rule.name}</span>
                 </button>
@@ -335,6 +335,40 @@ async function installMCP(mcpName) {
         }
     } catch (error) {
         alert(`❌ Error installing MCP: ${error.message}`);
+    }
+}
+
+async function installRule(ruleName) {
+    try {
+        const response = await fetch(`/api/actions/rule-content/${encodeURIComponent(ruleName)}`);
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            // Get current CLAUDE.md content from workspace
+            let currentContent = '';
+            if (window.workspaceManager && window.workspaceManager.getState()) {
+                const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
+                if (claudeFile) {
+                    currentContent = claudeFile;
+                }
+            }
+            
+            // Append rule content to CLAUDE.md
+            const newContent = currentContent + (currentContent ? '\n' : '') + result.content;
+            
+            // Add to virtual workspace
+            if (window.workspaceManager && window.workspaceManager.currentState) {
+                window.workspaceManager.currentState.addFile('CLAUDE.md', newContent);
+                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+                window.workspaceManager.render();
+            }
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.detail}`);
+        }
+    } catch (error) {
+        alert(`❌ Error installing rule: ${error.message}`);
     }
 }
 

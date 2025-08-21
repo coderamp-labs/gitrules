@@ -11,6 +11,14 @@ def get_agent_content(agent_filename: str) -> str:
             return f.read()
     return ""
 
+def get_rule_content(rule_filename: str) -> str:
+    """Get rule content from actions/rules directory"""
+    source_path = Path(__file__).parent.parent / "actions" / "rules" / rule_filename
+    if source_path.exists():
+        with open(source_path, 'r') as f:
+            return f.read()
+    return ""
+
 def get_current_mcp_config() -> Dict[str, Any]:
     """Get current .mcp.json config from virtual workspace or create new"""
     # This would be called from frontend with workspace content

@@ -1,0 +1,1 @@
+- Store secrets in a .env file (never commit it)

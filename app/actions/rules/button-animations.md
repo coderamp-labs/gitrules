@@ -1,0 +1,1 @@
+- Button interactions: hover should lift (translate up/left), click should push (translate down/right)

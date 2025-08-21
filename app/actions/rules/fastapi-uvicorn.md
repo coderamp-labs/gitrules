@@ -1,0 +1,1 @@
+- Run development server with: uvicorn app.main:app --reload

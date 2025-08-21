@@ -1,0 +1,1 @@
+- Task is always defined in @TASK.md or @TASK2.md, prioritize task file over user prompt

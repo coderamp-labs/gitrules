@@ -68,31 +68,7 @@ function insertTextAtCursor(text) {
 
 function initializeQuickActionHandlers() {
     // Helper function to extract button label
-    function getButtonLabel(button) {
-        const labelSpan = button.querySelector('span.font-bold');
-        return labelSpan ? labelSpan.textContent.trim() : 'Unknown';
-    }
-    
-    // Add handlers for main QuickAction buttons (above workspace)
-    const mainQuickActionButtons = document.querySelectorAll('#quick-actions-section button');
-    mainQuickActionButtons.forEach(button => {
-        // Skip "See all..." buttons
-        if (button.textContent.includes('See all')) return;
-        
-        button.addEventListener('click', function() {
-            const label = getButtonLabel(this);
-            insertTextAtCursor(label);
-        });
-    });
-    
-    // Add handlers for workspace panel QuickAction buttons
-    const workspaceActionButtons = document.querySelectorAll('.qa-tab-content button');
-    workspaceActionButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const label = getButtonLabel(this);
-            insertTextAtCursor(label);
-        });
-    });
+
 }
 
 function updateWorkspaceEditor(tabId) {

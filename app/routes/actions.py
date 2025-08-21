@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body
 from app.models.actions import ActionsResponse, Agent, Rule, MCP
 from app.services.actions_loader import actions_loader
-from app.services.mcp_installer import get_agent_content, create_mcp_config
+from app.services.mcp_installer import get_agent_content, get_rule_content, create_mcp_config
 from typing import List, Dict, Any
 
 router = APIRouter(prefix="/api/actions", tags=["actions"])
@@ -47,6 +47,23 @@ async def get_agent_content_endpoint(agent_name: str):
         "filename": agent.filename,
         "content": content,
         "path": f".claude/agents/{agent.filename}"
+    }
+
+@router.get("/rule-content/{rule_name}")
+async def get_rule_content_endpoint(rule_name: str):
+    """Get rule content to append to CLAUDE.md"""
+    rules = actions_loader.get_rules()
+    rule = next((r for r in rules if r.name == rule_name), None)
+    
+    if not rule:
+        raise HTTPException(status_code=404, detail="Rule not found")
+    
+    content = get_rule_content(rule.filename)
+    if not content:
+        raise HTTPException(status_code=500, detail="Failed to read rule file")
+    
+    return {
+        "content": content.strip()
     }
 
 @router.post("/mcp-config/{mcp_name}")

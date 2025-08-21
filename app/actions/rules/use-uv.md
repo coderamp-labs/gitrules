@@ -1,0 +1,1 @@
+- This project uses UV for package management: uv pip install -r requirements.txt
