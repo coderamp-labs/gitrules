@@ -26,6 +26,10 @@ function initializeWorkspaceEditor() {
             if (state && state.selectedFile) {
                 // Update the file content in workspace state
                 state.files[state.selectedFile] = workspaceMonacoEditor.getValue();
+                // Save to localStorage
+                if (window.workspaceManager) {
+                    window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+                }
                 // Dispatch event for auto-share
                 window.dispatchEvent(new CustomEvent('workspace-content-changed'));
             }

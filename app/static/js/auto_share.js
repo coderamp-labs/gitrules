@@ -30,6 +30,14 @@ class AutoShareManager {
         
         // Listen for workspace changes
         this.attachListeners();
+        
+        // Trigger initial sync if there's content
+        setTimeout(() => {
+            const data = this.collectWorkspaceData();
+            if (Object.keys(data).length > 0) {
+                this.markDirty();
+            }
+        }, 500);
     }
     
     attachListeners() {
@@ -71,6 +79,16 @@ class AutoShareManager {
         
         // Collect current workspace data
         const payload = this.collectWorkspaceData();
+        
+        // If no files, don't sync
+        if (Object.keys(payload).length === 0) {
+            this.dirty = false;
+            this.setState('synced');
+            if (this.linkInput) {
+                this.linkInput.value = 'Add files to generate install link';
+            }
+            return;
+        }
         
         // Check if payload has changed
         const payloadHash = this.hashPayload(payload);
@@ -166,13 +184,17 @@ class AutoShareManager {
             case 'synced':
                 if (this.panel) this.panel.style.display = 'flex';
                 if (this.linkInput) {
-                    this.linkInput.value = this.currentShareUrl || 'No share link yet';
+                    this.linkInput.value = this.currentShareUrl || 'Add files to generate install link';
                     this.linkInput.classList.remove('opacity-50');
                     this.linkInput.disabled = false;
                 }
                 if (this.copyButton) {
-                    this.copyButton.disabled = false;
-                    this.copyButton.classList.remove('opacity-50');
+                    this.copyButton.disabled = !this.currentShareUrl;
+                    if (this.currentShareUrl) {
+                        this.copyButton.classList.remove('opacity-50');
+                    } else {
+                        this.copyButton.classList.add('opacity-50');
+                    }
                 }
                 break;
                 
