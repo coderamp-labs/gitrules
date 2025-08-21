@@ -60,58 +60,84 @@
             }
         }
         .workspace-container {
-            margin-top: 4rem;
+            margin: 4rem auto;
             padding-bottom: 4rem;
-            max-width: none;
-            width: 85vw;
-            margin: 0 auto;
+            width: 95%;
+            max-width: 1800px;
             position: relative;
-            left: 50%;
-            transform: translateX(-50%);
         }
         .workspace-inner {
             width: 100%;
-            max-width: none;
-            padding-inline: 12px;
+            padding: 0 1rem;
         }
+        /* Three-panel workspace layout using Flexbox */
         .workspace-grid {
-            display: grid;
-            grid-template-columns: minmax(280px, 350px) minmax(400px, 600px) minmax(280px, 350px);
-            gap: 1rem;
+            display: flex;
             min-height: 400px;
+            width: 100%;
+            gap: 0; /* No gaps - panels share borders */
         }
-        .workspace-grid > .workspace-sidebar {
-            resize: horizontal;
+        
+        /* FileTree panel (left) - 20% of container width */
+        .workspace-sidebar {
+            flex: 1 1 20%;       /* Takes 20% of available width */
+            min-width: 220px;    /* Minimum: 220px */
+            max-width: 350px;    /* Maximum: 350px */
             overflow: auto;
-            min-width: 200px;
-            max-width: 400px;
         }
-        .workspace-grid > .workspace-center {
-            min-width: 400px;
-            resize: none;
+        
+        /* Editor panel (center) - 60% of container width */
+        .workspace-center {
+            flex: 3 1 60%;       /* Takes 60% of available width (3x side panels) */
+            min-width: 400px;    /* Minimum: 400px */
+            overflow: hidden;
         }
-        @media (max-width: 1280px) {
+        
+        /* QuickActions panel (right) - 20% of container width */
+        .workspace-actions {
+            flex: 1 1 20%;       /* Takes 20% of available width */
+            min-width: 220px;    /* Minimum: 220px */
+            max-width: 350px;    /* Maximum: 350px */
+            overflow: auto;
+        }
+        /* When total min-widths exceed container, allow horizontal scroll */
+        @media (max-width: 900px) {
             .workspace-grid {
-                grid-template-columns: minmax(220px, 300px) minmax(350px, 500px) minmax(220px, 300px);
+                min-width: 840px; /* 220px + 400px + 220px = minimum required */
+                overflow-x: auto;
             }
         }
-        @media (max-width: 1024px) {
+        @media (max-width: 768px) {
             .workspace-grid {
-                grid-template-columns: 1fr;
+                flex-direction: column;
                 min-height: auto;
+                min-width: auto;
+                overflow-x: visible;
             }
-            .workspace-grid > * {
-                min-height: 250px;
-                resize: none;
+            .workspace-sidebar,
+            .workspace-center,
+            .workspace-actions {
+                flex: 1 1 auto;
+                min-width: 100%;
+                max-width: 100%;
+                min-height: 300px;
             }
         }
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
             .workspace-container {
-                width: 95vw;
-                padding-inline: 0;
+                margin: 2rem auto;
+                padding-bottom: 2rem;
             }
             .workspace-inner {
-                padding-inline: 8px;
+                padding: 0 0.5rem;
+            }
+            .workspace-grid {
+                min-height: 200px;
+            }
+            .workspace-sidebar,
+            .workspace-center,
+            .workspace-actions {
+                min-height: 200px;
             }
         }
         .agent-tabs {
