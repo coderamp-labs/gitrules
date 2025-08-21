@@ -342,7 +342,13 @@ class WorkspaceManager {
         Object.values(this.contexts).forEach(ctx => {
             const option = document.createElement('option');
             option.value = ctx.id;
-            option.textContent = ctx.name;
+            // Truncate long names to fit the dropdown
+            let displayName = ctx.name;
+            if (displayName.length > 25) {
+                displayName = displayName.substring(0, 22) + '...';
+            }
+            option.textContent = displayName;
+            option.title = ctx.name; // Show full name on hover
             option.selected = ctx.id === this.currentContextId;
             contextSwitcher.appendChild(option);
         });
