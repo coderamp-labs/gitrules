@@ -289,15 +289,30 @@ class WorkspaceManager {
         
         // Update editor
         if (this.currentState.selectedFile && this.currentState.files[this.currentState.selectedFile]) {
+            // Selected file exists - load it
             if (window.openFile) {
                 window.openFile(this.currentState.selectedFile);
             }
         } else {
-            if (window.workspaceMonacoEditor) {
-                window.workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
-            }
-            if (window.updateFilePathLabel) {
-                window.updateFilePathLabel(null);
+            // No selected file - check if we have any files to auto-select
+            const fileKeys = Object.keys(this.currentState.files);
+            if (fileKeys.length > 0 && !this.currentState.selectedFile) {
+                // Auto-select first file
+                const firstFile = fileKeys[0];
+                this.currentState.selectedFile = firstFile;
+                this.saveState(this.currentContextId);
+                
+                if (window.openFile) {
+                    window.openFile(firstFile);
+                }
+            } else {
+                // No files available - show placeholder
+                if (window.workspaceMonacoEditor) {
+                    window.workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
+                }
+                if (window.updateFilePathLabel) {
+                    window.updateFilePathLabel(null);
+                }
             }
         }
         

@@ -451,24 +451,46 @@ function showWorkspace() {
 
 // Clear editor and set focus when workspace appears
 function clearEditorAndFocus() {
-    // Clear selected file in workspace manager
+    // Auto-focus first file if available, otherwise clear editor
     if (window.workspaceManager && window.workspaceManager.currentState) {
-        window.workspaceManager.currentState.selectedFile = null;
-        window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+        const state = window.workspaceManager.currentState;
+        const fileKeys = Object.keys(state.files);
+        
+        if (fileKeys.length > 0) {
+            // Auto-select the first file
+            const firstFile = fileKeys[0];
+            state.selectedFile = firstFile;
+            window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+            
+            // Load the first file in editor
+            if (window.workspaceMonacoEditor && state.files[firstFile]) {
+                window.workspaceMonacoEditor.setValue(state.files[firstFile]);
+                window.workspaceMonacoEditor.focus();
+            }
+            
+            // Update file path label
+            if (window.updateFilePathLabel) {
+                window.updateFilePathLabel(firstFile);
+            }
+        } else {
+            // No files available - clear everything
+            state.selectedFile = null;
+            window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+            
+            // Clear and focus the monaco editor
+            if (window.workspaceMonacoEditor) {
+                window.workspaceMonacoEditor.setValue('');
+                window.workspaceMonacoEditor.focus();
+            }
+            
+            // Update file path label to show no file selected
+            if (window.updateFilePathLabel) {
+                window.updateFilePathLabel(null);
+            }
+        }
     }
     
-    // Clear and focus the monaco editor
-    if (window.workspaceMonacoEditor) {
-        window.workspaceMonacoEditor.setValue('');
-        window.workspaceMonacoEditor.focus();
-    }
-    
-    // Update file path label to show no file selected
-    if (window.updateFilePathLabel) {
-        window.updateFilePathLabel(null);
-    }
-    
-    // Re-render file tree to clear selection
+    // Re-render file tree to show selection
     if (window.renderFileTree) {
         window.renderFileTree();
     }
