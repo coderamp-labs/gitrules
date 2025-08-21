@@ -59,7 +59,8 @@ function insertTextAtCursor(text) {
         range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
         text: text
     }]);
-    
+    console.log("Inserted text:", text);
+
     // Move cursor to end of inserted text
     const newPosition = new monaco.Position(position.lineNumber, position.column + text.length);
     workspaceMonacoEditor.setPosition(newPosition);
