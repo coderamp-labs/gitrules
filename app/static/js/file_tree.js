@@ -115,7 +115,6 @@ function renderFileTree() {
                         <span class="w-3"></span>
                         <span class="mdi mdi-file-document-outline text-gray-600 text-sm"></span>
                         <span>${node.name}</span>
-                        <span class="text-xs text-blue-600 ml-1">✓</span>
                     </div>
                     <button class="delete-file opacity-0 group-hover:opacity-100 hover:opacity-100 text-red-600 hover:text-red-800 p-1" data-path="${node.path}" title="Delete file">
                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -230,6 +229,22 @@ async function createNewFile() {
         '# New file\n\nContent goes here...';
     
     return await includeFile(filePath, defaultContent);
+}
+
+async function createNewFolder() {
+    const folderName = prompt('Enter folder name:');
+    if (!folderName || folderName.trim() === '') {
+        return;
+    }
+    
+    const folderPath = folderName.trim();
+    
+    // Create a placeholder file in the folder to make it visible
+    // Folders only appear when they contain files
+    const placeholderPath = `${folderPath}/README.md`;
+    const placeholderContent = `# ${folderPath}\n\nThis folder contains files for ${folderPath}.`;
+    
+    return await includeFile(placeholderPath, placeholderContent);
 }
 
 // Include a file with given path and content
@@ -462,6 +477,13 @@ function initializeFileTree() {
         newFileButton.setAttribute('data-initialized', 'true');
     }
     
+    // Wire up New Folder button
+    const newFolderButton = document.getElementById('new-folder-button');
+    if (newFolderButton && !newFolderButton.hasAttribute('data-initialized')) {
+        newFolderButton.addEventListener('click', createNewFolder);
+        newFolderButton.setAttribute('data-initialized', 'true');
+    }
+    
     // Wire up Quick Action buttons (use delegation to avoid duplicates)
     if (!document.body.hasAttribute('data-qa-initialized')) {
         document.addEventListener('click', async function(e) {
@@ -484,6 +506,7 @@ window.handleTreeClick = handleTreeClick;
 window.openFile = openFile;
 window.updateFilePathLabel = updateFilePathLabel;
 window.createNewFile = createNewFile;
+window.createNewFolder = createNewFolder;
 window.includeFile = includeFile;
 window.deleteFile = deleteFile;
 window.includeTemplate = includeTemplate;
