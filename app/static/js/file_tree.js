@@ -84,15 +84,18 @@ function renderFileTree() {
         
         if (node.type === 'folder') {
             const state = window.workspaceManager?.getState();
-            const isExpanded = state && state.expandedFolders.has(node.path);
+            // Default to expanded - only collapsed if explicitly marked
+            let isExpanded = true;
+            if (state && state.expandedFolders.has(node.path + ':collapsed')) {
+                isExpanded = false;
+            }
+            const folderIcon = isExpanded ? 'mdi-folder-open' : 'mdi-folder';
             div.innerHTML = `
                 <div class="flex items-center gap-1 p-1 hover:bg-gray-100 cursor-pointer folder-toggle" data-path="${node.path}">
                     <svg class="w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M7 7l3 3 3-3" stroke="currentColor" stroke-width="2" fill="none"/>
                     </svg>
-                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-                    </svg>
+                    <span class="mdi ${folderIcon} text-blue-600 text-base"></span>
                     <span class="font-medium">${node.name}</span>
                 </div>
             `;
@@ -110,9 +113,7 @@ function renderFileTree() {
                 <div class="flex items-center justify-between p-1 hover:bg-gray-100 cursor-pointer file-item ${isSelected ? 'bg-cyan-100 font-medium' : ''}" data-path="${node.path}">
                     <div class="flex items-center gap-1">
                         <span class="w-3"></span>
-                        <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4z"/>
-                        </svg>
+                        <span class="mdi mdi-file-document-outline text-gray-600 text-sm"></span>
                         <span>${node.name}</span>
                         <span class="text-xs text-blue-600 ml-1">✓</span>
                     </div>
@@ -152,10 +153,12 @@ async function handleTreeClick(event) {
         const path = folderToggle.dataset.path;
         const state = window.workspaceManager?.getState();
         if (state) {
-            if (state.expandedFolders.has(path)) {
-                state.expandedFolders.delete(path);
+            // Track collapsed state instead of expanded state (default is expanded)
+            const collapsedKey = path + ':collapsed';
+            if (state.expandedFolders.has(collapsedKey)) {
+                state.expandedFolders.delete(collapsedKey);
             } else {
-                state.expandedFolders.add(path);
+                state.expandedFolders.add(collapsedKey);
             }
             window.workspaceManager.saveState(window.workspaceManager.currentContextId);
             renderFileTree();
