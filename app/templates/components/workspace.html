@@ -690,6 +690,7 @@ class WorkspaceManager {
 
 // Create global workspace manager instance
 const workspaceManager = new WorkspaceManager();
+window.workspaceManager = workspaceManager;
 
 // ============================================================================
 // COMPATIBILITY LAYER - Maps old functions to new system
@@ -1247,6 +1248,9 @@ Handles context and conversation history management.
         return false;
     }
 }
+
+// Expose includeTemplate globally
+window.includeTemplate = includeTemplate;
 
 async function createNewFile() {
     const fileName = prompt('Enter file name (with extension):');

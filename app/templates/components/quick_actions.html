@@ -149,37 +149,75 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Simple action functions
 function addAgent(name) {
-    if (window.includeTemplate) {
-        window.includeTemplate(name);
-        showWorkspace();
-    }
+    createNewContextAndApplyTemplate(name);
 }
 
 function addRule(name) {
-    if (window.includeTemplate) {
-        window.includeTemplate(name);
-        showWorkspace();
-    }
+    createNewContextAndApplyTemplate(name);
 }
 
 function addMCP(name) {
-    if (window.includeTemplate) {
-        window.includeTemplate(name === 'GitHub' ? 'Github MCP' : name + ' MCP');
-        showWorkspace();
-    }
+    const templateName = name === 'GitHub' ? 'Github MCP' : name + ' MCP';
+    createNewContextAndApplyTemplate(templateName);
 }
 
 
 // Start from scratch with empty context
 function startFromScratch() {
-    if (window.workspaceManager) {
-        // Switch to default context and reset it
-        workspaceManager.switchContext('default');
-        workspaceManager.reset();
+    createNewContextFromScratch();
+}
+
+// Create a new context and apply a template to it
+function createNewContextAndApplyTemplate(templateName) {
+    if (!window.workspaceManager) {
+        console.error('WorkspaceManager not available');
+        return;
     }
     
-    // Show workspace
-    showWorkspace();
+    // Generate unique context ID
+    const timestamp = Date.now();
+    const contextId = `context-${timestamp}`;
+    const contextName = `${templateName} - ${new Date().toLocaleString()}`;
+    
+    // Create new context
+    if (workspaceManager.createContext(contextId, contextName)) {
+        // Switch to new context
+        workspaceManager.switchContext(contextId);
+        
+        // Apply template to new context
+        if (window.includeTemplate) {
+            window.includeTemplate(templateName);
+        }
+        
+        // Show workspace
+        showWorkspace();
+    } else {
+        console.error('Failed to create new context');
+    }
+}
+
+// Create a new empty context from scratch
+function createNewContextFromScratch() {
+    if (!window.workspaceManager) {
+        console.error('WorkspaceManager not available');
+        return;
+    }
+    
+    // Generate unique context ID
+    const timestamp = Date.now();
+    const contextId = `scratch-${timestamp}`;
+    const contextName = `From Scratch - ${new Date().toLocaleString()}`;
+    
+    // Create new context
+    if (workspaceManager.createContext(contextId, contextName)) {
+        // Switch to new context (it will be empty by default)
+        workspaceManager.switchContext(contextId);
+        
+        // Show workspace
+        showWorkspace();
+    } else {
+        console.error('Failed to create new context');
+    }
 }
 
 // Show full lists (placeholder functions)
