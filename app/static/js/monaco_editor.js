@@ -123,6 +123,7 @@ function updateWorkspaceEditor(tabId) {
     if (config) {
         workspaceMonacoEditor.setValue(config.content);
         monaco.editor.setModelLanguage(workspaceMonacoEditor.getModel(), config.language);
+        console.log("Updated workspace editor:", config.content);
         const languageSelect = document.getElementById('workspace-language-select');
         if (languageSelect) {
             languageSelect.value = config.language;

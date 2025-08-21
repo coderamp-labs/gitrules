@@ -229,13 +229,35 @@ function insertTextAction(text) {
     }
 }
 
+// Cache for sidebar actions data
+let sidebarActionsCache = null;
+
 // Load sidebar actions from backend
 async function loadSidebarActions() {
     try {
+        // Use cached data if available
+        if (sidebarActionsCache) {
+            renderSidebarActions(sidebarActionsCache);
+            return;
+        }
+        
         const response = await fetch('/api/actions/');
         if (!response.ok) throw new Error('Failed to fetch actions');
         
         const data = await response.json();
+        
+        // Cache the data
+        sidebarActionsCache = data;
+        
+        renderSidebarActions(data);
+    } catch (error) {
+        console.error('Error loading sidebar actions:', error);
+    }
+}
+
+// Render sidebar actions from data
+function renderSidebarActions(data) {
+    try {
         
         // Render MCPs
         const mcpsContainer = document.getElementById('sidebar-mcps-container');

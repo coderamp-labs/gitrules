@@ -128,6 +128,9 @@
 // Global state
 let isWorkspaceVisible = false;
 
+// Cache for actions data
+let actionsCache = null;
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     const workspaceSection = document.querySelector('.workspace-container');
@@ -143,10 +146,29 @@ document.addEventListener('DOMContentLoaded', function() {
 // Fetch and display actions from backend API
 async function loadActionsFromBackend() {
     try {
+        // Use cached data if available
+        if (actionsCache) {
+            renderActions(actionsCache);
+            return;
+        }
+        
         const response = await fetch('/api/actions/');
         if (!response.ok) throw new Error('Failed to fetch actions');
         
         const data = await response.json();
+        
+        // Cache the data
+        actionsCache = data;
+        
+        renderActions(data);
+    } catch (error) {
+        console.error('Error loading actions:', error);
+    }
+}
+
+// Render actions from data
+function renderActions(data) {
+    try {
         
         // Render agents (max 4)
         const agentsContainer = document.getElementById('agents-container');
