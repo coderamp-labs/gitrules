@@ -262,34 +262,40 @@ function renderSidebarActions(data) {
         // Render MCPs
         const mcpsContainer = document.getElementById('sidebar-mcps-container');
         if (mcpsContainer && data.mcps) {
-            mcpsContainer.innerHTML = data.mcps.map(mcp => `
-                <button class="sidebar-themed-button" onclick="installMCP('${mcp.name}')">
+            mcpsContainer.innerHTML = data.mcps.map(mcp => {
+                const name = mcp.name || 'Unknown';
+                return `
+                <button class="sidebar-themed-button" onclick="installMCP('${name.replace(/'/g, "\\'")}')">
                     <span class="button-accent-icon">+</span>
-                    <span>${mcp.name}</span>
+                    <span>${name}</span>
                 </button>
-            `).join('');
+            `}).join('');
         }
         
         // Render rules
         const rulesContainer = document.getElementById('sidebar-rules-container');
         if (rulesContainer && data.rules) {
-            rulesContainer.innerHTML = data.rules.map(rule => `
-                <button class="sidebar-themed-button" onclick="installRule('${rule.name}')">
+            rulesContainer.innerHTML = data.rules.map(rule => {
+                const name = rule.name || 'Unknown';
+                return `
+                <button class="sidebar-themed-button" onclick="installRule('${name.replace(/'/g, "\\'")}')">
                     <span class="button-accent-icon">+</span>
-                    <span>${rule.name}</span>
+                    <span>${name}</span>
                 </button>
-            `).join('');
+            `}).join('');
         }
         
         // Render agents
         const agentsContainer = document.getElementById('sidebar-agents-container');
         if (agentsContainer && data.agents) {
-            agentsContainer.innerHTML = data.agents.map(agent => `
-                <button class="sidebar-themed-button" onclick="installAgent('${agent.name}')">
+            agentsContainer.innerHTML = data.agents.map(agent => {
+                const name = agent.name || 'Unknown';
+                return `
+                <button class="sidebar-themed-button" onclick="installAgent('${name.replace(/'/g, "\\'")}')">
                     <span class="button-accent-icon">+</span>
-                    <span>${agent.name}</span>
+                    <span>${name}</span>
                 </button>
-            `).join('');
+            `}).join('');
         }
     } catch (error) {
         console.error('Error loading sidebar actions:', error);
@@ -298,6 +304,10 @@ function renderSidebarActions(data) {
 
 // Install functions
 async function installAgent(agentName) {
+    if (!agentName || agentName === 'Unknown') {
+        console.error('Invalid agent name');
+        return;
+    }
     try {
         const response = await fetch(`/api/actions/agent-content/${encodeURIComponent(agentName)}`);
         
@@ -320,6 +330,10 @@ async function installAgent(agentName) {
 }
 
 async function installMCP(mcpName) {
+    if (!mcpName || mcpName === 'Unknown') {
+        console.error('Invalid MCP name');
+        return;
+    }
     try {
         // Get current .mcp.json content from workspace
         let currentConfig = {};
@@ -361,6 +375,10 @@ async function installMCP(mcpName) {
 }
 
 async function installRule(ruleName) {
+    if (!ruleName || ruleName === 'Unknown') {
+        console.error('Invalid rule name');
+        return;
+    }
     try {
         const response = await fetch(`/api/actions/rule-content/${encodeURIComponent(ruleName)}`);
         

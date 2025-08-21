@@ -173,40 +173,46 @@ function renderActions(data) {
         // Render agents (max 4)
         const agentsContainer = document.getElementById('agents-container');
         if (agentsContainer && data.agents) {
-            agentsContainer.innerHTML = data.agents.slice(0, 4).map(agent => `
-                <button class="action-button action-button--primary" onclick="addAgent('${agent.name}')">
+            agentsContainer.innerHTML = data.agents.slice(0, 4).map(agent => {
+                const name = agent.name || 'Unknown';
+                return `
+                <button class="action-button action-button--primary" onclick="addAgent('${name.replace(/'/g, "\\'")}')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
-                        <span class="action-button__label">${agent.name}</span>
+                        <span class="action-button__label">${name}</span>
                     </div>
                 </button>
-            `).join('');
+            `}).join('');
         }
         
         // Render MCPs (max 4)
         const mcpsContainer = document.getElementById('mcps-container');
         if (mcpsContainer && data.mcps) {
-            mcpsContainer.innerHTML = data.mcps.slice(0, 4).map(mcp => `
-                <button class="action-button action-button--secondary" onclick="addMCP('${mcp.name}')">
+            mcpsContainer.innerHTML = data.mcps.slice(0, 4).map(mcp => {
+                const name = mcp.name || 'Unknown';
+                return `
+                <button class="action-button action-button--secondary" onclick="addMCP('${name.replace(/'/g, "\\'")}')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
-                        <span class="action-button__label">${mcp.name}</span>
+                        <span class="action-button__label">${name}</span>
                     </div>
                 </button>
-            `).join('');
+            `}).join('');
         }
         
         // Render rules (max 4)
         const rulesContainer = document.getElementById('rules-container');
         if (rulesContainer && data.rules) {
-            rulesContainer.innerHTML = data.rules.slice(0, 4).map(rule => `
-                <button class="action-button action-button--accent" onclick="addRule('${rule.name}')">
+            rulesContainer.innerHTML = data.rules.slice(0, 4).map(rule => {
+                const name = rule.name || 'Unknown';
+                return `
+                <button class="action-button action-button--accent" onclick="addRule('${name.replace(/'/g, "\\'")}')">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
-                        <span class="action-button__label">${rule.name}</span>
+                        <span class="action-button__label">${name}</span>
                     </div>
                 </button>
-            `).join('');
+            `}).join('');
         }
     } catch (error) {
         console.error('Error loading actions:', error);
@@ -255,14 +261,26 @@ function createNewContextFromScratch() {
 
 // Action functions that use backend data
 function addAgent(name) {
+    if (!name || name === 'Unknown') {
+        console.error('Invalid agent name');
+        return;
+    }
     createNewContextAndInstallAgent(name);
 }
 
 function addRule(name) {
+    if (!name || name === 'Unknown') {
+        console.error('Invalid rule name');
+        return;
+    }
     createNewContextAndInsertRule(name);
 }
 
 function addMCP(name) {
+    if (!name || name === 'Unknown') {
+        console.error('Invalid MCP name');
+        return;
+    }
     createNewContextAndInstallMCP(name);
 }
 
