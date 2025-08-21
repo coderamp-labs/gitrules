@@ -1,4 +1,7 @@
 # Gitrules
+<p align="center">
+  <img width="672" height="602" alt="image" src="https://github.com/user-attachments/assets/7ed8b1c3-b602-4dfd-aba3-01cc9c3b799b" />
+</p>
 
 **Pastable superpowers for your codebases.**  
 Build context files (agents, rules, MCP configs, etc.) for AI coding tools. Compose them in a browser workspace, then generate a single _install-in-one-click_ script that recreates the files inside any repo.
