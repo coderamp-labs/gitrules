@@ -157,6 +157,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedTemplateValue = this.value;
                 selectedTemplateActions = TEMPLATES[selectedTemplateValue];
                 
+                // Create or switch to template-specific context
+                const templateName = getTemplateDisplayName(selectedTemplateValue);
+                const contextId = selectedTemplateValue === 'scratch' ? 'default' : selectedTemplateValue;
+                
+                // Check if context exists, create if not
+                if (window.createContext && window.switchContext) {
+                    const contexts = JSON.parse(localStorage.getItem('app:contexts') || '{}');
+                    if (!contexts[contextId] && contextId !== 'default') {
+                        window.createContext(contextId, templateName);
+                    }
+                    window.switchContext(contextId);
+                }
+                
                 // Apply quick actions sequentially
                 applyQuickActionsSequentially(selectedTemplateActions);
                 
