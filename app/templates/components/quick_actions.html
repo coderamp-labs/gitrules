@@ -1,283 +1,244 @@
-<div id="quick-actions-section" class="bg-cyan-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 min-h-[400px] flex flex-col transition-opacity duration-300">
+<div id="quick-actions-section" class="bg-cyan-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 min-h-[500px] flex flex-col transition-opacity duration-300">
     <!-- Header -->
     <div class="mb-6">
-        <h2 class="text-2xl font-black text-black mb-2">Choose a template...</h2>
-        <p class="text-black font-medium">Select a pre-configured template to get started quickly</p>
+        <h2 class="text-2xl font-black text-black mb-2">Quick Actions</h2>
+        <p class="text-black font-medium">Add capabilities to your workspace</p>
     </div>
 
-    <!-- Template Options -->
-    <div class="flex-1 space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label class="template-option cursor-pointer">
-                <input type="radio" name="template" value="full-stack" class="sr-only peer">
-                <div class="p-4 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] peer-checked:bg-cyan-400 peer-checked:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] peer-checked:translate-x-[-1px] peer-checked:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-pink-400 border-2 border-black flex items-center justify-center">
-                            <span class="text-sm font-black">FS</span>
-                        </div>
-                        <div>
-                            <h4 class="font-black text-black">Full-Stack Web App</h4>
-                            <p class="text-sm text-black font-medium">React + Python + Database</p>
-                        </div>
-                    </div>
-                </div>
-            </label>
-
-            <label class="template-option cursor-pointer">
-                <input type="radio" name="template" value="ai-agent" class="sr-only peer">
-                <div class="p-4 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] peer-checked:bg-cyan-400 peer-checked:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] peer-checked:translate-x-[-1px] peer-checked:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-pink-400 border-2 border-black flex items-center justify-center">
-                            <span class="text-sm font-black">AI</span>
-                        </div>
-                        <div>
-                            <h4 class="font-black text-black">AI Agent Project</h4>
-                            <p class="text-sm text-black font-medium">LLM + Memory + Tools</p>
-                        </div>
-                    </div>
-                </div>
-            </label>
-
-            <label class="template-option cursor-pointer">
-                <input type="radio" name="template" value="data-science" class="sr-only peer">
-                <div class="p-4 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] peer-checked:bg-cyan-400 peer-checked:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] peer-checked:translate-x-[-1px] peer-checked:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-pink-400 border-2 border-black flex items-center justify-center">
-                            <span class="text-sm font-black">DS</span>
-                        </div>
-                        <div>
-                            <h4 class="font-black text-black">Data Science</h4>
-                            <p class="text-sm text-black font-medium">Jupyter + Pandas + Analysis</p>
-                        </div>
-                    </div>
-                </div>
-            </label>
-
-            <label class="template-option cursor-pointer">
-                <input type="radio" name="template" value="api-service" class="sr-only peer">
-                <div class="p-4 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] peer-checked:bg-cyan-400 peer-checked:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] peer-checked:translate-x-[-1px] peer-checked:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-pink-400 border-2 border-black flex items-center justify-center">
-                            <span class="text-sm font-black">API</span>
-                        </div>
-                        <div>
-                            <h4 class="font-black text-black">API Service</h4>
-                            <p class="text-sm text-black font-medium">FastAPI + Authentication</p>
-                        </div>
-                    </div>
-                </div>
-            </label>
+    <!-- Main Column with 3 Categories -->
+    <div class="flex-1 space-y-6">
+        
+        <!-- Add an Agent Section -->
+        <div class="bg-white border-2 border-black p-4">
+            <h3 class="text-lg font-black text-black mb-3 flex items-center gap-2">
+                <span class="text-xl">🤖</span> Add an Agent
+            </h3>
+            <div class="flex gap-2 flex-wrap">
+                <button class="qa-include-btn px-3 py-2 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm" 
+                        data-template="Researcher">
+                    Researcher
+                </button>
+                <button class="qa-include-btn px-3 py-2 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                        data-template="Memory Manager">
+                    Memory Manager
+                </button>
+                <button class="px-3 py-2 bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                        onclick="showFullAgentList()">
+                    View all agents →
+                </button>
+            </div>
         </div>
 
-        <!-- Start from scratch option -->
-        <div class="border-t-2 border-black pt-4 mt-6">
-            <label class="template-option cursor-pointer">
-                <input type="radio" name="template" value="scratch" class="sr-only peer">
-                <div class="p-4 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] peer-checked:bg-cyan-400 peer-checked:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] peer-checked:translate-x-[-1px] peer-checked:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-gray-300 border-2 border-black flex items-center justify-center">
-                            <span class="text-xl font-black">+</span>
-                        </div>
-                        <div>
-                            <h4 class="font-black text-black">... or start from scratch</h4>
-                            <p class="text-sm text-black font-medium">Build your own custom setup</p>
-                        </div>
-                    </div>
-                </div>
-            </label>
+        <!-- Add a Rule Set Section -->
+        <div class="bg-white border-2 border-black p-4">
+            <h3 class="text-lg font-black text-black mb-3 flex items-center gap-2">
+                <span class="text-xl">📋</span> Add a Rule Set
+            </h3>
+            <div class="flex gap-2 flex-wrap">
+                <button class="qa-include-btn px-3 py-2 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                        data-template="Python">
+                    Python Style
+                </button>
+                <button class="qa-include-btn px-3 py-2 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                        data-template="TypeScript">
+                    TypeScript Rules
+                </button>
+                <button class="px-3 py-2 bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                        onclick="showFullRulesList()">
+                    View all rules →
+                </button>
+            </div>
+        </div>
+
+        <!-- Add an MCP Section -->
+        <div class="bg-white border-2 border-black p-4">
+            <h3 class="text-lg font-black text-black mb-3 flex items-center gap-2">
+                <span class="text-xl">🔌</span> Add an MCP
+            </h3>
+            <div class="flex gap-2 flex-wrap">
+                <button class="qa-include-btn px-3 py-2 bg-yellow-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                        data-template="Supabase MCP">
+                    Supabase
+                </button>
+                <button class="qa-include-btn px-3 py-2 bg-yellow-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                        data-template="Github MCP">
+                    GitHub
+                </button>
+                <button class="px-3 py-2 bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                        onclick="showFullMCPList()">
+                    View all MCPs →
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Control Buttons -->
-    <div class="flex justify-between items-center mt-6">
-        <div class="flex gap-3">
-            <button id="back-btn" class="px-4 py-2 bg-gray-100 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all" style="display: none;">
-                Back
+    <!-- Choose a Template Section (Below the column) -->
+    <div class="mt-8 pt-6 border-t-2 border-black">
+        <h3 class="text-lg font-black text-black mb-4">
+            ✨ Choose a Template
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button class="template-select-btn p-4 bg-gradient-to-r from-cyan-50 to-pink-50 border-2 border-black text-left hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+                    data-template-id="full-stack">
+                <div class="font-black text-black mb-1">Full-Stack Web App</div>
+                <div class="text-sm text-gray-700">Researcher + Python Rules + Supabase MCP</div>
+            </button>
+            
+            <button class="template-select-btn p-4 bg-gradient-to-r from-pink-50 to-yellow-50 border-2 border-black text-left hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+                    data-template-id="ai-agent">
+                <div class="font-black text-black mb-1">AI Agent Project</div>
+                <div class="text-sm text-gray-700">Memory Manager + TypeScript + GitHub MCP</div>
+            </button>
+            
+            <button class="template-select-btn p-4 bg-gradient-to-r from-yellow-50 to-cyan-50 border-2 border-black text-left hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+                    data-template-id="data-science">
+                <div class="font-black text-black mb-1">Data Science</div>
+                <div class="text-sm text-gray-700">Researcher + Python Rules</div>
+            </button>
+            
+            <!-- Start from Scratch -->
+            <button id="start-from-scratch-btn" class="p-4 bg-gray-100 border-2 border-black text-left hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                <div class="font-black text-black mb-1">Start from Scratch</div>
+                <div class="text-sm text-gray-700">Begin with an empty workspace</div>
             </button>
         </div>
     </div>
+
+    <!-- Back Button (hidden initially) -->
+    <button id="back-btn" class="mt-4 px-4 py-2 bg-gray-100 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all" style="display: none;">
+        ← Back to Quick Actions
+    </button>
 </div>
 
 <script>
-// Template definitions with Quick Actions
-const TEMPLATES = {
+// Template definitions
+const TEMPLATE_COMPOSITIONS = {
     'full-stack': [
-        'Researcher',
-        'Memory Manager', 
-        'Supabase MCP',
-        'Github MCP',
-        'Python',
-        'TypeScript'
+        { type: 'agent', name: 'Researcher' },
+        { type: 'rules', name: 'Python' },
+        { type: 'mcp', name: 'Supabase MCP' }
     ],
     'ai-agent': [
-        'Researcher',
-        'Memory Manager',
-        'Code Reviewer',
-        'Python',
-        'Github MCP'
+        { type: 'agent', name: 'Memory Manager' },
+        { type: 'rules', name: 'TypeScript' },
+        { type: 'mcp', name: 'Github MCP' }
     ],
     'data-science': [
-        'Researcher',
-        'Python',
-        'Data Analysis Guidelines',
-        'Jupyter Notebook MCP'
-    ],
-    'api-service': [
-        'Supabase MCP',
-        'Github MCP',
-        'Python',
-        'API Security Guidelines',
-        'Authentication MCP'
-    ],
-    'scratch': []
+        { type: 'agent', name: 'Researcher' },
+        { type: 'rules', name: 'Python' }
+    ]
 };
 
 // Global state
 let isWorkspaceVisible = false;
-let selectedTemplateValue = null;
-let selectedTemplateActions = [];
 
-// Main application logic
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize workspace visibility first
     const workspaceSection = document.querySelector('.mt-16');
     if (workspaceSection) {
         workspaceSection.style.display = 'none';
         workspaceSection.style.transition = 'opacity 300ms ease-in-out';
     }
     
-    const radioButtons = document.querySelectorAll('input[name="template"]');
-    const backButton = document.getElementById('back-btn');
-    const quickActionsSection = document.getElementById('quick-actions-section');
+    // Wire up template buttons
+    document.querySelectorAll('.template-select-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const templateId = this.dataset.templateId;
+            applyTemplate(templateId);
+        });
+    });
     
-    // Handle template selection - instantly switch to workspace
-    radioButtons.forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.checked) {
-                selectedTemplateValue = this.value;
-                selectedTemplateActions = TEMPLATES[selectedTemplateValue];
-                
-                // Create or switch to template-specific context
-                const templateName = getTemplateDisplayName(selectedTemplateValue);
-                const contextId = selectedTemplateValue === 'scratch' ? 'default' : selectedTemplateValue;
-                
-                // Use workspaceManager if available
-                if (window.workspaceManager) {
-                    const contexts = workspaceManager.loadContextsList();
-                    if (!contexts[contextId] && contextId !== 'default') {
-                        workspaceManager.createContext(contextId, templateName);
-                    }
-                    workspaceManager.switchContext(contextId);
-                }
-                
-                // Apply quick actions sequentially
-                applyQuickActionsSequentially(selectedTemplateActions);
-                
-                // Fade out quick actions and show workspace
+    // Wire up start from scratch button
+    const scratchBtn = document.getElementById('start-from-scratch-btn');
+    if (scratchBtn) {
+        scratchBtn.addEventListener('click', startFromScratch);
+    }
+    
+    // Wire up back button
+    const backBtn = document.getElementById('back-btn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            if (isWorkspaceVisible) {
+                hideWorkspace();
+            }
+        });
+    }
+    
+    // Wire up Quick Action Include buttons
+    document.querySelectorAll('.qa-include-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const templateName = this.dataset.template;
+            if (templateName && window.includeTemplate) {
+                window.includeTemplate(templateName);
                 showWorkspace();
             }
         });
     });
-    
-    // Handle back button click
-    backButton.addEventListener('click', function() {
-        if (isWorkspaceVisible) {
-            hideWorkspace();
-        }
-    });
-    
 });
 
-// Get display name for template
-function getTemplateDisplayName(templateValue) {
-    const displayNames = {
-        'full-stack': 'Full-Stack Web App',
-        'ai-agent': 'AI Agent Project', 
-        'data-science': 'Data Science',
-        'api-service': 'API Service',
-        'scratch': 'Start from Scratch'
-    };
-    return displayNames[templateValue] || templateValue;
-}
-
-// Reset workspace to selected template
-function resetToTemplate() {
-    if (!selectedTemplateValue || !selectedTemplateActions) {
-        console.error('No template data available for reset');
+// Apply a template composition
+function applyTemplate(templateId) {
+    const composition = TEMPLATE_COMPOSITIONS[templateId];
+    if (!composition) {
+        console.error('Unknown template:', templateId);
         return;
     }
     
-    // Clear workspace editor content
-    if (typeof workspaceMonacoEditor !== 'undefined' && workspaceMonacoEditor) {
-        workspaceMonacoEditor.setValue('# My Agent Configuration\n\nResetting template...\n');
-    }
-    
-    // Re-apply template actions sequentially
-    setTimeout(() => {
-        applyQuickActionsSequentially(selectedTemplateActions);
-    }, 500);
-    
-    // Visual feedback
-    const resetButton = document.getElementById('workspace-reset-btn');
-    if (resetButton) {
-        const originalText = resetButton.textContent;
-        resetButton.textContent = 'Resetting...';
-        resetButton.disabled = true;
-        
-        setTimeout(() => {
-            resetButton.textContent = 'Template Restored!';
-            resetButton.classList.remove('bg-red-100');
-            resetButton.classList.add('bg-green-100');
-            
-            setTimeout(() => {
-                resetButton.textContent = originalText;
-                resetButton.disabled = false;
-                resetButton.classList.remove('bg-green-100');
-                resetButton.classList.add('bg-red-100');
-            }, 2000);
-        }, 1000);
-    }
-}
-
-// Apply quick actions sequentially with delay
-async function applyQuickActionsSequentially(quickActions) {
-    if (quickActions.length === 0) return;
-    
-    console.log('Applying quick actions:', quickActions);
-    
-    // Find existing quick action buttons and simulate clicks
-    for (let i = 0; i < quickActions.length; i++) {
-        const actionName = quickActions[i];
-        await simulateQuickActionClick(actionName);
-        
-        // Add delay between actions for visual feedback
-        if (i < quickActions.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 200));
+    // Create or switch to template-specific context
+    if (window.workspaceManager) {
+        const contexts = workspaceManager.loadContextsList();
+        if (!contexts[templateId]) {
+            const templateNames = {
+                'full-stack': 'Full-Stack Web App',
+                'ai-agent': 'AI Agent Project',
+                'data-science': 'Data Science'
+            };
+            workspaceManager.createContext(templateId, templateNames[templateId] || templateId);
         }
+        workspaceManager.switchContext(templateId);
+        
+        // Apply all template items
+        composition.forEach(item => {
+            if (window.includeTemplate) {
+                window.includeTemplate(item.name);
+            }
+        });
     }
+    
+    // Show workspace
+    showWorkspace();
 }
 
-// Simulate clicking a quick action button
-async function simulateQuickActionClick(actionName) {
-    // This would normally find and click the corresponding quick action button
-    // For now, we'll just log it and add to the workspace editor
-    console.log(`Applying quick action: ${actionName}`);
+// Start from scratch with empty context
+function startFromScratch() {
+    if (window.workspaceManager) {
+        // Switch to default context and reset it
+        workspaceManager.switchContext('default');
+        workspaceManager.reset();
+    }
     
-    // Prefer mutating Workspace Files panel
-    if (typeof applyWorkspaceQuickAction === 'function') {
-        await applyWorkspaceQuickAction(actionName);
-        return;
-    }
-    // Fallback: log into editor
-    if (typeof insertTextAtCursor === 'function') {
-        insertTextAtCursor(`${actionName}\n`);
-    }
+    // Show workspace
+    showWorkspace();
+}
+
+// Show full lists (placeholder functions)
+function showFullAgentList() {
+    alert('Full agent list coming soon!');
+}
+
+function showFullRulesList() {
+    alert('Full rules list coming soon!');
+}
+
+function showFullMCPList() {
+    alert('Full MCP list coming soon!');
 }
 
 // Show workspace with fade transition
 function showWorkspace() {
     const quickActionsSection = document.getElementById('quick-actions-section');
-    const workspaceSection = document.querySelector('.mt-16'); // workspace container
+    const workspaceSection = document.querySelector('.mt-16');
     const backButton = document.getElementById('back-btn');
     
     if (!workspaceSection) {
@@ -293,24 +254,24 @@ function showWorkspace() {
         quickActionsSection.style.display = 'none';
         workspaceSection.style.display = 'block';
         workspaceSection.style.opacity = '0';
-        workspaceSection.style.transition = 'opacity 300ms ease-in-out';
         
         // Show back button
-        backButton.style.display = 'inline-block';
+        if (backButton) {
+            backButton.style.display = 'inline-block';
+        }
         
         // Fade in workspace
         setTimeout(() => {
             workspaceSection.style.opacity = '1';
             isWorkspaceVisible = true;
         }, 50);
-        
     }, 300);
 }
 
 // Hide workspace with fade transition
 function hideWorkspace() {
     const quickActionsSection = document.getElementById('quick-actions-section');
-    const workspaceSection = document.querySelector('.mt-16'); // workspace container
+    const workspaceSection = document.querySelector('.mt-16');
     const backButton = document.getElementById('back-btn');
     
     if (!workspaceSection) {
@@ -328,15 +289,15 @@ function hideWorkspace() {
         quickActionsSection.style.opacity = '0';
         
         // Hide back button
-        backButton.style.display = 'none';
+        if (backButton) {
+            backButton.style.display = 'none';
+        }
         
         // Fade in quick actions
         setTimeout(() => {
             quickActionsSection.style.opacity = '1';
             isWorkspaceVisible = false;
         }, 50);
-        
     }, 300);
 }
-
 </script>
