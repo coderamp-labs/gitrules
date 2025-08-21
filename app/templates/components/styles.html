@@ -66,6 +66,22 @@
             max-width: 1800px;
             position: relative;
         }
+        /* Medium screens - gradually increase width as screen gets smaller */
+        @media (max-width: 1400px) {
+            .workspace-container {
+                width: 80%;
+            }
+        }
+        @media (max-width: 1200px) {
+            .workspace-container {
+                width: 90%;
+            }
+        }
+        @media (max-width: 1000px) {
+            .workspace-container {
+                width: 95%;
+            }
+        }
         .workspace-inner {
             width: 100%;
             padding: 0 1rem;
@@ -100,10 +116,33 @@
             max-width: 350px;    /* Maximum: 350px */
             overflow: auto;
         }
-        /* When total min-widths exceed container, allow horizontal scroll */
+        
+        /* Medium screens - compress mainly the editor */
+        @media (max-width: 1200px) {
+            .workspace-center {
+                min-width: 350px;
+            }
+        }
+        
+        @media (max-width: 1000px) {
+            .workspace-center {
+                min-width: 300px;
+            }
+        }
+        
         @media (max-width: 900px) {
+            .workspace-center {
+                min-width: 250px;
+            }
+            .workspace-sidebar,
+            .workspace-actions {
+                min-width: 180px;
+            }
+        }
+        /* When total min-widths exceed container, allow horizontal scroll */
+        @media (max-width: 800px) {
             .workspace-grid {
-                min-width: 840px; /* 220px + 400px + 220px = minimum required */
+                min-width: 610px; /* 180px + 250px + 180px = compressed minimum */
                 overflow-x: auto;
             }
         }
