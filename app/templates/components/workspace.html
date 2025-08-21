@@ -1132,10 +1132,12 @@ function updateFilePathLabel(path) {
     
     if (path) {
         filePathElement.textContent = path;
-        filePathElement.className = 'text-xs text-gray-600 font-mono bg-gray-50 px-2 py-1 border border-gray-300 rounded';
+        filePathElement.className = 'text-xs text-gray-600 bg-gray-50 px-2 py-1 border border-gray-300 rounded';
+        filePathElement.style.fontFamily = "'Courier New', monospace";
     } else {
         filePathElement.textContent = 'No file selected';
-        filePathElement.className = 'text-xs text-gray-400 font-mono bg-gray-50 px-2 py-1 border border-gray-300 rounded';
+        filePathElement.className = 'text-xs text-gray-400 bg-gray-50 px-2 py-1 border border-gray-300 rounded';
+        filePathElement.style.fontFamily = "'Courier New', monospace";
     }
 }
 
