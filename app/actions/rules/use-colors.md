@@ -1,1 +1,0 @@
-- Refer to @COLORS.md for the official color palette and usage guidelines

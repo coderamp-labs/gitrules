@@ -1,1 +1,1 @@
-- Update CLAUDE.md when it's relevant
+- Update any documentation when it's relevant, including CLAUDE.md.
