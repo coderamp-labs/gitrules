@@ -91,12 +91,26 @@ function renderFileTree() {
             }
             const folderIcon = isExpanded ? 'mdi-folder-open' : 'mdi-folder';
             div.innerHTML = `
-                <div class="flex items-center gap-1 p-1 hover:bg-gray-100 cursor-pointer folder-toggle" data-path="${node.path}">
-                    <svg class="w-3 h-3 transition-transform ${isExpanded ? '' : '-rotate-90'}" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6 10l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"/>
-                    </svg>
-                    <span class="mdi ${folderIcon} text-blue-600 text-base"></span>
-                    <span class="font-medium">${node.name}</span>
+                <div class="flex items-center justify-between p-1 hover:bg-gray-100 group">
+                    <div class="flex items-center gap-1 cursor-pointer folder-toggle" data-path="${node.path}">
+                        <svg class="w-3 h-3 transition-transform ${isExpanded ? '' : '-rotate-90'}" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M6 10l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                        <span class="mdi ${folderIcon} text-blue-600 text-base"></span>
+                        <span class="font-medium">${node.name}</span>
+                    </div>
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                        <button class="add-file-to-folder text-green-600 hover:text-green-800 p-1" data-path="${node.path}" title="Add file to folder">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </button>
+                        <button class="delete-folder text-red-600 hover:text-red-800 p-1" data-path="${node.path}" title="Delete folder">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             `;
             
@@ -141,6 +155,8 @@ function renderFileTree() {
 // Handle tree clicks
 async function handleTreeClick(event) {
     const deleteButton = event.target.closest('.delete-file');
+    const deleteFolder = event.target.closest('.delete-folder');
+    const addFileButton = event.target.closest('.add-file-to-folder');
     const folderToggle = event.target.closest('.folder-toggle');
     const fileItem = event.target.closest('.file-item');
     
@@ -148,6 +164,24 @@ async function handleTreeClick(event) {
         event.stopPropagation();
         const path = deleteButton.dataset.path;
         window.workspaceManager?.deleteFile(path);
+    } else if (deleteFolder) {
+        event.stopPropagation();
+        const path = deleteFolder.dataset.path;
+        // Delete all files in this folder
+        const state = window.workspaceManager?.getState();
+        if (state) {
+            const folderPrefix = path + '/';
+            const filesToDelete = Object.keys(state.files).filter(filePath => 
+                filePath.startsWith(folderPrefix)
+            );
+            filesToDelete.forEach(filePath => {
+                window.workspaceManager?.deleteFile(filePath);
+            });
+        }
+    } else if (addFileButton) {
+        event.stopPropagation();
+        const folderPath = addFileButton.dataset.path;
+        await createNewFile(folderPath);
     } else if (folderToggle) {
         const path = folderToggle.dataset.path;
         const state = window.workspaceManager?.getState();
@@ -211,41 +245,29 @@ function updateFilePathLabel(path) {
 }
 
 // Create new file
-async function createNewFile() {
-    const fileName = prompt('Enter file name (with extension):');
-    if (!fileName || fileName.trim() === '') {
+async function createNewFile(basePath = '') {
+    const fullPath = await openFileModal(basePath);
+    if (!fullPath) {
         return;
     }
     
-    const filePath = fileName.trim();
+    // Parse the path to check for nested directories
+    const parts = fullPath.split('/');
+    const fileName = parts[parts.length - 1];
     
     // Create file with default content
-    const defaultContent = filePath.endsWith('.md') ? 
-        `# ${filePath.replace('.md', '').replace(/[_-]/g, ' ')}\n\nYour content here...` :
-        filePath.endsWith('.json') ?
+    const defaultContent = fileName.endsWith('.md') ? 
+        `# ${fileName.replace('.md', '').replace(/[_-]/g, ' ')}\n\nYour content here...` :
+        fileName.endsWith('.json') ?
         '{\n  "name": "new-file",\n  "version": "1.0.0"\n}' :
-        filePath.endsWith('.yaml') || filePath.endsWith('.yml') ?
+        fileName.endsWith('.yaml') || fileName.endsWith('.yml') ?
         'name: new-file\nversion: 1.0.0\n' :
         '# New file\n\nContent goes here...';
     
-    return await includeFile(filePath, defaultContent);
+    return await includeFile(fullPath, defaultContent);
 }
 
-async function createNewFolder() {
-    const folderName = prompt('Enter folder name:');
-    if (!folderName || folderName.trim() === '') {
-        return;
-    }
-    
-    const folderPath = folderName.trim();
-    
-    // Create a placeholder file in the folder to make it visible
-    // Folders only appear when they contain files
-    const placeholderPath = `${folderPath}/README.md`;
-    const placeholderContent = `# ${folderPath}\n\nThis folder contains files for ${folderPath}.`;
-    
-    return await includeFile(placeholderPath, placeholderContent);
-}
+// Removed - folder creation now happens through file path parsing
 
 // Include a file with given path and content
 async function includeFile(filePath, content) {
@@ -473,15 +495,8 @@ function initializeFileTree() {
     // Wire up New File button
     const newFileButton = document.getElementById('new-file-button');
     if (newFileButton && !newFileButton.hasAttribute('data-initialized')) {
-        newFileButton.addEventListener('click', createNewFile);
+        newFileButton.addEventListener('click', () => createNewFile());
         newFileButton.setAttribute('data-initialized', 'true');
-    }
-    
-    // Wire up New Folder button
-    const newFolderButton = document.getElementById('new-folder-button');
-    if (newFolderButton && !newFolderButton.hasAttribute('data-initialized')) {
-        newFolderButton.addEventListener('click', createNewFolder);
-        newFolderButton.setAttribute('data-initialized', 'true');
     }
     
     // Wire up Quick Action buttons (use delegation to avoid duplicates)
@@ -506,7 +521,6 @@ window.handleTreeClick = handleTreeClick;
 window.openFile = openFile;
 window.updateFilePathLabel = updateFilePathLabel;
 window.createNewFile = createNewFile;
-window.createNewFolder = createNewFolder;
 window.includeFile = includeFile;
 window.deleteFile = deleteFile;
 window.includeTemplate = includeTemplate;

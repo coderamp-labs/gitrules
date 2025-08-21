@@ -1,0 +1,154 @@
+<!-- File Creation Modal -->
+<div id="file-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" onclick="closeFileModal(event)">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div id="file-modal" class="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-md w-full" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <h2 class="text-xl font-black text-black mb-4">Create file</h2>
+            
+            <!-- Modal Body -->
+            <div class="mb-6">
+                <label for="file-path-input" class="block text-sm font-bold text-black mb-2">File path</label>
+                <input 
+                    type="text" 
+                    id="file-path-input" 
+                    class="w-full px-3 py-2 border-2 border-black focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    placeholder="e.g. truc/machin/bobo.py"
+                    autocomplete="off"
+                />
+                <div id="file-modal-error" class="text-red-600 text-sm mt-2 hidden"></div>
+            </div>
+            
+            <!-- Modal Actions -->
+            <div class="flex gap-2 justify-end">
+                <button 
+                    onclick="closeFileModal()" 
+                    class="px-4 py-2 bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all">
+                    Cancel
+                </button>
+                <button 
+                    onclick="submitFileModal()" 
+                    class="px-4 py-2 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all">
+                    Create
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let fileModalCallback = null;
+let previousFocusElement = null;
+
+function openFileModal(basePath = '') {
+    const modal = document.getElementById('file-modal-overlay');
+    const input = document.getElementById('file-path-input');
+    const error = document.getElementById('file-modal-error');
+    
+    // Store the currently focused element
+    previousFocusElement = document.activeElement;
+    
+    // Reset and show modal
+    modal.classList.remove('hidden');
+    error.classList.add('hidden');
+    error.textContent = '';
+    
+    // Set initial value with basePath
+    if (basePath) {
+        input.value = basePath.endsWith('/') ? basePath : basePath + '/';
+    } else {
+        input.value = '';
+    }
+    
+    // Focus input and position cursor at end
+    setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+    }, 50);
+    
+    // Handle Enter key
+    input.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+            submitFileModal();
+        } else if (e.key === 'Escape') {
+            closeFileModal();
+        }
+    };
+    
+    return new Promise((resolve) => {
+        fileModalCallback = resolve;
+    });
+}
+
+function closeFileModal(event) {
+    // Don't close if clicking inside modal
+    if (event && event.target !== event.currentTarget) {
+        return;
+    }
+    
+    const modal = document.getElementById('file-modal-overlay');
+    modal.classList.add('hidden');
+    
+    // Restore focus
+    if (previousFocusElement) {
+        previousFocusElement.focus();
+    }
+    
+    if (fileModalCallback) {
+        fileModalCallback(null);
+        fileModalCallback = null;
+    }
+}
+
+function submitFileModal() {
+    const input = document.getElementById('file-path-input');
+    const error = document.getElementById('file-modal-error');
+    const fullPath = input.value.trim();
+    
+    // Validation
+    if (!fullPath) {
+        error.textContent = 'Please enter a file path';
+        error.classList.remove('hidden');
+        return;
+    }
+    
+    // Check for invalid characters
+    if (/[<>:"|?*]/.test(fullPath)) {
+        error.textContent = 'File path contains invalid characters';
+        error.classList.remove('hidden');
+        return;
+    }
+    
+    // Check for trailing slash
+    if (fullPath.endsWith('/')) {
+        error.textContent = 'File path cannot end with /';
+        error.classList.remove('hidden');
+        return;
+    }
+    
+    // Check for empty segments
+    if (fullPath.includes('//') || fullPath.split('/').some(segment => !segment)) {
+        error.textContent = 'File path contains empty segments';
+        error.classList.remove('hidden');
+        return;
+    }
+    
+    // Close modal and return result
+    const modal = document.getElementById('file-modal-overlay');
+    modal.classList.add('hidden');
+    
+    // Restore focus
+    if (previousFocusElement) {
+        previousFocusElement.focus();
+    }
+    
+    if (fileModalCallback) {
+        fileModalCallback(fullPath);
+        fileModalCallback = null;
+    }
+}
+
+// Export for global use
+window.openFileModal = openFileModal;
+window.closeFileModal = closeFileModal;
+window.submitFileModal = submitFileModal;
+</script>
