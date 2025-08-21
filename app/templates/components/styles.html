@@ -58,7 +58,7 @@
             margin-top: 4rem;
             padding-bottom: 4rem;
             max-width: none;
-            width: 96vw;
+            width: 85vw;
             margin: 0 auto;
             position: relative;
             left: 50%;
@@ -71,7 +71,7 @@
         }
         .workspace-grid {
             display: grid;
-            grid-template-columns: minmax(250px, 320px) 1fr minmax(250px, 320px);
+            grid-template-columns: minmax(280px, 350px) minmax(400px, 600px) minmax(280px, 350px);
             gap: 1rem;
             min-height: 400px;
         }
@@ -87,7 +87,7 @@
         }
         @media (max-width: 1280px) {
             .workspace-grid {
-                grid-template-columns: minmax(200px, 280px) 1fr minmax(200px, 280px);
+                grid-template-columns: minmax(220px, 300px) minmax(350px, 500px) minmax(220px, 300px);
             }
         }
         @media (max-width: 1024px) {
@@ -102,7 +102,7 @@
         }
         @media (max-width: 480px) {
             .workspace-container {
-                width: 100vw;
+                width: 95vw;
                 padding-inline: 0;
             }
             .workspace-inner {
@@ -117,16 +117,27 @@
         .agent-tabs .tab-button {
             margin: 0;
             border-radius: 0;
+            position: relative;
+        }
+        .agent-tabs .tab-button:not(:last-child) {
             border-right: none;
         }
         .agent-tabs .tab-button:last-child {
-            border-right: 2px solid;
+            border-right: 2px solid black;
         }
-        .agent-tabs .tab-button:last-child.active {
-            border-right-color: black;
+        .agent-tabs .tab-button.active {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+            z-index: 20;
+            border-right: 2px solid black;
         }
-        .agent-tabs .tab-button:last-child:not(.active) {
-            border-right-color: rgb(156 163 175);
+        .agent-tabs .tab-button:not(.active) {
+            transform: translateY(0px);
+            z-index: 10;
+        }
+        .agent-tabs .tab-button:not(.active):hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 3px 3px 0px 0px rgba(0,0,0,0.7) !important;
         }
     }
     @layer utilities {
