@@ -7,63 +7,66 @@
     <div class="relative z-10 p-4">
         <h3 class="text-lg font-black text-black mb-3">Quick Actions</h3>
         
-        <!-- Tabs -->
-        <div class="flex gap-1 mb-3 border-b-2 border-black" role="tablist">
-            <button 
-                role="tab"
-                aria-selected="true"
-                data-tab="mcps"
-                data-theme="yellow"
-                onclick="switchQuickActionTab('mcps', 'yellow')" 
-                id="qa-tab-mcps" 
-                class="qa-sidebar-tab px-2 py-1 font-bold text-xs transition-all active"
-            >
-                MCPs
-            </button>
-            <button 
-                role="tab"
-                aria-selected="false"
-                data-tab="rules"
-                data-theme="pink"
-                onclick="switchQuickActionTab('rules', 'pink')" 
-                id="qa-tab-rules" 
-                class="qa-sidebar-tab px-2 py-1 font-bold text-xs transition-all"
-            >
-                Rules
-            </button>
-            <button 
-                role="tab"
-                aria-selected="false"
-                data-tab="subagents"
-                data-theme="blue"
-                onclick="switchQuickActionTab('subagents', 'blue')" 
-                id="qa-tab-subagents" 
-                class="qa-sidebar-tab px-2 py-1 font-bold text-xs transition-all"
-            >
-                Subagents
-            </button>
-        </div>
-        
-        <!-- White Card Container -->
-        <div class="qa-sidebar-card bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-3">
-            <!-- MCPs Tab Content -->
-            <div id="qa-content-mcps" class="qa-tab-content" role="tabpanel">
-                <div id="sidebar-mcps-container" class="space-y-2">
-                    <div class="text-xs text-gray-500">Loading...</div>
-                </div>
+        <!-- Joined Tabs and Card Container -->
+        <div class="qa-tabs-card-container">
+            <!-- Tabs Header -->
+            <div class="flex gap-1 relative pb-2" role="tablist">
+                <button 
+                    role="tab"
+                    aria-selected="true"
+                    data-tab="mcps"
+                    data-theme="yellow"
+                    onclick="switchQuickActionTab('mcps', 'yellow')" 
+                    id="qa-tab-mcps" 
+                    class="qa-sidebar-tab active px-3 py-2 bg-white border-2 border-black font-bold text-xs transition-all relative z-20 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px]"
+                >
+                    MCPs
+                </button>
+                <button 
+                    role="tab"
+                    aria-selected="false"
+                    data-tab="rules"
+                    data-theme="pink"
+                    onclick="switchQuickActionTab('rules', 'pink')" 
+                    id="qa-tab-rules" 
+                    class="qa-sidebar-tab px-3 py-2 bg-gray-100 border-2 border-gray-400 font-bold text-xs text-gray-700 transition-all relative z-10 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px]"
+                >
+                    Rules
+                </button>
+                <button 
+                    role="tab"
+                    aria-selected="false"
+                    data-tab="subagents"
+                    data-theme="blue"
+                    onclick="switchQuickActionTab('subagents', 'blue')" 
+                    id="qa-tab-subagents" 
+                    class="qa-sidebar-tab px-3 py-2 bg-gray-100 border-2 border-gray-400 font-bold text-xs text-gray-700 transition-all relative z-10 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px]"
+                >
+                    Subagents
+                </button>
             </div>
-
-            <!-- Rules Tab Content -->
-            <div id="qa-content-rules" class="qa-tab-content hidden" role="tabpanel">
-                <div id="sidebar-rules-container" class="space-y-2">
-                    <div class="text-xs text-gray-500">Loading...</div>
+            
+            <!-- White Card Container (visually joined to tabs) -->
+            <div class="qa-sidebar-card bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-3 relative z-10">
+                <!-- MCPs Tab Content -->
+                <div id="qa-content-mcps" class="qa-tab-content" role="tabpanel">
+                    <div id="sidebar-mcps-container" class="space-y-2">
+                        <div class="text-xs text-gray-500">Loading...</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Subagents Tab Content -->
-            <div id="qa-content-subagents" class="qa-tab-content hidden" role="tabpanel">
-                <div id="sidebar-agents-container" class="space-y-2">
-                    <div class="text-xs text-gray-500">Loading...</div>
+                <!-- Rules Tab Content -->
+                <div id="qa-content-rules" class="qa-tab-content hidden" role="tabpanel">
+                    <div id="sidebar-rules-container" class="space-y-2">
+                        <div class="text-xs text-gray-500">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Subagents Tab Content -->
+                <div id="qa-content-subagents" class="qa-tab-content hidden" role="tabpanel">
+                    <div id="sidebar-agents-container" class="space-y-2">
+                        <div class="text-xs text-gray-500">Loading...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -77,6 +80,8 @@
     --qa-sidebar-card-bg: #ffffff;
     --qa-sidebar-card-border: #000000;
     --qa-sidebar-shadow: rgba(0, 0, 0, 1);
+    --tab-anim-dur: 150ms;
+    --tab-anim-ease: ease;
 }
 
 /* Yellow Theme (MCPs) */
@@ -106,26 +111,33 @@
 /* Background Layer */
 .qa-sidebar-bg {
     background-color: var(--qa-sidebar-bg);
+    transition: background-color var(--tab-anim-dur) var(--tab-anim-ease);
 }
 
-/* Tab Styles */
-.qa-sidebar-tab {
-    background-color: white;
-    border: 2px solid black;
-    border-bottom: none;
+/* Joined Card and Tabs Container */
+.qa-tabs-card-container {
     position: relative;
-    margin-bottom: -2px;
-    color: black;
 }
 
-.qa-sidebar-tab:hover {
-    background-color: #f3f4f6;
+/* Card properly positioned */
+.qa-sidebar-card {
+    position: relative;
 }
 
+/* Active tab gets accent color */
 .qa-sidebar-tab.active {
-    background-color: var(--qa-sidebar-accent);
-    color: var(--qa-sidebar-contrast);
-    z-index: 10;
+    background-color: var(--qa-sidebar-accent) !important;
+    border-color: black !important;
+    color: black !important;
+    position: relative;
+}
+
+
+/* Inactive tabs */
+.qa-sidebar-tab:not(.active) {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+    color: #6b7280;
 }
 
 /* Themed Buttons */
@@ -185,13 +197,15 @@ function switchQuickActionTab(tabName, theme) {
         section.setAttribute('data-qa-theme', theme);
     }
     
-    // Update tabs
+    // Update all tabs - active gets theme color, inactive gets gray
     document.querySelectorAll('.qa-sidebar-tab').forEach(tab => {
         if (tab.dataset.tab === tabName) {
-            tab.classList.add('active');
+            // Active tab styling - note: bg color handled by CSS variable
+            tab.className = 'qa-sidebar-tab active px-3 py-2 border-2 border-black font-bold text-xs transition-all relative z-20 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px]';
             tab.setAttribute('aria-selected', 'true');
         } else {
-            tab.classList.remove('active');
+            // Inactive tab styling
+            tab.className = 'qa-sidebar-tab px-3 py-2 bg-gray-100 border-2 border-gray-400 font-bold text-xs text-gray-700 transition-all relative z-10 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px]';
             tab.setAttribute('aria-selected', 'false');
         }
     });
