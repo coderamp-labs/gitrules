@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from app.routes import install
+from app.routes import install, actions
 from api_analytics.fastapi import Analytics
 import os
 from dotenv import load_dotenv
@@ -23,8 +23,9 @@ templates = Jinja2Templates(directory="app/templates")
 static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Include install routes
+# Include routers
 app.include_router(install.router)
+app.include_router(actions.router)
 
 @app.get("/favicon.ico")
 async def favicon():

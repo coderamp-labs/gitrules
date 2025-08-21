@@ -1,23 +1,23 @@
 {
-    "github": {
+    "GitHub": {
         "type": "http",
         "url": "https://api.githubcopilot.com/mcp",
         "headers": {
             "Authorization": "Bearer ${GITHUB_TOKEN}"
         }
     },
-    "firecrawl": {
+    "Firecrawl": {
         "type": "sse",
         "url": "https://mcp.firecrawl.dev/${FIRECRAWL_API_KEY}/sse"
     },
-    "playwright": {
+    "Playwright": {
         "type": "stdio",
         "command": "npx",
         "args": [
             "@playwright/mcp@latest"
         ]
     },
-    "supabase": {
+    "Supabase": {
         "command": "npx",
         "args": [
             "-y",
