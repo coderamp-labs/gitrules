@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
@@ -14,6 +14,11 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Include install routes
 app.include_router(install.router)
+
+@app.get("/favicon.ico")
+async def favicon():
+    favicon_path = static_dir / "favicon.ico"
+    return FileResponse(favicon_path, media_type="image/x-icon")
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
