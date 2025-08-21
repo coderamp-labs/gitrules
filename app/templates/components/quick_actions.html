@@ -1,107 +1,130 @@
-<div id="quick-actions-section" class="bg-cyan-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 min-h-[500px] flex flex-col transition-opacity duration-300">
+<div id="quick-actions-section" class="bg-cyan-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 max-w-4xl mx-auto transition-opacity duration-300">
     <!-- Header -->
-    <div class="mb-6">
-        <h2 class="text-2xl font-black text-black mb-2">Quick Actions</h2>
-        <p class="text-black font-medium">Add capabilities to your workspace</p>
+    <div class="mb-4">
+        <h2 class="text-xl font-black text-black mb-1">Quick Actions</h2>
+        <p class="text-black font-medium text-sm">Add capabilities to your workspace</p>
     </div>
 
-    <!-- Main Column with 3 Categories -->
-    <div class="flex-1 space-y-6">
+    <!-- Three Categories in Columns -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
         
-        <!-- Add an Agent Section -->
-        <div class="bg-white border-2 border-black p-4">
-            <h3 class="text-lg font-black text-black mb-3 flex items-center gap-2">
-                <span class="text-xl">🤖</span> Add an Agent
+        <!-- Add an Agent Column -->
+        <div class="bg-white border-2 border-black p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
+                <span class="text-sm">🤖</span> Agents
             </h3>
-            <div class="flex gap-2 flex-wrap">
-                <button class="qa-include-btn px-3 py-2 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm" 
+            <div class="space-y-1">
+                <button class="qa-include-btn w-full bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs flex items-center p-0 overflow-hidden" 
                         data-template="Researcher">
-                    Researcher
+                    <div class="bg-cyan-400 border-r-2 border-black px-2 py-1 flex items-center justify-center">
+                        <span class="text-lg font-black">+</span>
+                    </div>
+                    <div class="px-2 py-1 flex-1">Researcher</div>
                 </button>
-                <button class="qa-include-btn px-3 py-2 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                <button class="qa-include-btn w-full bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs flex items-center p-0 overflow-hidden"
                         data-template="Memory Manager">
-                    Memory Manager
+                    <div class="bg-cyan-400 border-r-2 border-black px-2 py-1 flex items-center justify-center">
+                        <span class="text-lg font-black">+</span>
+                    </div>
+                    <div class="px-2 py-1 flex-1">Memory Manager</div>
                 </button>
-                <button class="px-3 py-2 bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                <button class="w-full bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs px-2 py-1"
                         onclick="showFullAgentList()">
-                    View all agents →
+                    View all →
                 </button>
             </div>
         </div>
 
-        <!-- Add a Rule Set Section -->
-        <div class="bg-white border-2 border-black p-4">
-            <h3 class="text-lg font-black text-black mb-3 flex items-center gap-2">
-                <span class="text-xl">📋</span> Add a Rule Set
+        <!-- Add a Rule Set Column -->
+        <div class="bg-white border-2 border-black p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
+                <span class="text-sm">📋</span> Rules
             </h3>
-            <div class="flex gap-2 flex-wrap">
-                <button class="qa-include-btn px-3 py-2 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+            <div class="space-y-1">
+                <button class="qa-include-btn w-full bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs flex items-center p-0 overflow-hidden"
                         data-template="Python">
-                    Python Style
+                    <div class="bg-pink-400 border-r-2 border-black px-2 py-1 flex items-center justify-center">
+                        <span class="text-lg font-black">+</span>
+                    </div>
+                    <div class="px-2 py-1 flex-1">Python</div>
                 </button>
-                <button class="qa-include-btn px-3 py-2 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                <button class="qa-include-btn w-full bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs flex items-center p-0 overflow-hidden"
                         data-template="TypeScript">
-                    TypeScript Rules
+                    <div class="bg-pink-400 border-r-2 border-black px-2 py-1 flex items-center justify-center">
+                        <span class="text-lg font-black">+</span>
+                    </div>
+                    <div class="px-2 py-1 flex-1">TypeScript</div>
                 </button>
-                <button class="px-3 py-2 bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                <button class="w-full bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs px-2 py-1"
                         onclick="showFullRulesList()">
-                    View all rules →
+                    View all →
                 </button>
             </div>
         </div>
 
-        <!-- Add an MCP Section -->
-        <div class="bg-white border-2 border-black p-4">
-            <h3 class="text-lg font-black text-black mb-3 flex items-center gap-2">
-                <span class="text-xl">🔌</span> Add an MCP
+        <!-- Add an MCP Column -->
+        <div class="bg-white border-2 border-black p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
+                <span class="text-sm">🔌</span> MCPs
             </h3>
-            <div class="flex gap-2 flex-wrap">
-                <button class="qa-include-btn px-3 py-2 bg-yellow-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+            <div class="space-y-1">
+                <button class="qa-include-btn w-full bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs flex items-center p-0 overflow-hidden"
                         data-template="Supabase MCP">
-                    Supabase
+                    <div class="bg-yellow-400 border-r-2 border-black px-2 py-1 flex items-center justify-center">
+                        <span class="text-lg font-black">+</span>
+                    </div>
+                    <div class="px-2 py-1 flex-1">Supabase</div>
                 </button>
-                <button class="qa-include-btn px-3 py-2 bg-yellow-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                <button class="qa-include-btn w-full bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs flex items-center p-0 overflow-hidden"
                         data-template="Github MCP">
-                    GitHub
+                    <div class="bg-yellow-400 border-r-2 border-black px-2 py-1 flex items-center justify-center">
+                        <span class="text-lg font-black">+</span>
+                    </div>
+                    <div class="px-2 py-1 flex-1">GitHub</div>
                 </button>
-                <button class="px-3 py-2 bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm"
+                <button class="w-full bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs px-2 py-1"
                         onclick="showFullMCPList()">
-                    View all MCPs →
+                    View all →
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Choose a Template Section (Below the column) -->
-    <div class="mt-8 pt-6 border-t-2 border-black">
-        <h3 class="text-lg font-black text-black mb-4">
-            ✨ Choose a Template
+    <!-- Choose a Template Section (Below the columns) -->
+    <div class="border-t-2 border-black pt-3">
+        <h3 class="text-sm font-black text-black mb-2">
+            ✨ Templates
         </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <button class="template-select-btn p-4 bg-gradient-to-r from-cyan-50 to-pink-50 border-2 border-black text-left hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+        <div class="grid grid-cols-3 gap-2 mb-3">
+            <button class="template-select-btn p-2 bg-gradient-to-r from-cyan-50 to-pink-50 border-2 border-black text-left shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all"
                     data-template-id="full-stack">
-                <div class="font-black text-black mb-1">Full-Stack Web App</div>
-                <div class="text-sm text-gray-700">Researcher + Python Rules + Supabase MCP</div>
+                <div class="font-black text-black text-xs mb-1">Full-Stack App</div>
+                <div class="text-xs text-gray-700">Researcher + Python + Supabase</div>
             </button>
             
-            <button class="template-select-btn p-4 bg-gradient-to-r from-pink-50 to-yellow-50 border-2 border-black text-left hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+            <button class="template-select-btn p-2 bg-gradient-to-r from-pink-50 to-yellow-50 border-2 border-black text-left shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all"
                     data-template-id="ai-agent">
-                <div class="font-black text-black mb-1">AI Agent Project</div>
-                <div class="text-sm text-gray-700">Memory Manager + TypeScript + GitHub MCP</div>
+                <div class="font-black text-black text-xs mb-1">AI Agent</div>
+                <div class="text-xs text-gray-700">Memory Manager + TypeScript + GitHub</div>
             </button>
             
-            <button class="template-select-btn p-4 bg-gradient-to-r from-yellow-50 to-cyan-50 border-2 border-black text-left hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+            <button class="template-select-btn p-2 bg-gradient-to-r from-yellow-50 to-cyan-50 border-2 border-black text-left shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all"
                     data-template-id="data-science">
-                <div class="font-black text-black mb-1">Data Science</div>
-                <div class="text-sm text-gray-700">Researcher + Python Rules</div>
-            </button>
-            
-            <!-- Start from Scratch -->
-            <button id="start-from-scratch-btn" class="p-4 bg-gray-100 border-2 border-black text-left hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-                <div class="font-black text-black mb-1">Start from Scratch</div>
-                <div class="text-sm text-gray-700">Begin with an empty workspace</div>
+                <div class="font-black text-black text-xs mb-1">Data Science</div>
+                <div class="text-xs text-gray-700">Researcher + Python</div>
             </button>
         </div>
+    </div>
+
+    <!-- Start from Scratch Section -->
+    <div class="border-t-2 border-black pt-3">
+        <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
+            <span class="text-sm">⚡</span> Start Fresh
+        </h3>
+        <button id="start-from-scratch-btn" class="w-full p-3 bg-gradient-to-r from-gray-50 to-white border-2 border-black text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all">
+            <div class="font-black text-black text-sm mb-1">Start from Scratch</div>
+            <div class="text-xs text-gray-700">Begin with an empty workspace</div>
+        </button>
     </div>
 
     <!-- Back Button (hidden initially) -->
