@@ -52,14 +52,12 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-
-.action-button__plus-glyph {
-    font-size: 20px;
+    font-size: 30px;
     font-weight: 900;
     line-height: 1;
     color: var(--ab-fg);
 }
+
 
 /* Right Content Area */
 .action-button__content {
@@ -107,11 +105,12 @@
 .action-button:active {
     transform: translate(2px, 2px); /* Press button down towards shadow */
     box-shadow: calc(var(--ab-shadow-x) - 2px) calc(var(--ab-shadow-y) - 2px) 0 0 var(--ab-shadow);
+    outline: none !important;
 }
 
-.action-button:focus {
-    outline: 2px solid var(--ab-focus-ring);
-    outline-offset: 2px;
+.action-button:focus,
+.action-button:focus-visible {
+    outline: none !important;
 }
 
 /* Disabled State */
