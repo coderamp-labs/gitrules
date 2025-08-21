@@ -249,11 +249,16 @@ function showWorkspace() {
         workspaceSection.style.display = 'block';
         workspaceSection.style.opacity = '0';
         
-        // Scroll to workspace to focus on it (with offset to show beginning)
+        // Scroll to workspace to focus on it (ensuring top is visible)
         setTimeout(() => {
             const rect = workspaceSection.getBoundingClientRect();
-            const offsetTop = window.pageYOffset + rect.top - 20; // 20px offset from top
-            window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+            const currentScrollTop = window.pageYOffset;
+            const workspaceTop = currentScrollTop + rect.top;
+            const navbarHeight = 64; // h-16 = 64px
+            const buffer = 20; // Small buffer below navbar
+            const targetScrollTop = Math.max(0, workspaceTop - navbarHeight - buffer);
+            
+            window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
         }, 100);
         
         // Show back button
