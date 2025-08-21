@@ -20,6 +20,17 @@ function initializeWorkspaceEditor() {
             wordWrap: 'on'
         });
         
+        // Listen for content changes and update workspace state
+        workspaceMonacoEditor.onDidChangeModelContent(function() {
+            const state = window.workspaceManager?.getState();
+            if (state && state.selectedFile) {
+                // Update the file content in workspace state
+                state.files[state.selectedFile] = workspaceMonacoEditor.getValue();
+                // Dispatch event for auto-share
+                window.dispatchEvent(new CustomEvent('workspace-content-changed'));
+            }
+        });
+        
         // Expose globally for access from other components
         window.workspaceMonacoEditor = workspaceMonacoEditor;
         
@@ -27,67 +38,6 @@ function initializeWorkspaceEditor() {
         document.getElementById('copy-workspace-editor').addEventListener('click', function() {
             const content = workspaceMonacoEditor.getValue();
             navigator.clipboard.writeText(content);
-        });
-        
-        // Share functionality
-        document.getElementById('share-install').addEventListener('click', async function() {
-            // Collect all files from the file system
-            const allFiles = {};
-            
-            // Helper function to collect files from tree structure
-            function collectFilesFromTree(nodes, collected) {
-                nodes.forEach(node => {
-                    if (node.type === 'file') {
-                        const state = window.workspaceManager?.getState();
-                        if (state?.files[node.path]) {
-                            collected[node.path] = state.files[node.path];
-                        }
-                    } else if (node.type === 'folder' && node.children) {
-                        collectFilesFromTree(node.children, collected);
-                    }
-                });
-            }
-            
-            // Collect files from dynamic tree
-            const fileTreeData = window.generateFileTreeData();
-            collectFilesFromTree(fileTreeData, allFiles);
-            
-            try {
-                // Send files to API to generate install script
-                const response = await fetch('/api/install', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ files: allFiles })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to create install');
-                }
-                
-                const data = await response.json();
-                const installCommand = `sh -c "$(curl -fsSL ${window.location.origin}/api/install/${data.hash}.sh)"`;
-                
-                // Copy to clipboard
-                await navigator.clipboard.writeText(installCommand);
-                
-                // Show feedback
-                const button = document.getElementById('share-install');
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                button.classList.remove('bg-pink-400');
-                button.classList.add('bg-green-400');
-                
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.classList.remove('bg-green-400');
-                    button.classList.add('bg-pink-400');
-                }, 2000);
-            } catch (error) {
-                console.error('Error sharing install:', error);
-                alert('Failed to share install. Please try again.');
-            }
         });
         
         // Initialize QuickAction button handlers after editor is ready

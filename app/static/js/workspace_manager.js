@@ -41,6 +41,8 @@ class WorkspaceState {
         this.files[path] = content;
         this.selectedFile = path;
         this.history.present = this.snapshot();
+        // Dispatch event for auto-share
+        window.dispatchEvent(new CustomEvent('workspace-file-added'));
     }
 
     // Delete a file
@@ -51,6 +53,8 @@ class WorkspaceState {
             this.selectedFile = null;
         }
         this.history.present = this.snapshot();
+        // Dispatch event for auto-share
+        window.dispatchEvent(new CustomEvent('workspace-file-deleted'));
     }
 
     // Push current state to history

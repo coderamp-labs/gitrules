@@ -3,7 +3,7 @@
 
 <div class="workspace-container" style="display: none;">
     <div class="workspace-inner">
-        <!-- Context switcher and tabs container -->
+        <!-- Tabs and auto-share container -->
         <div class="flex justify-between items-end mb-0">
             <!-- Tabs floating above container -->
             <div class="agent-tabs translate-x-1 translate-y-1">
@@ -15,17 +15,12 @@
                 </button>
             </div>
             
-            <!-- Context switcher -->
-            <div class="flex gap-2 items-center mb-1 mr-2">
-                <label class="text-sm font-bold text-black">Context:</label>
-                <select id="context-switcher" class="px-3 py-1 bg-white border-2 border-black text-black font-medium shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-2 focus:ring-cyan-400 text-sm">
-                    <!-- Options will be populated dynamically -->
-                </select>
-                <button id="new-context-btn" class="px-2 py-1 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm" title="New Context">
-                    +
-                </button>
-                <button id="delete-context-btn" class="px-2 py-1 bg-red-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm" title="Delete Context">
-                    ×
+            <!-- Auto-share panel -->
+            <div id="auto-share-panel" class="flex gap-2 items-center mb-1 mr-2">
+                <label class="text-sm font-bold text-black">Install in one click</label>
+                <input id="share-link-input" type="text" readonly class="px-3 py-1 bg-white border-2 border-black text-black font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" style="width: 320px; cursor: text;" value="Waiting for first save...">
+                <button id="copy-share-link" class="px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Copy
                 </button>
             </div>
         </div>
@@ -77,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="/static/js/file_tree.js"></script>
 <script src="/static/js/monaco_editor.js"></script>
 <script src="/static/js/context_manager.js"></script>
+<script src="/static/js/auto_share.js"></script>
 
 <!-- Initialize workspace -->
 <script>
