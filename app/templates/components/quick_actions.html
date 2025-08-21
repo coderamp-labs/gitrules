@@ -108,46 +108,6 @@
         </div>
     </div>
 
-    <!-- Choose a Template Section (Below the columns) -->
-    <div class="border-t-2 border-black pt-3">
-        <h3 class="text-sm font-black text-black mb-2">
-            ✨ Templates
-        </h3>
-        <div class="grid grid-cols-3 gap-3 mb-3" style="margin: 4px;">
-            <button class="action-button action-button--primary action-button--template" onclick="applyTemplate('full-stack')">
-                <div class="action-button__plus">+</div>
-                <div class="action-button__content">
-                    <span class="action-button__icon">🌐</span>
-                    <div class="action-button__text">
-                        <span class="action-button__label">Full-Stack App</span>
-                        <span class="action-button__description">Researcher + Python + Supabase</span>
-                    </div>
-                </div>
-            </button>
-            
-            <button class="action-button action-button--primary action-button--template" onclick="applyTemplate('ai-agent')">
-                <div class="action-button__plus">+</div>
-                <div class="action-button__content">
-                    <span class="action-button__icon">🤖</span>
-                    <div class="action-button__text">
-                        <span class="action-button__label">AI Agent</span>
-                        <span class="action-button__description">Memory Manager + TypeScript + GitHub</span>
-                    </div>
-                </div>
-            </button>
-            
-            <button class="action-button action-button--primary action-button--template" onclick="applyTemplate('data-science')">
-                <div class="action-button__plus">+</div>
-                <div class="action-button__content">
-                    <span class="action-button__icon">📊</span>
-                    <div class="action-button__text">
-                        <span class="action-button__label">Data Science</span>
-                        <span class="action-button__description">Researcher + Python</span>
-                    </div>
-                </div>
-            </button>
-        </div>
-    </div>
 
     <!-- Start from Scratch Section -->
     <div class="border-t-2 border-black pt-3">
@@ -178,23 +138,6 @@
 </div>
 
 <script>
-// Template definitions
-const TEMPLATE_COMPOSITIONS = {
-    'full-stack': [
-        { type: 'agent', name: 'Researcher' },
-        { type: 'rules', name: 'Python' },
-        { type: 'mcp', name: 'Supabase MCP' }
-    ],
-    'ai-agent': [
-        { type: 'agent', name: 'Memory Manager' },
-        { type: 'rules', name: 'TypeScript' },
-        { type: 'mcp', name: 'Github MCP' }
-    ],
-    'data-science': [
-        { type: 'agent', name: 'Researcher' },
-        { type: 'rules', name: 'Python' }
-    ]
-};
 
 // Global state
 let isWorkspaceVisible = false;
@@ -230,38 +173,6 @@ function addMCP(name) {
     }
 }
 
-// Apply a template composition
-function applyTemplate(templateId) {
-    const composition = TEMPLATE_COMPOSITIONS[templateId];
-    if (!composition) {
-        console.error('Unknown template:', templateId);
-        return;
-    }
-    
-    // Create or switch to template-specific context
-    if (window.workspaceManager) {
-        const contexts = workspaceManager.loadContextsList();
-        if (!contexts[templateId]) {
-            const templateNames = {
-                'full-stack': 'Full-Stack Web App',
-                'ai-agent': 'AI Agent Project',
-                'data-science': 'Data Science'
-            };
-            workspaceManager.createContext(templateId, templateNames[templateId] || templateId);
-        }
-        workspaceManager.switchContext(templateId);
-        
-        // Apply all template items
-        composition.forEach(item => {
-            if (window.includeTemplate) {
-                window.includeTemplate(item.name);
-            }
-        });
-    }
-    
-    // Show workspace
-    showWorkspace();
-}
 
 // Start from scratch with empty context
 function startFromScratch() {
