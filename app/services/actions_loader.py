@@ -24,14 +24,11 @@ class ActionsLoader:
         if agents_dir.exists():
             self.agents = []
             for file_path in agents_dir.glob("*.md"):
-                with open(file_path, 'r') as f:
-                    content = f.read()
-                    name = file_path.stem.replace('-', ' ').title()
-                    self.agents.append(Agent(
-                        name=name,
-                        filename=file_path.name,
-                        content=content
-                    ))
+                name = file_path.stem.replace('-', ' ').title()
+                self.agents.append(Agent(
+                    name=name,
+                    filename=file_path.name
+                ))
     
     def load_rules(self):
         """Load all rule files from actions/rules directory"""
@@ -39,14 +36,11 @@ class ActionsLoader:
         if rules_dir.exists():
             self.rules = []
             for file_path in rules_dir.glob("*.md"):
-                with open(file_path, 'r') as f:
-                    content = f.read()
-                    name = file_path.stem.replace('-', ' ').title()
-                    self.rules.append(Rule(
-                        name=name,
-                        filename=file_path.name,
-                        content=content
-                    ))
+                name = file_path.stem.replace('-', ' ').title()
+                self.rules.append(Rule(
+                    name=name,
+                    filename=file_path.name
+                ))
     
     def load_mcps(self):
         """Load MCPs from actions/mcps.json"""

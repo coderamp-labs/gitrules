@@ -4,12 +4,10 @@ from typing import Dict, List, Any
 class Agent(BaseModel):
     name: str
     filename: str
-    content: str
 
 class Rule(BaseModel):
     name: str
     filename: str
-    content: str
 
 class MCP(BaseModel):
     name: str
