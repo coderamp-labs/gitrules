@@ -161,13 +161,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 const templateName = getTemplateDisplayName(selectedTemplateValue);
                 const contextId = selectedTemplateValue === 'scratch' ? 'default' : selectedTemplateValue;
                 
-                // Check if context exists, create if not
-                if (window.createContext && window.switchContext) {
-                    const contexts = JSON.parse(localStorage.getItem('app:contexts') || '{}');
+                // Use workspaceManager if available
+                if (window.workspaceManager) {
+                    const contexts = workspaceManager.loadContextsList();
                     if (!contexts[contextId] && contextId !== 'default') {
-                        window.createContext(contextId, templateName);
+                        workspaceManager.createContext(contextId, templateName);
                     }
-                    window.switchContext(contextId);
+                    workspaceManager.switchContext(contextId);
                 }
                 
                 // Apply quick actions sequentially

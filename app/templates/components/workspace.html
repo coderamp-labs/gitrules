@@ -119,7 +119,8 @@ Click any QuickAction button to add it here...`,
                 });
             }
             
-            // Collect default files from tree
+            // Collect files from dynamic tree
+            const fileTreeData = generateFileTreeData();
             collectFilesFromTree(fileTreeData, allFiles);
             
             // Add user-created files
@@ -273,229 +274,512 @@ function updateWorkspaceEditor(tabId) {
     }
 }
 
-// File tree data structure
-const fileTreeData = [
-    {
-        type: 'folder',
-        path: 'subagents',
-        name: 'subagents',
-        children: [
-            { type: 'file', path: 'subagents/researcher.md', name: 'researcher.md' },
-            { type: 'file', path: 'subagents/memory_manager.md', name: 'memory_manager.md' },
-            { type: 'file', path: 'subagents/code_reviewer.md', name: 'code_reviewer.md' }
-        ]
-    },
-    {
-        type: 'folder',
-        path: 'mcps',
-        name: 'mcps',
-        children: [
-            { type: 'file', path: 'mcps/supabase_mcp.json', name: 'supabase_mcp.json' },
-            { type: 'file', path: 'mcps/github_mcp.json', name: 'github_mcp.json' },
-            { type: 'file', path: 'mcps/filesystem_mcp.json', name: 'filesystem_mcp.json' }
-        ]
-    },
-    {
-        type: 'folder',
-        path: 'guidelines',
-        name: 'guidelines',
-        children: [
-            { type: 'file', path: 'guidelines/python_style.md', name: 'python_style.md' },
-            { type: 'file', path: 'guidelines/typescript_rules.md', name: 'typescript_rules.md' },
-            { type: 'file', path: 'guidelines/security.md', name: 'security.md' }
-        ]
-    },
-    { type: 'file', path: 'README.md', name: 'README.md' },
-    { type: 'file', path: 'config.yaml', name: 'config.yaml' }
-];
+// ============================================================================
+// NEW UNIFIED STATE MANAGEMENT SYSTEM
+// ============================================================================
 
-// File content mock data
-const fileContent = {
-    'subagents/researcher.md': `# Researcher Agent
-
-A specialized subagent for information gathering and analysis.
-
-## Capabilities
-- Web search and analysis
-- Document research
-- Data compilation and synthesis
-
-## Usage
-\`\`\`
-@researcher find information about [topic]
-\`\`\`
-
-## Configuration
-- Search depth: 3 levels
-- Sources: Academic, News, Documentation
-- Output format: Structured markdown`,
-
-    'subagents/memory_manager.md': `# Memory Manager Agent
-
-Handles context and conversation history management.
-
-## Features
-- Long-term context preservation
-- Conversation summarization
-- Knowledge base integration
-
-## Usage
-\`\`\`
-@memory store this information about [topic]
-@memory recall information about [topic]
-\`\`\``,
-
-    'subagents/code_reviewer.md': `# Code Reviewer Agent
-
-Automated code review and quality assessment.
-
-## Review Areas
-- Code quality and style
-- Security vulnerabilities
-- Performance optimization
-- Best practices compliance
-
-## Configuration
-- Languages: Python, TypeScript, JavaScript
-- Severity levels: Error, Warning, Info
-- Auto-fix: Enabled for style issues`,
-
-    'mcps/supabase_mcp.json': `{
-  "name": "supabase-mcp",
-  "version": "1.0.0",
-  "description": "Model Context Protocol for Supabase integration",
-  "tools": [
-    {
-      "name": "query_database",
-      "description": "Execute SQL queries on Supabase database",
-      "parameters": {
-        "query": "string",
-        "params": "array"
-      }
-    },
-    {
-      "name": "insert_record",
-      "description": "Insert new record into table",
-      "parameters": {
-        "table": "string",
-        "data": "object"
-      }
+/**
+ * WorkspaceState - Manages all state for a single workspace context
+ */
+class WorkspaceState {
+    constructor(contextId) {
+        this.contextId = contextId;
+        this.files = {};  // File path -> content mapping
+        this.selectedFile = null;
+        this.expandedFolders = new Set();
+        this.history = {
+            past: [],
+            present: null,
+            future: [],
+            maxSize: 50
+        };
     }
-  ]
-}`,
 
-    'mcps/github_mcp.json': `{
-  "name": "github-mcp",
-  "version": "1.0.0", 
-  "description": "Model Context Protocol for GitHub API integration",
-  "tools": [
-    {
-      "name": "create_issue",
-      "description": "Create a new GitHub issue",
-      "parameters": {
-        "title": "string",
-        "body": "string",
-        "labels": "array"
-      }
-    },
-    {
-      "name": "get_repository",
-      "description": "Get repository information",
-      "parameters": {
-        "owner": "string",
-        "repo": "string"
-      }
+    // Initialize empty state
+    initEmpty() {
+        this.files = {};
+        this.selectedFile = null;
+        this.expandedFolders = new Set();
+        this.history.present = this.snapshot();
+        this.history.past = [];
+        this.history.future = [];
     }
-  ]
-}`,
 
-    'guidelines/python_style.md': `# Python Style Guidelines
+    // Create a snapshot of current state
+    snapshot() {
+        return {
+            files: { ...this.files },
+            selectedFile: this.selectedFile,
+            expandedFolders: Array.from(this.expandedFolders),
+            timestamp: new Date().toISOString()
+        };
+    }
 
-## Code Formatting
-- Use PEP 8 style guide
-- Line length: 88 characters (Black formatter)
-- Use type hints for all functions
+    // Add a file (Include action)
+    addFile(path, content) {
+        // Save current state to history
+        this.pushHistory();
+        
+        // Add the file
+        this.files[path] = content;
+        this.selectedFile = path;
+        
+        // Update history present
+        this.history.present = this.snapshot();
+    }
 
-## Best Practices
-- Use meaningful variable names
-- Add docstrings to all functions and classes
-- Prefer list comprehensions over loops when appropriate
-- Use f-strings for string formatting
+    // Delete a file
+    deleteFile(path) {
+        this.pushHistory();
+        delete this.files[path];
+        if (this.selectedFile === path) {
+            this.selectedFile = null;
+        }
+        this.history.present = this.snapshot();
+    }
 
-## Example
-\`\`\`python
-def calculate_total(items: List[Item]) -> float:
-    """Calculate the total price of items."""
-    return sum(item.price for item in items)
-\`\`\``,
+    // Push current state to history
+    pushHistory() {
+        if (this.history.present) {
+            this.history.past.push(this.history.present);
+            if (this.history.past.length > this.history.maxSize) {
+                this.history.past.shift();
+            }
+            this.history.future = [];
+        }
+    }
 
-    'guidelines/typescript_rules.md': `# TypeScript Coding Rules
+    // Go to previous state
+    undo() {
+        if (this.history.past.length === 0) return false;
+        
+        const previousState = this.history.past.pop();
+        this.history.future.unshift(this.history.present);
+        this.history.present = previousState;
+        this.restoreFromSnapshot(previousState);
+        return true;
+    }
 
-## Type Safety
-- Always use strict mode
-- No \`any\` type unless absolutely necessary
-- Define interfaces for all data structures
+    // Go to next state
+    redo() {
+        if (this.history.future.length === 0) return false;
+        
+        const nextState = this.history.future.shift();
+        this.history.past.push(this.history.present);
+        this.history.present = nextState;
+        this.restoreFromSnapshot(nextState);
+        return true;
+    }
 
-## Code Style
-- Use Prettier for formatting
-- Prefer const over let
-- Use arrow functions for callbacks
+    // Restore state from snapshot
+    restoreFromSnapshot(snapshot) {
+        this.files = { ...snapshot.files };
+        this.selectedFile = snapshot.selectedFile;
+        this.expandedFolders = new Set(snapshot.expandedFolders || []);
+    }
 
-## Example
-\`\`\`typescript
-interface User {
-  id: string;
-  name: string;
-  email: string;
+    // Reset to empty state
+    reset() {
+        this.pushHistory();
+        this.files = {};
+        this.selectedFile = null;
+        this.expandedFolders = new Set();
+        this.history.present = this.snapshot();
+    }
+
+    // Check if we can undo/redo
+    canUndo() {
+        return this.history.past.length > 0;
+    }
+
+    canRedo() {
+        return this.history.future.length > 0;
+    }
+
+    // Serialize state for localStorage
+    serialize() {
+        return JSON.stringify({
+            contextId: this.contextId,
+            files: this.files,
+            selectedFile: this.selectedFile,
+            expandedFolders: Array.from(this.expandedFolders),
+            history: {
+                past: this.history.past,
+                present: this.history.present,
+                future: this.history.future
+            }
+        });
+    }
+
+    // Deserialize state from localStorage
+    static deserialize(contextId, data) {
+        const state = new WorkspaceState(contextId);
+        if (data) {
+            try {
+                const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                state.files = parsed.files || {};
+                state.selectedFile = parsed.selectedFile || null;
+                state.expandedFolders = new Set(parsed.expandedFolders || []);
+                
+                if (parsed.history) {
+                    state.history.past = parsed.history.past || [];
+                    state.history.present = parsed.history.present || state.snapshot();
+                    state.history.future = parsed.history.future || [];
+                } else {
+                    state.history.present = state.snapshot();
+                }
+            } catch (e) {
+                console.error('Failed to deserialize state:', e);
+                state.initEmpty();
+            }
+        } else {
+            state.initEmpty();
+        }
+        return state;
+    }
 }
 
-const processUser = (user: User): string => {
-  return \`Processing user: \${user.name}\`;
-};
-\`\`\``,
+/**
+ * WorkspaceManager - Manages multiple workspace contexts
+ */
+class WorkspaceManager {
+    constructor() {
+        this.contexts = {};
+        this.currentContextId = null;
+        this.currentState = null;
+    }
 
-    'README.md': `# My Agent Configuration
+    // Initialize the manager
+    init() {
+        // Load contexts list
+        this.contexts = this.loadContextsList();
+        
+        // Ensure default context exists
+        if (!this.contexts['default']) {
+            this.createContext('default', 'Default Workspace');
+        }
+        
+        // Get last active context or use default
+        const lastContext = localStorage.getItem('app:currentContext');
+        
+        if (lastContext && this.contexts[lastContext]) {
+            this.switchContext(lastContext);
+        } else {
+            this.switchContext('default');
+        }
+    }
 
-This directory contains configuration files for various agents and tools.
+    // Load contexts list from localStorage
+    loadContextsList() {
+        try {
+            const data = localStorage.getItem('app:contexts');
+            return data ? JSON.parse(data) : {};
+        } catch {
+            return {};
+        }
+    }
 
-## Structure
-- \`subagents/\` - AI subagent configurations
-- \`mcps/\` - Model Context Protocol definitions  
-- \`guidelines/\` - Coding standards and guidelines
+    // Save contexts list to localStorage
+    saveContextsList() {
+        localStorage.setItem('app:contexts', JSON.stringify(this.contexts));
+    }
 
-## Getting Started
-1. Choose your agent configuration from the subagents folder
-2. Set up any required MCPs
-3. Apply the relevant coding guidelines
+    // Create a new context
+    createContext(id, name) {
+        if (this.contexts[id]) {
+            console.warn(`Context ${id} already exists`);
+            return false;
+        }
+        
+        this.contexts[id] = {
+            id,
+            name,
+            createdAt: Date.now()
+        };
+        
+        this.saveContextsList();
+        return true;
+    }
 
-Click any file in the left panel to view its contents.`,
+    // Switch to a different context
+    switchContext(contextId) {
+        if (!this.contexts[contextId] && contextId !== 'default') {
+            // Try to load from saved contexts
+            const saved = this.loadContextsList();
+            if (!saved[contextId]) {
+                console.error(`Context ${contextId} not found`);
+                return false;
+            }
+            this.contexts = saved;
+        }
+        
+        // Save current state if exists
+        if (this.currentState) {
+            this.saveState(this.currentContextId);
+        }
+        
+        // Load new context state
+        this.currentContextId = contextId;
+        this.currentState = this.loadState(contextId);
+        
+        // Update localStorage current context
+        localStorage.setItem('app:currentContext', contextId);
+        
+        // Trigger UI update
+        this.render();
+        
+        return true;
+    }
 
-    'config.yaml': `# Global Configuration
-version: "1.0"
-environment: development
+    // Delete a context
+    deleteContext(contextId) {
+        if (contextId === 'default') {
+            console.warn('Cannot delete default context');
+            return false;
+        }
+        
+        delete this.contexts[contextId];
+        localStorage.removeItem(`app:workspace:${contextId}`);
+        this.saveContextsList();
+        
+        // Switch to default if deleting current
+        if (this.currentContextId === contextId) {
+            this.switchContext('default');
+        }
+        
+        return true;
+    }
 
-# Agent Settings
-agents:
-  researcher:
-    enabled: true
-    max_search_depth: 3
-  
-  memory_manager:
-    enabled: true
-    retention_days: 30
+    // Save state to localStorage
+    saveState(contextId) {
+        if (!this.currentState) return;
+        
+        const key = `app:workspace:${contextId}`;
+        localStorage.setItem(key, this.currentState.serialize());
+    }
 
-# MCP Settings
-mcps:
-  supabase:
-    url: "https://your-project.supabase.co"
-    anon_key: "your-anon-key"
-  
-  github:
-    token: "ghp_your-token"
-    default_org: "your-org"`
-};
+    // Load state from localStorage
+    loadState(contextId) {
+        const key = `app:workspace:${contextId}`;
+        const data = localStorage.getItem(key);
+        return WorkspaceState.deserialize(contextId, data);
+    }
 
-// Context management
+    // Get current state
+    getState() {
+        return this.currentState;
+    }
+
+    // Render the UI based on current state
+    render() {
+        if (!this.currentState) return;
+        
+        // Update file tree
+        renderFileTree();
+        
+        // Update editor
+        if (this.currentState.selectedFile && this.currentState.files[this.currentState.selectedFile]) {
+            openFile(this.currentState.selectedFile);
+        } else {
+            if (window.workspaceMonacoEditor) {
+                window.workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
+            }
+            updateFilePathLabel(null);
+        }
+        
+        // Update history buttons
+        this.updateHistoryButtons();
+        
+        // Update context dropdown
+        this.updateContextDropdown();
+    }
+
+    // Update history button states
+    updateHistoryButtons() {
+        const prevBtn = document.getElementById('files-prev-btn');
+        const nextBtn = document.getElementById('files-next-btn');
+        
+        if (prevBtn) {
+            prevBtn.disabled = !this.currentState.canUndo();
+        }
+        if (nextBtn) {
+            nextBtn.disabled = !this.currentState.canRedo();
+        }
+    }
+
+    // Update context dropdown
+    updateContextDropdown() {
+        const contextSwitcher = document.getElementById('context-switcher');
+        if (!contextSwitcher) return;
+        
+        contextSwitcher.innerHTML = '';
+        Object.values(this.contexts).forEach(ctx => {
+            const option = document.createElement('option');
+            option.value = ctx.id;
+            option.textContent = ctx.name;
+            option.selected = ctx.id === this.currentContextId;
+            contextSwitcher.appendChild(option);
+        });
+    }
+
+    // Include a file (main action for adding files)
+    includeFile(path, content) {
+        if (!this.currentState) return false;
+        
+        // Check if file exists
+        if (this.currentState.files[path]) {
+            if (!confirm(`File "${path}" already exists. Overwrite?`)) {
+                return false;
+            }
+        }
+        
+        this.currentState.addFile(path, content);
+        this.saveState(this.currentContextId);
+        this.render();
+        return true;
+    }
+
+    // Delete a file
+    deleteFile(path) {
+        if (!this.currentState) return false;
+        
+        if (!confirm(`Delete "${path}"?`)) {
+            return false;
+        }
+        
+        this.currentState.deleteFile(path);
+        this.saveState(this.currentContextId);
+        this.render();
+        return true;
+    }
+
+    // Undo action
+    undo() {
+        if (!this.currentState) return;
+        
+        if (this.currentState.undo()) {
+            this.saveState(this.currentContextId);
+            this.render();
+        }
+    }
+
+    // Redo action
+    redo() {
+        if (!this.currentState) return;
+        
+        if (this.currentState.redo()) {
+            this.saveState(this.currentContextId);
+            this.render();
+        }
+    }
+
+    // Reset current workspace
+    reset() {
+        if (!this.currentState) return;
+        
+        if (confirm('Reset will clear all files. Are you sure?')) {
+            this.currentState.reset();
+            this.saveState(this.currentContextId);
+            this.render();
+        }
+    }
+}
+
+// Create global workspace manager instance
+const workspaceManager = new WorkspaceManager();
+
+// ============================================================================
+// COMPATIBILITY LAYER - Maps old functions to new system
+// ============================================================================
+
+// Keep this for compatibility but it now uses the WorkspaceManager
+const fileContent = new Proxy({}, {
+    get(target, prop) {
+        const state = workspaceManager.getState();
+        return state ? state.files[prop] : undefined;
+    },
+    set(target, prop, value) {
+        const state = workspaceManager.getState();
+        if (state) {
+            state.files[prop] = value;
+        }
+        return true;
+    },
+    deleteProperty(target, prop) {
+        const state = workspaceManager.getState();
+        if (state) {
+            delete state.files[prop];
+        }
+        return true;
+    },
+    has(target, prop) {
+        const state = workspaceManager.getState();
+        return state ? prop in state.files : false;
+    },
+    ownKeys(target) {
+        const state = workspaceManager.getState();
+        return state ? Object.keys(state.files) : [];
+    }
+});
+
+// Generate file tree structure dynamically from fileContent  
+function generateFileTreeData() {
+    const tree = {};
+    const state = workspaceManager.getState();
+    if (!state) return [];
+    
+    const files = Object.keys(state.files);
+    
+    // Build nested tree structure
+    files.forEach(filePath => {
+        const parts = filePath.split('/');
+        let current = tree;
+        
+        // Create folder nodes
+        for (let i = 0; i < parts.length - 1; i++) {
+            const folderName = parts[i];
+            const folderPath = parts.slice(0, i + 1).join('/');
+            
+            if (!current[folderName]) {
+                current[folderName] = {
+                    type: 'folder',
+                    path: folderPath,
+                    name: folderName,
+                    children: {}
+                };
+            }
+            current = current[folderName].children;
+        }
+        
+        // Add file node
+        const fileName = parts[parts.length - 1];
+        current[fileName] = {
+            type: 'file',
+            path: filePath,
+            name: fileName
+        };
+    });
+    
+    // Convert to array format expected by renderer
+    function convertToArray(obj) {
+        return Object.values(obj).map(node => {
+            if (node.type === 'folder') {
+                return {
+                    ...node,
+                    children: convertToArray(node.children)
+                };
+            }
+            return node;
+        });
+    }
+    
+    return convertToArray(tree);
+}
+
+// OLD CODE REMOVED - Now using WorkspaceManager
+// The fileContent object is now a Proxy that uses the WorkspaceManager
+
+// OLD Context management - TO BE REMOVED
 let currentContext = null;
 
 function initContextManager() {
@@ -635,11 +919,52 @@ function safeGetJSON(key, fallback) {
     return safeGetRawJSON(getContextKey(key), fallback);
 }
 
-// File tree state management
-let selectedFilePath = null;
-let expandedFolders = new Set();
-let userFiles = new Set(); // Track user-created files
-let deletedFiles = new Set(); // Track deleted files
+// OLD GLOBAL VARIABLES - REPLACED BY WorkspaceManager
+// These are now managed inside WorkspaceState class
+// let selectedFilePath = null;
+// let expandedFolders = new Set();
+// let userFiles = new Set(); 
+// let deletedFiles = new Set();
+// let filesHistory = { past: [], present: null, future: [] };
+
+// Create proxy objects for backward compatibility
+const selectedFilePath = new Proxy({}, {
+    get() { const s = workspaceManager.getState(); return s ? s.selectedFile : null; },
+    set(t, p, v) { const s = workspaceManager.getState(); if (s) s.selectedFile = v; return true; }
+});
+
+const expandedFolders = new Proxy(new Set(), {
+    get(target, prop) {
+        const state = workspaceManager.getState();
+        if (!state) return target[prop];
+        if (prop === 'has') return (v) => state.expandedFolders.has(v);
+        if (prop === 'add') return (v) => state.expandedFolders.add(v);
+        if (prop === 'delete') return (v) => state.expandedFolders.delete(v);
+        if (prop === 'clear') return () => state.expandedFolders.clear();
+        return target[prop];
+    }
+});
+
+// These are no longer needed - files are tracked in state.files
+const userFiles = new Set();
+const deletedFiles = new Set();
+
+// OLD FUNCTIONS - Now simple wrappers around WorkspaceManager
+function goToPrevious() {
+    workspaceManager.undo();
+}
+
+function goToNext() {
+    workspaceManager.redo();
+}
+
+function resetFiles() {
+    workspaceManager.reset();
+}
+
+function updateHistoryButtons() {
+    workspaceManager.updateHistoryButtons();
+}
 
 // Load file content
 async function loadFile(path) {
@@ -657,16 +982,34 @@ async function loadFile(path) {
 // Render file tree
 function renderFileTree() {
     const treeContainer = document.getElementById('file-tree');
+    const emptyStateEl = document.getElementById('files-empty-state');
     if (!treeContainer) return;
     
     treeContainer.innerHTML = '';
+    
+    const state = workspaceManager.getState();
+    const hasFiles = state && Object.keys(state.files).length > 0;
+    
+    if (!hasFiles) {
+        // Show empty state
+        if (emptyStateEl) {
+            emptyStateEl.classList.remove('hidden');
+        }
+        return;
+    } else {
+        // Hide empty state
+        if (emptyStateEl) {
+            emptyStateEl.classList.add('hidden');
+        }
+    }
     
     function renderNode(node, level = 0) {
         const div = document.createElement('div');
         div.style.paddingLeft = `${level * 16}px`;
         
         if (node.type === 'folder') {
-            const isExpanded = expandedFolders.has(node.path);
+            const state = workspaceManager.getState();
+            const isExpanded = state && state.expandedFolders.has(node.path);
             div.innerHTML = `
                 <div class="flex items-center gap-1 p-1 hover:bg-gray-100 cursor-pointer folder-toggle" data-path="${node.path}">
                     <svg class="w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}" fill="currentColor" viewBox="0 0 20 20">
@@ -685,11 +1028,10 @@ function renderFileTree() {
                 node.children.forEach(child => renderNode(child, level + 1));
             }
         } else {
-            // Skip deleted files
-            if (deletedFiles.has(node.path)) return;
-            
-            const isSelected = selectedFilePath === node.path;
-            const isUserFile = userFiles.has(node.path);
+            // File node
+            const state = workspaceManager.getState();
+            const isSelected = state && state.selectedFile === node.path;
+            const isUserFile = true; // All files are user files now
             div.innerHTML = `
                 <div class="flex items-center justify-between p-1 hover:bg-gray-100 cursor-pointer file-item ${isSelected ? 'bg-cyan-100 font-medium' : ''}" data-path="${node.path}">
                     <div class="flex items-center gap-1">
@@ -714,15 +1056,9 @@ function renderFileTree() {
         }
     }
     
+    // Generate and render dynamic tree
+    const fileTreeData = generateFileTreeData();
     fileTreeData.forEach(node => renderNode(node));
-    
-    // Add user-created files to root level
-    userFiles.forEach(filePath => {
-        if (!deletedFiles.has(filePath)) {
-            const fileName = filePath.split('/').pop();
-            renderNode({ type: 'file', path: filePath, name: fileName }, 0);
-        }
-    });
     
     // Add event listeners
     treeContainer.addEventListener('click', handleTreeClick);
@@ -737,21 +1073,19 @@ async function handleTreeClick(event) {
     if (deleteButton) {
         event.stopPropagation();
         const path = deleteButton.dataset.path;
-        await deleteFile(path);
+        workspaceManager.deleteFile(path);
     } else if (folderToggle) {
         const path = folderToggle.dataset.path;
-        if (expandedFolders.has(path)) {
-            expandedFolders.delete(path);
-        } else {
-            expandedFolders.add(path);
+        const state = workspaceManager.getState();
+        if (state) {
+            if (state.expandedFolders.has(path)) {
+                state.expandedFolders.delete(path);
+            } else {
+                state.expandedFolders.add(path);
+            }
+            workspaceManager.saveState(workspaceManager.currentContextId);
+            renderFileTree();
         }
-        
-        // Persist folder state
-        safeSet('fileTreeState', JSON.stringify({
-            expanded: Array.from(expandedFolders)
-        }));
-        
-        renderFileTree();
     } else if (fileItem) {
         const path = fileItem.dataset.path;
         await openFile(path);
@@ -762,26 +1096,26 @@ async function handleTreeClick(event) {
 async function openFile(path) {
     if (!workspaceMonacoEditor) return;
     
-    // Update selected file
-    selectedFilePath = path;
-    safeSet('selectedFilePath', path);
-    
-    // Show loading state
-    workspaceMonacoEditor.setValue('Loading...');
-    
-    try {
-        const content = await loadFile(path);
-        workspaceMonacoEditor.setValue(content);
-        
-        // Update file path label
-        updateFilePathLabel(path);
-        
-        // Refresh tree to show selection
-        renderFileTree();
-    } catch (error) {
-        workspaceMonacoEditor.setValue(`⚠️ Failed to load "${path}"\n\nError: ${error.message}`);
-        updateFilePathLabel(null);
+    const state = workspaceManager.getState();
+    if (!state || !state.files[path]) {
+        console.error('File not found:', path);
+        workspaceMonacoEditor.setValue(`⚠️ File not found: "${path}"`);
+        return;
     }
+    
+    // Update selected file
+    state.selectedFile = path;
+    workspaceManager.saveState(workspaceManager.currentContextId);
+    
+    // Show content
+    const content = state.files[path];
+    workspaceMonacoEditor.setValue(content);
+    
+    // Update file path label
+    updateFilePathLabel(path);
+    
+    // Refresh tree to show selection
+    renderFileTree();
 }
 
 // Update file path label
@@ -798,39 +1132,119 @@ function updateFilePathLabel(path) {
     }
 }
 
-// Delete file
+// Delete file - wrapper for workspaceManager
 async function deleteFile(path) {
-    if (!confirm(`Are you sure you want to delete "${path.split('/').pop()}"?`)) {
-        return;
-    }
-    
-    // Add to deleted files
-    deletedFiles.add(path);
-    
-    // Remove from user files if it was user-created
-    userFiles.delete(path);
-    
-    // Clear editor if this file was selected
-    if (selectedFilePath === path) {
-        selectedFilePath = null;
-        safeSet('selectedFilePath', '');
-        if (workspaceMonacoEditor) {
-            workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
-        }
-        updateFilePathLabel(null);
-    }
-    
-    // Remove file content
-    delete fileContent[path];
-    
-    // Persist state
-    persistUserFileState();
-    
-    // Refresh tree
-    renderFileTree();
+    return workspaceManager.deleteFile(path);
 }
 
-// Create new file
+// Include a file with given path and content - wrapper for workspaceManager
+async function includeFile(filePath, content) {
+    return workspaceManager.includeFile(filePath, content);
+}
+
+// Include predefined content templates
+async function includeTemplate(templateName) {
+    const templates = {
+        'Supabase MCP': {
+            path: 'mcps/supabase_mcp.json',
+            content: `{
+  "name": "supabase-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol for Supabase integration",
+  "tools": [
+    {
+      "name": "query_database",
+      "description": "Execute SQL queries on Supabase database"
+    }
+  ]
+}`
+        },
+        'Github MCP': {
+            path: 'mcps/github_mcp.json',
+            content: `{
+  "name": "github-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol for GitHub integration",
+  "tools": [
+    {
+      "name": "create_issue",
+      "description": "Create a new GitHub issue"
+    }
+  ]
+}`
+        },
+        'Python': {
+            path: 'guidelines/python_style.md',
+            content: `# Python Style Guidelines
+
+## Code Formatting
+- Use PEP 8 style guide
+- Line length: 88 characters (Black formatter)
+- Use type hints for all functions
+
+## Best Practices
+- Use meaningful variable names
+- Add docstrings to all functions and classes
+- Prefer list comprehensions over loops when appropriate`
+        },
+        'TypeScript': {
+            path: 'guidelines/typescript_rules.md',
+            content: `# TypeScript Coding Rules
+
+## Type Safety
+- Always use strict mode
+- No \`any\` type unless absolutely necessary
+- Define interfaces for all data structures
+
+## Code Style
+- Use Prettier for formatting
+- Prefer const over let
+- Use arrow functions for callbacks`
+        },
+        'Researcher': {
+            path: 'subagents/researcher.md',
+            content: `# Researcher Agent
+
+A specialized subagent for information gathering and analysis.
+
+## Capabilities
+- Web search and analysis
+- Document research
+- Data compilation and synthesis
+
+## Usage
+\`\`\`
+@researcher find information about [topic]
+\`\`\``
+        },
+        'Memory Manager': {
+            path: 'subagents/memory_manager.md',
+            content: `# Memory Manager Agent
+
+Handles context and conversation history management.
+
+## Features
+- Long-term context preservation
+- Conversation summarization
+- Knowledge base integration
+
+## Usage
+\`\`\`
+@memory store this information about [topic]
+@memory recall information about [topic]
+\`\`\``
+        }
+    };
+    
+    const template = templates[templateName];
+    if (template) {
+        return await includeFile(template.path, template.content);
+    } else {
+        console.error('Unknown template:', templateName);
+        return false;
+    }
+}
+
 async function createNewFile() {
     const fileName = prompt('Enter file name (with extension):');
     if (!fileName || fileName.trim() === '') {
@@ -838,12 +1252,6 @@ async function createNewFile() {
     }
     
     const filePath = fileName.trim();
-    
-    // Check if file already exists
-    if (fileContent[filePath] || userFiles.has(filePath)) {
-        alert('File already exists!');
-        return;
-    }
     
     // Create file with default content
     const defaultContent = filePath.endsWith('.md') ? 
@@ -854,15 +1262,7 @@ async function createNewFile() {
         'name: new-file\nversion: 1.0.0\n' :
         '# New file\n\nContent goes here...';
     
-    // Add to user files and content
-    userFiles.add(filePath);
-    fileContent[filePath] = defaultContent;
-    
-    // Persist state
-    persistUserFileState();
-    
-    // Open the new file
-    await openFile(filePath);
+    return await includeFile(filePath, defaultContent);
 }
 
 // Persist user file state
@@ -882,44 +1282,46 @@ function persistUserFileState() {
 
 // Initialize file tree system
 function initializeFileTree() {
-    // Initialize context manager if not already done
-    if (!currentContext) {
-        initContextManager();
+    // Everything is now managed by workspaceManager
+    // Just wire up UI event handlers once
+    
+    // Wire up history buttons
+    const prevBtn = document.getElementById('files-prev-btn');
+    const nextBtn = document.getElementById('files-next-btn');
+    const resetBtn = document.getElementById('files-reset-btn');
+    
+    if (prevBtn && !prevBtn.hasAttribute('data-initialized')) {
+        prevBtn.addEventListener('click', goToPrevious);
+        prevBtn.setAttribute('data-initialized', 'true');
     }
-    
-    // Load persisted state for current context
-    selectedFilePath = safeGet('selectedFilePath');
-    const treeState = safeGetJSON('fileTreeState', { expanded: [] });
-    expandedFolders = new Set(treeState.expanded || []);
-    
-    // Load user files and deleted files
-    const savedUserFiles = safeGetJSON('userFiles', []);
-    const savedDeletedFiles = safeGetJSON('deletedFiles', []);
-    const savedUserFileContents = safeGetJSON('userFileContents', {});
-    
-    userFiles = new Set(savedUserFiles);
-    deletedFiles = new Set(savedDeletedFiles);
-    
-    // Restore user file contents
-    Object.assign(fileContent, savedUserFileContents);
+    if (nextBtn && !nextBtn.hasAttribute('data-initialized')) {
+        nextBtn.addEventListener('click', goToNext);
+        nextBtn.setAttribute('data-initialized', 'true');
+    }
+    if (resetBtn && !resetBtn.hasAttribute('data-initialized')) {
+        resetBtn.addEventListener('click', resetFiles);
+        resetBtn.setAttribute('data-initialized', 'true');
+    }
     
     // Wire up New File button
     const newFileButton = document.getElementById('new-file-button');
-    if (newFileButton) {
+    if (newFileButton && !newFileButton.hasAttribute('data-initialized')) {
         newFileButton.addEventListener('click', createNewFile);
+        newFileButton.setAttribute('data-initialized', 'true');
     }
     
-    // Render initial tree
-    renderFileTree();
-    
-    // Auto-open last selected file
-    if (selectedFilePath && fileContent[selectedFilePath] && !deletedFiles.has(selectedFilePath)) {
-        setTimeout(() => openFile(selectedFilePath), 200);
-    } else {
-        if (workspaceMonacoEditor) {
-            workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
-        }
-        updateFilePathLabel(null);
+    // Wire up Quick Action buttons (use delegation to avoid duplicates)
+    if (!document.body.hasAttribute('data-qa-initialized')) {
+        document.addEventListener('click', async function(e) {
+            const button = e.target.closest('.qa-include-btn');
+            if (button) {
+                const templateName = button.dataset.template;
+                if (templateName) {
+                    await includeTemplate(templateName);
+                }
+            }
+        });
+        document.body.setAttribute('data-qa-initialized', 'true');
     }
 }
 
@@ -931,70 +1333,64 @@ function initializeContextUI() {
     
     if (!contextSwitcher) return;
     
-    // Populate context dropdown
-    function updateContextDropdown() {
-        const contexts = safeGetRawJSON('app:contexts', {});
-        contextSwitcher.innerHTML = '';
-        
-        Object.values(contexts).forEach(ctx => {
-            const option = document.createElement('option');
-            option.value = ctx.id;
-            option.textContent = ctx.name;
-            option.selected = ctx.id === currentContext;
-            contextSwitcher.appendChild(option);
+    // Handle context switching
+    if (!contextSwitcher.hasAttribute('data-initialized')) {
+        contextSwitcher.addEventListener('change', function() {
+            const newContext = this.value;
+            if (newContext && newContext !== workspaceManager.currentContextId) {
+                workspaceManager.switchContext(newContext);
+            }
         });
+        contextSwitcher.setAttribute('data-initialized', 'true');
     }
     
-    // Handle context switching
-    contextSwitcher.addEventListener('change', function() {
-        const newContext = this.value;
-        if (newContext && newContext !== currentContext) {
-            window.switchContext(newContext);
-            updateContextDropdown();
-        }
-    });
-    
     // Handle new context creation
-    newContextBtn.addEventListener('click', function() {
-        const name = prompt('Enter name for new context:');
-        if (name && name.trim()) {
-            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-            if (window.createContext(id, name.trim())) {
-                window.switchContext(id);
-                updateContextDropdown();
-            } else {
-                alert('Context with this ID already exists');
+    if (newContextBtn && !newContextBtn.hasAttribute('data-initialized')) {
+        newContextBtn.addEventListener('click', function() {
+            const name = prompt('Enter name for new context:');
+            if (name && name.trim()) {
+                const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                if (workspaceManager.createContext(id, name.trim())) {
+                    workspaceManager.switchContext(id);
+                } else {
+                    alert('Context with this ID already exists');
+                }
             }
-        }
-    });
+        });
+        newContextBtn.setAttribute('data-initialized', 'true');
+    }
     
     // Handle context deletion
-    deleteContextBtn.addEventListener('click', function() {
-        if (currentContext === 'default') {
-            alert('Cannot delete the default context');
-            return;
-        }
-        
-        if (confirm(`Delete context "${currentContext}"? This will remove all associated files.`)) {
-            const contextToDelete = currentContext;
-            deleteContext(contextToDelete);
-            updateContextDropdown();
-        }
-    });
-    
-    // Initial population
-    updateContextDropdown();
+    if (deleteContextBtn && !deleteContextBtn.hasAttribute('data-initialized')) {
+        deleteContextBtn.addEventListener('click', function() {
+            if (workspaceManager.currentContextId === 'default') {
+                alert('Cannot delete the default context');
+                return;
+            }
+            
+            const contexts = workspaceManager.loadContextsList();
+            const currentName = contexts[workspaceManager.currentContextId]?.name || workspaceManager.currentContextId;
+            
+            if (confirm(`Delete context "${currentName}"? This will remove all associated files.`)) {
+                workspaceManager.deleteContext(workspaceManager.currentContextId);
+            }
+        });
+        deleteContextBtn.setAttribute('data-initialized', 'true');
+    }
 }
 
 // Initialize workspace editor when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize context manager first
-    initContextManager();
+    // Initialize the new WorkspaceManager
+    workspaceManager.init();
     
     setTimeout(() => {
         initializeWorkspaceEditor();
         initializeContextUI();
-        setTimeout(initializeFileTree, 200);
+        initializeFileTree();
+        
+        // Initial render
+        workspaceManager.render();
     }, 100);
 });
 </script>

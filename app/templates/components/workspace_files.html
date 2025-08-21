@@ -1,10 +1,26 @@
 <!-- Left Panel: File System -->
 <div class="bg-cyan-50 border-r-2 border-black p-4">
-    <h3 class="text-lg font-black text-black mb-3">Files</h3>
+    <div class="flex justify-between items-center mb-3">
+        <h3 class="text-lg font-black text-black">Files</h3>
+        <div class="flex gap-1">
+            <button id="files-prev-btn" class="px-2 py-1 bg-gray-200 border border-black text-black font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-all" title="Previous" disabled>
+                ←
+            </button>
+            <button id="files-next-btn" class="px-2 py-1 bg-gray-200 border border-black text-black font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-all" title="Next" disabled>
+                →
+            </button>
+            <button id="files-reset-btn" class="px-2 py-1 bg-red-400 border border-black text-black font-bold text-xs hover:bg-red-500 transition-all" title="Reset">
+                ×
+            </button>
+        </div>
+    </div>
     
     <div class="bg-white border-2 border-black p-3 h-48 overflow-y-auto mb-3">
         <div id="file-tree" class="text-sm">
             <!-- File tree will be populated here -->
+        </div>
+        <div id="files-empty-state" class="text-center text-gray-500 text-sm py-8 hidden">
+            No files yet. Use Quick Actions to add files.
         </div>
     </div>
     
