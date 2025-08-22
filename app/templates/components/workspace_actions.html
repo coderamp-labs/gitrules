@@ -532,7 +532,15 @@ async function installAgent(agentName) {
             const result = await response.json();
             
             if (window.workspaceManager && window.workspaceManager.currentState) {
+                // Store the agent file
                 window.workspaceManager.currentState.addFile(result.path, result.content);
+                
+                // Store agent name to path mapping in metadata (for easier removal)
+                if (!window.workspaceManager.currentState.agentMappings) {
+                    window.workspaceManager.currentState.agentMappings = {};
+                }
+                window.workspaceManager.currentState.agentMappings[agentName] = result.path;
+                
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);
                 window.workspaceManager.render();
             }
@@ -675,13 +683,51 @@ async function removeAgent(agentName) {
     try {
         if (window.workspaceManager && window.workspaceManager.currentState) {
             const state = window.workspaceManager.currentState;
+            let filesToRemove = [];
             
-            // Remove the specific agent file
-            const agentPath = `.gitrules/agents/${agentName}.md`;
-            if (state.files[agentPath]) {
-                delete state.files[agentPath];
+            // First check if we have a stored mapping for this agent
+            if (state.agentMappings && state.agentMappings[agentName]) {
+                const mappedPath = state.agentMappings[agentName];
+                if (state.files[mappedPath]) {
+                    filesToRemove.push(mappedPath);
+                }
+                // Clean up the mapping
+                delete state.agentMappings[agentName];
+            }
+            
+            // If no mapping found, search for the agent file
+            if (filesToRemove.length === 0) {
+                // Find files in .claude/agents/ directory that match this agent
+                filesToRemove = Object.keys(state.files).filter(path => {
+                    return path.startsWith('.claude/agents/') && 
+                           path.toLowerCase().includes(agentName.toLowerCase().replace(/[-\s]/g, '_'));
+                });
+                
+                // If still no match, try alternative path patterns
+                if (filesToRemove.length === 0) {
+                    const alternativePaths = [
+                        `.claude/agents/${agentName}.md`,
+                        `.claude/agents/${agentName.replace(/[-\s]/g, '_')}.md`,
+                        `.claude/agents/${agentName.replace(/[-\s]/g, '-')}.md`
+                    ];
+                    
+                    alternativePaths.forEach(path => {
+                        if (state.files[path]) {
+                            filesToRemove.push(path);
+                        }
+                    });
+                }
+            }
+            
+            // Remove all found files
+            if (filesToRemove.length > 0) {
+                filesToRemove.forEach(path => {
+                    delete state.files[path];
+                });
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);
                 window.workspaceManager.render();
+            } else {
+                console.warn(`No agent files found for: ${agentName}`);
             }
         }
     } catch (error) {
