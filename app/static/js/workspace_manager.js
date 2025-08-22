@@ -306,9 +306,9 @@ class WorkspaceManager {
                     window.openFile(firstFile);
                 }
             } else {
-                // No files available - show placeholder
+                // No files available - clear editor
                 if (window.workspaceMonacoEditor) {
-                    window.workspaceMonacoEditor.setValue('Select a file from the left to view its content.');
+                    window.workspaceMonacoEditor.setValue('');
                 }
                 if (window.updateFilePathLabel) {
                     window.updateFilePathLabel(null);
