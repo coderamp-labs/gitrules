@@ -19,11 +19,20 @@
             </div>
         </div>
         
-        <div class="relative flex-1">
+        <div class="relative flex-1 mb-3">
             <div class="w-full h-full bg-gray-900 translate-y-1 translate-x-1 absolute inset-0 z-0"></div>
             <div id="workspace-monaco-editor" 
                  class="relative z-10 border-2 border-black bg-white h-full" 
-                 style="min-height: 400px;"></div>
+                 style="min-height: 350px;"></div>
+        </div>
+        
+        <!-- Install in one click bar -->
+        <div id="auto-share-panel" class="flex gap-2 items-center justify-center py-2 border-t-2 border-gray-200">
+            <label class="text-sm font-bold text-black">Install in one click</label>
+            <input id="share-link-input" type="text" readonly class="px-3 py-1 bg-white border-2 border-black text-black font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" style="width: 320px; cursor: text;" value="Waiting for first save...">
+            <button id="copy-share-link" class="px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Copy
+            </button>
         </div>
     </div>
 </div>
