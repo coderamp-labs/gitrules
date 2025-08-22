@@ -1,6 +1,6 @@
 <!-- Left Panel: File System -->
-<div class="workspace-sidebar bg-cyan-50 border-r-2 border-black p-4">
-    <div class="flex justify-between items-center mb-3">
+<div class="workspace-sidebar bg-cyan-50 border-r-2 border-black flex flex-col" style="height: 100%;">
+    <div class="flex justify-between items-center mb-3 px-4 pt-4">
         <h3 class="text-lg font-black text-black">Files</h3>
         <div class="flex gap-2">
             <button id="files-prev-btn" class="w-6 h-6 bg-gray-200 border-2 border-black text-black font-bold flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all" title="Previous" disabled>
@@ -15,24 +15,30 @@
         </div>
     </div>
     
-    <div class="bg-white border-2 border-black p-3 h-48 overflow-y-auto mb-3">
-        <div id="file-tree" class="text-sm">
-            <!-- File tree will be populated here -->
+    <!-- File tree section with New File button -->
+    <div class="flex-1 overflow-hidden flex flex-col px-4 pb-3" style="min-height: 0;">
+        <div class="bg-white border-2 border-black p-3 mb-3 overflow-y-auto" style="min-height: 200px; max-height: 900px;">
+            <div id="file-tree" class="text-sm">
+                <!-- File tree will be populated here -->
+            </div>
+            <div id="files-empty-state" class="text-center text-gray-500 text-sm py-8 hidden">
+                No files yet. Use Quick Actions to add files.
+            </div>
         </div>
-        <div id="files-empty-state" class="text-center text-gray-500 text-sm py-8 hidden">
-            No files yet. Use Quick Actions to add files.
+        
+        <div class="flex gap-2">
+            <button id="new-file-button" class="w-full px-3 py-2 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-1 text-sm">
+                <span class="mdi mdi-file-plus text-base"></span>
+                <span>New File</span>
+            </button>
         </div>
+        
+        <!-- Empty space filler that takes remaining room -->
+        <div class="flex-1"></div>
     </div>
     
-    <div class="flex gap-2">
-        <button id="new-file-button" class="w-full px-3 py-2 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-1 text-sm">
-            <span class="mdi mdi-file-plus text-base"></span>
-            <span>New File</span>
-        </button>
-    </div>
-    
-    <!-- Context selector relocated here -->
-    <div class="mt-4 pt-4 border-t-2 border-black">
+    <!-- Context selector sticks to bottom -->
+    <div class="p-4 border-t-2 border-black bg-cyan-50" style="flex-shrink: 0;">
         <div class="flex flex-col gap-2">
             <div class="flex justify-between items-center mb-1">
                 <label class="text-sm font-black text-black">CONTEXT</label>

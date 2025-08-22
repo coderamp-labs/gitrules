@@ -90,6 +90,7 @@
         .workspace-grid {
             display: flex;
             min-height: 600px;
+            height: 100%;
             width: 100%;
             gap: 0; /* No gaps - panels share borders */
         }
@@ -99,7 +100,9 @@
             flex: 1.2 1 24%;     /* Takes 24% of available width */
             min-width: 240px;    /* Minimum: 240px */
             max-width: 380px;    /* Maximum: 380px */
-            overflow: auto;
+            overflow: hidden;    /* Changed from auto to hidden since inner divs handle scroll */
+            display: flex;
+            flex-direction: column;
         }
         
         /* Editor panel (center) - 52% of container width */
