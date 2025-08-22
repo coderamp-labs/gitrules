@@ -188,7 +188,7 @@ class AutoShareManager {
             this.linkInput.classList.add('opacity-50');
             this.linkInput.disabled = true;
             if (this.currentShareUrl) {
-                this.linkInput.value = this.currentShareUrl + ' (updating...)';
+                this.linkInput.value = this.currentShareUrl;
             }
         }
         // Keep copy button enabled but just disable if no URL

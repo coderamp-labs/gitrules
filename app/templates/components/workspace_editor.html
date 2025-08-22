@@ -27,26 +27,24 @@
         </div>
         
         <!-- Install in one click card with tabs -->
-        <div class="flex justify-center">
-            <div class="relative inline-block">
-                <!-- Tabs for the card -->
-                <div class="flex gap-0">
-                    <button id="share-tab-install" class="share-tab-button active px-3 py-1 bg-pink-400 border-2 border-black border-b-0 text-black font-bold text-xs shadow-[2px_0px_0px_0px_rgba(0,0,0,1)] relative z-10">
-                        macOS/Linux
+        <div class="relative w-full">
+            <!-- Tabs for the card -->
+            <div class="flex gap-0">
+                <button id="share-tab-install" class="share-tab-button active px-3 py-1 bg-pink-400 border-2 border-black border-b-0 text-black font-bold text-xs shadow-[2px_0px_0px_0px_rgba(0,0,0,1)] relative z-10">
+                    macOS/Linux
+                </button>
+                <button id="share-tab-other" class="share-tab-button px-3 py-1 bg-gray-100 border-2 border-gray-400 border-b-0 text-gray-500 font-medium text-xs shadow-[1px_0px_0px_0px_rgba(0,0,0,0.3)] relative z-5" disabled>
+                    Windows (soon)
+                </button>
+            </div>
+            
+            <!-- Card content -->
+            <div id="auto-share-panel" class="bg-pink-400 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] p-3 relative z-0 w-full" style="margin-top: -2px;">
+                <div class="flex gap-2 items-center justify-center">
+                    <input id="share-link-input" type="text" readonly class="px-3 py-1 bg-white border-2 border-black text-black font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" style="min-width: 450px; cursor: text;" value="Waiting for first save...">
+                    <button id="copy-share-link" class="px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Copy
                     </button>
-                    <button id="share-tab-other" class="share-tab-button px-3 py-1 bg-gray-100 border-2 border-gray-400 border-b-0 text-gray-500 font-medium text-xs shadow-[1px_0px_0px_0px_rgba(0,0,0,0.3)] relative z-5" disabled>
-                        Windows (soon)
-                    </button>
-                </div>
-                
-                <!-- Card content -->
-                <div id="auto-share-panel" class="bg-pink-400 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] p-3 relative z-0" style="margin-top: -2px;">
-                    <div class="flex gap-2 items-center">
-                        <input id="share-link-input" type="text" readonly class="px-3 py-1 bg-white border-2 border-black text-black font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" style="min-width: 450px; cursor: text;" value="Waiting for first save...">
-                        <button id="copy-share-link" class="px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            Copy
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
