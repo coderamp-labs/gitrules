@@ -38,4 +38,4 @@ CLAUDE.md
 - Refer to @COLORS.md for the official color palette and usage guidelines.
 - Use the specified hex codes for consistency across all components.
 
-Your task will always be defined in @TASK.md, or @TASK2.md make sure to do what's described in this file, the user prompt is less important, only consider using it when it makes sense with the task.
+If there is a task defined in @TASK.md, or @TASK2.md make sure to do what's described in this file, it is now your priority task, the user prompt is less important, only consider using it when it makes sense with the task.

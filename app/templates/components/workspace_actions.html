@@ -1,70 +1,75 @@
-<!-- Right Panel: Quick Actions with Dynamic Theme -->
-<div class="workspace-actions qa-sidebar-section relative overflow-hidden" data-qa-theme="yellow">
-    <!-- Background Layer -->
-    <div class="qa-sidebar-bg absolute inset-0 transition-colors duration-300"></div>
-    
-    <!-- Content Container -->
-    <div class="relative z-10 p-4">
-        <h3 class="text-lg font-black text-black mb-3">Quick Actions</h3>
+<!-- Right Panel: Add tools -->
+<div class="workspace-actions">
+    <div class="p-4">
+        <h3 class="text-lg font-black text-black mb-4">Add tools</h3>
         
-        <!-- Joined Tabs and Card Container -->
-        <div class="qa-tabs-card-container">
-            <!-- Tabs Header -->
-            <div class="flex gap-1 relative" role="tablist">
-                <button 
-                    role="tab"
-                    aria-selected="true"
-                    data-tab="mcps"
-                    data-theme="yellow"
-                    onclick="switchQuickActionTab('mcps', 'yellow')" 
-                    id="qa-tab-mcps" 
-                    class="qa-sidebar-tab active px-3 py-2 bg-white border-2 border-black font-bold text-xs transition-all relative z-20 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px]"
-                >
-                    MCPs
-                </button>
-                <button 
-                    role="tab"
-                    aria-selected="false"
-                    data-tab="rules"
-                    data-theme="pink"
-                    onclick="switchQuickActionTab('rules', 'pink')" 
-                    id="qa-tab-rules" 
-                    class="qa-sidebar-tab px-3 py-2 bg-gray-100 border-2 border-gray-400 font-bold text-xs text-gray-700 transition-all relative z-10 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px]"
-                >
-                    Rules
-                </button>
-                <button 
-                    role="tab"
-                    aria-selected="false"
-                    data-tab="subagents"
-                    data-theme="blue"
-                    onclick="switchQuickActionTab('subagents', 'blue')" 
-                    id="qa-tab-subagents" 
-                    class="qa-sidebar-tab px-3 py-2 bg-gray-100 border-2 border-gray-400 font-bold text-xs text-gray-700 transition-all relative z-10 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px]"
-                >
-                    Subagents
-                </button>
+        <!-- QuickAction Section - Search Bar -->
+        <div class="mb-4">
+            <h4 class="text-sm font-bold text-black mb-2">Quick Action</h4>
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    class="search-input"
+                    placeholder="Search actions..."
+                    onkeyup="searchActions(this.value)"
+                />
+                <div class="search-results" id="search-results" style="display: none;"></div>
             </div>
+        </div>
+
+        <!-- Toggle Menu Buttons -->
+        <div class="mb-4">
+            <h4 class="text-sm font-bold text-black mb-2">Actions</h4>
             
-            <!-- White Card Container (visually joined to tabs) -->
-            <div class="qa-sidebar-card bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-3 relative z-30 -mt-1">
-                <!-- MCPs Tab Content -->
-                <div id="qa-content-mcps" class="qa-tab-content" role="tabpanel">
-                    <div id="sidebar-mcps-container" class="space-y-2">
+            <!-- MCPs Button with Expand -->
+            <div class="menu-item mb-2">
+                <button 
+                    class="menu-button expandable"
+                    data-theme="yellow"
+                    onclick="toggleMenuButton(this, 'mcps')"
+                >
+                    <span class="menu-button-plus">+</span>
+                    <span class="menu-button-text">MCPs</span>
+                    <span class="menu-button-expand">▼</span>
+                </button>
+                <div class="menu-dropdown" id="dropdown-mcps" style="display: none;">
+                    <div id="mcps-list" class="p-2">
                         <div class="text-xs text-gray-500">Loading...</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Rules Tab Content -->
-                <div id="qa-content-rules" class="qa-tab-content hidden" role="tabpanel">
-                    <div id="sidebar-rules-container" class="space-y-2">
+            <!-- Rules Button with Expand -->
+            <div class="menu-item mb-2">
+                <button 
+                    class="menu-button expandable"
+                    data-theme="pink"
+                    onclick="toggleMenuButton(this, 'rules')"
+                >
+                    <span class="menu-button-plus">+</span>
+                    <span class="menu-button-text">Rules</span>
+                    <span class="menu-button-expand">▼</span>
+                </button>
+                <div class="menu-dropdown" id="dropdown-rules" style="display: none;">
+                    <div id="rules-list" class="p-2">
                         <div class="text-xs text-gray-500">Loading...</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Subagents Tab Content -->
-                <div id="qa-content-subagents" class="qa-tab-content hidden" role="tabpanel">
-                    <div id="sidebar-agents-container" class="space-y-2">
+            <!-- Agents Button with Expand -->
+            <div class="menu-item mb-2">
+                <button 
+                    class="menu-button expandable"
+                    data-theme="blue"
+                    onclick="toggleMenuButton(this, 'agents')"
+                >
+                    <span class="menu-button-plus">+</span>
+                    <span class="menu-button-text">Agents</span>
+                    <span class="menu-button-expand">▼</span>
+                </button>
+                <div class="menu-dropdown" id="dropdown-agents" style="display: none;">
+                    <div id="agents-list" class="p-2">
                         <div class="text-xs text-gray-500">Loading...</div>
                     </div>
                 </div>
@@ -73,230 +78,452 @@
     </div>
 </div>
 
-<!-- Theme-specific CSS for Sidebar -->
 <style>
-/* CSS Variables for Sidebar Theming */
-.qa-sidebar-section {
-    --qa-sidebar-card-bg: #ffffff;
-    --qa-sidebar-card-border: #000000;
-    --qa-sidebar-shadow: rgba(0, 0, 0, 1);
-    --tab-anim-dur: 150ms;
-    --tab-anim-ease: ease;
+/* Workspace actions sidebar */
+.workspace-actions {
+    background: white;
+    border-left: 2px solid black;
+    min-height: 100%;
+    height: 100%;
 }
 
-/* Yellow Theme (MCPs) */
-.qa-sidebar-section[data-qa-theme="yellow"] {
-    --qa-sidebar-accent: #FDE047;
-    --qa-sidebar-accent-hover: #FACC15;
-    --qa-sidebar-contrast: #000000;
-    --qa-sidebar-bg: #FEFCE8;
-}
-
-/* Pink Theme (Rules) */
-.qa-sidebar-section[data-qa-theme="pink"] {
-    --qa-sidebar-accent: #F472B6;
-    --qa-sidebar-accent-hover: #EC4899;
-    --qa-sidebar-contrast: #000000;
-    --qa-sidebar-bg: #FCE7F3;
-}
-
-/* Blue Theme (Subagents) */
-.qa-sidebar-section[data-qa-theme="blue"] {
-    --qa-sidebar-accent: #22D3EE;
-    --qa-sidebar-accent-hover: #0EA5E9;
-    --qa-sidebar-contrast: #000000;
-    --qa-sidebar-bg: #ECFEFF;
-}
-
-/* Background Layer */
-.qa-sidebar-bg {
-    background-color: var(--qa-sidebar-bg);
-    transition: background-color var(--tab-anim-dur) var(--tab-anim-ease);
-}
-
-/* Joined Card and Tabs Container */
-.qa-tabs-card-container {
+/* Search Container */
+.search-container {
     position: relative;
 }
 
-/* Card properly positioned */
-.qa-sidebar-card {
-    position: relative;
-}
-
-/* Active tab gets accent color */
-.qa-sidebar-tab.active {
-    background-color: var(--qa-sidebar-accent) !important;
-    border-color: black !important;
-    color: black !important;
-    position: relative;
-}
-
-
-/* Inactive tabs */
-.qa-sidebar-tab:not(.active) {
-    background-color: #f3f4f6;
-    border-color: #9ca3af;
-    color: #6b7280;
-}
-
-/* Themed Buttons */
-.qa-sidebar-section .qa-sidebar-card .sidebar-themed-button {
-    background-color: white;
-    border: 2px solid black;
-    color: black;
-    font-weight: bold;
-    padding: 0.5rem 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
-    transition: all 150ms;
+.search-input {
     width: 100%;
-    text-align: left;
-    font-size: 0.75rem;
+    padding: 8px 12px;
+    border: 2px solid black;
+    font-size: 14px;
+    background: white;
+    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+    transition: all 150ms ease;
 }
 
-.qa-sidebar-section .qa-sidebar-card .sidebar-themed-button:hover {
+.search-input:focus {
+    outline: none;
     box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
     transform: translate(-1px, -1px);
 }
 
-.qa-sidebar-section .qa-sidebar-card .sidebar-themed-button:active {
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: white;
+    border: 2px solid black;
+    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.search-result-item {
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: #f3f4f6;
+}
+
+.search-result-type {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 4px;
+    border: 1px solid black;
+    background: #f3f4f6;
+}
+
+/* Menu Button Base Style */
+.menu-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 2px solid black;
+    padding: 0;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 150ms ease;
+    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Plus icon area */
+.menu-button-plus {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    border-right: 2px solid black;
+    flex-shrink: 0;
+}
+
+/* Text area */
+.menu-button-text {
+    flex: 1;
+    padding: 0 12px;
+    color: black;
+    text-align: left;
+}
+
+/* Expand arrow */
+.menu-button-expand {
+    padding: 0 12px;
+    font-size: 12px;
+    color: black;
+    transition: transform 150ms ease;
+}
+
+/* Theme colors for plus area (default state) */
+.menu-button[data-theme="yellow"] .menu-button-plus {
+    background: #FDE047;
+}
+
+.menu-button[data-theme="pink"] .menu-button-plus {
+    background: #F472B6;
+}
+
+.menu-button[data-theme="blue"] .menu-button-plus {
+    background: #22D3EE;
+}
+
+/* Toggled state - color inversion (color moves to text area) */
+.menu-button.toggled[data-theme="yellow"] {
+    background: #FDE047;
+}
+
+.menu-button.toggled[data-theme="yellow"] .menu-button-plus {
+    background: white;
+}
+
+.menu-button.toggled[data-theme="pink"] {
+    background: #F472B6;
+}
+
+.menu-button.toggled[data-theme="pink"] .menu-button-plus {
+    background: white;
+}
+
+.menu-button.toggled[data-theme="blue"] {
+    background: #22D3EE;
+}
+
+.menu-button.toggled[data-theme="blue"] .menu-button-plus {
+    background: white;
+}
+
+/* Text always stays black */
+.menu-button .menu-button-text,
+.menu-button.toggled .menu-button-text {
+    color: black;
+}
+
+/* Expanded state */
+.menu-button.expanded .menu-button-expand {
+    transform: rotate(180deg);
+}
+
+/* Hover effect */
+.menu-button:hover {
+    box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
+    transform: translate(-1px, -1px);
+}
+
+/* Active/pressed effect */
+.menu-button:active {
     box-shadow: 1px 1px 0px 0px rgba(0,0,0,1);
     transform: translate(1px, 1px);
 }
 
-.qa-sidebar-section .qa-sidebar-card .sidebar-themed-button .button-accent-icon {
-    background-color: var(--qa-sidebar-accent);
-    color: var(--qa-sidebar-contrast);
-    width: 20px;
-    height: 20px;
+/* Dropdown container */
+.menu-dropdown {
+    background: white;
+    border: 2px solid black;
+    border-top: none;
+    margin-top: -2px;
+    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+}
+
+/* List items in dropdown */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 100ms ease;
+}
+
+.dropdown-item:hover {
+    background: #f3f4f6;
+}
+
+.dropdown-item.active {
+    background: #e5e7eb;
+    font-weight: bold;
+}
+
+.dropdown-item-icon {
+    width: 16px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 0.75rem;
+    font-size: 12px;
     border: 1px solid black;
+}
+
+.dropdown-item.active .dropdown-item-icon {
+    background: black;
+    color: white;
 }
 </style>
 
 <script>
-// Current sidebar tab state
-let currentSidebarTab = 'mcps';
-let currentSidebarTheme = 'yellow';
+// Track toggled buttons and expanded states
+let toggledButtons = {};
+let expandedButtons = {};
+let loadedData = {};
 
-function switchQuickActionTab(tabName, theme) {
-    // Update current state
-    currentSidebarTab = tabName;
-    currentSidebarTheme = theme;
-    
-    // Update section theme
-    const section = document.querySelector('.qa-sidebar-section');
-    if (section) {
-        section.setAttribute('data-qa-theme', theme);
-    }
-    
-    // Update all tabs - active gets theme color, inactive gets gray
-    document.querySelectorAll('.qa-sidebar-tab').forEach(tab => {
-        if (tab.dataset.tab === tabName) {
-            // Active tab styling - note: bg color handled by CSS variable
-            tab.className = 'qa-sidebar-tab active px-3 py-2 border-2 border-black font-bold text-xs transition-all relative z-20 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px]';
-            tab.setAttribute('aria-selected', 'true');
-        } else {
-            // Inactive tab styling
-            tab.className = 'qa-sidebar-tab px-3 py-2 bg-gray-100 border-2 border-gray-400 font-bold text-xs text-gray-700 transition-all relative z-10 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.3)] active:translate-x-[1px] active:translate-y-[1px]';
-            tab.setAttribute('aria-selected', 'false');
-        }
-    });
-    
-    // Update panels
-    document.querySelectorAll('.qa-tab-content').forEach(panel => {
-        if (panel.id === `qa-content-${tabName}`) {
-            panel.classList.remove('hidden');
-        } else {
-            panel.classList.add('hidden');
-        }
-    });
-}
+// Search functionality
+let allActions = [];
+let searchTimeout = null;
 
-// Workspace sidebar action function - just inserts text, doesn't create contexts
-function insertTextAction(text) {
-    if (window.insertTextAtCursor) {
-        window.insertTextAtCursor(text);
-    } else {
-        console.error('insertTextAtCursor function not available');
-    }
-}
-
-// Cache for sidebar actions data
-let sidebarActionsCache = null;
-
-// Load sidebar actions from backend
-async function loadSidebarActions() {
+// Initialize search data
+async function initSearchData() {
     try {
-        // Use cached data if available
-        if (sidebarActionsCache) {
-            renderSidebarActions(sidebarActionsCache);
+        const response = await fetch('/api/actions/');
+        if (response.ok) {
+            const data = await response.json();
+            allActions = [
+                ...(data.mcps || []).map(item => ({...item, type: 'MCP'})),
+                ...(data.rules || []).map(item => ({...item, type: 'Rule'})),
+                ...(data.agents || []).map(item => ({...item, type: 'Agent'}))
+            ];
+        }
+    } catch (error) {
+        console.error('Error loading search data:', error);
+    }
+}
+
+// Search actions
+function searchActions(query) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const resultsContainer = document.getElementById('search-results');
+        
+        if (!query || query.trim() === '') {
+            resultsContainer.style.display = 'none';
             return;
         }
         
+        const searchTerm = query.toLowerCase();
+        const filtered = allActions.filter(action => 
+            action.name.toLowerCase().includes(searchTerm)
+        );
+        
+        if (filtered.length > 0) {
+            resultsContainer.innerHTML = filtered.map(action => `
+                <div class="search-result-item" onclick="selectSearchResult('${action.name}', '${action.type}')">
+                    <span class="search-result-type">${action.type}</span>
+                    <span>${action.name}</span>
+                </div>
+            `).join('');
+            resultsContainer.style.display = 'block';
+        } else {
+            resultsContainer.innerHTML = '<div class="search-result-item">No results found</div>';
+            resultsContainer.style.display = 'block';
+        }
+    }, 200);
+}
+
+// Select search result
+async function selectSearchResult(name, type) {
+    const resultsContainer = document.getElementById('search-results');
+    const searchInput = document.querySelector('.search-input');
+    
+    // Clear search
+    searchInput.value = '';
+    resultsContainer.style.display = 'none';
+    
+    // Install the selected action
+    if (type === 'MCP') {
+        await installMCP(name);
+    } else if (type === 'Rule') {
+        await installRule(name);
+    } else if (type === 'Agent') {
+        await installAgent(name);
+    }
+}
+
+// Initialize search on load
+document.addEventListener('DOMContentLoaded', function() {
+    initSearchData();
+});
+
+// Toggle menu button - handles both toggle and expand together
+function toggleMenuButton(button, type) {
+    const isToggled = button.classList.contains('toggled');
+    const dropdown = document.getElementById(`dropdown-${type}`);
+    
+    // Toggle the button state
+    if (isToggled) {
+        button.classList.remove('toggled');
+        button.classList.remove('expanded');
+        toggledButtons[type] = false;
+        expandedButtons[type] = false;
+        dropdown.style.display = 'none';
+        // Remove from context
+        removeFromContext(type);
+    } else {
+        button.classList.add('toggled');
+        button.classList.add('expanded');
+        toggledButtons[type] = true;
+        expandedButtons[type] = true;
+        dropdown.style.display = 'block';
+        // Insert into context
+        insertIntoContext(type);
+        // Load data if needed
+        if (!loadedData[type]) {
+            loadDropdownData(type);
+            loadedData[type] = true;
+        }
+    }
+}
+
+// Insert action into context
+async function insertIntoContext(type) {
+    if (type === 'agents') {
+        // Default agent insertion
+        const defaultAgent = 'code-searcher';
+        await installAgent(defaultAgent);
+    } else if (type === 'mcps') {
+        // Default MCP insertion
+        const defaultMcp = 'filesystem';
+        await installMCP(defaultMcp);
+    } else if (type === 'rules') {
+        // Default rule insertion
+        const defaultRule = 'code-quality';
+        await installRule(defaultRule);
+    }
+}
+
+// Remove action from context
+async function removeFromContext(type) {
+    if (window.workspaceManager && window.workspaceManager.currentState) {
+        const state = window.workspaceManager.currentState;
+        
+        if (type === 'agents') {
+            // Remove agent files
+            const agentFiles = Object.keys(state.files).filter(f => f.startsWith('.gitrules/agents/'));
+            agentFiles.forEach(file => {
+                delete state.files[file];
+            });
+        } else if (type === 'mcps') {
+            // Remove MCP config
+            delete state.files['.mcp.json'];
+        } else if (type === 'rules') {
+            // Clear rules from CLAUDE.md
+            if (state.files['CLAUDE.md']) {
+                state.files['CLAUDE.md'] = '';
+            }
+        }
+        
+        window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+        window.workspaceManager.render();
+    }
+}
+
+// Load dropdown data
+async function loadDropdownData(type) {
+    try {
         const response = await fetch('/api/actions/');
         if (!response.ok) throw new Error('Failed to fetch actions');
         
         const data = await response.json();
+        let container, items;
         
-        // Cache the data
-        sidebarActionsCache = data;
-        
-        renderSidebarActions(data);
-    } catch (error) {
-        console.error('Error loading sidebar actions:', error);
-    }
-}
-
-// Render sidebar actions from data
-function renderSidebarActions(data) {
-    try {
-        
-        // Render MCPs
-        const mcpsContainer = document.getElementById('sidebar-mcps-container');
-        if (mcpsContainer && data.mcps) {
-            mcpsContainer.innerHTML = data.mcps.map(mcp => `
-                <button class="sidebar-themed-button" onclick="installMCP('${mcp.name}')">
-                    <span class="button-accent-icon">+</span>
-                    <span>${mcp.name}</span>
-                </button>
-            `).join('');
+        switch(type) {
+            case 'mcps':
+                container = document.getElementById('mcps-list');
+                items = data.mcps || [];
+                break;
+            case 'rules':
+                container = document.getElementById('rules-list');
+                items = data.rules || [];
+                break;
+            case 'agents':
+                container = document.getElementById('agents-list');
+                items = data.agents || [];
+                break;
         }
         
-        // Render rules
-        const rulesContainer = document.getElementById('sidebar-rules-container');
-        if (rulesContainer && data.rules) {
-            rulesContainer.innerHTML = data.rules.map(rule => `
-                <button class="sidebar-themed-button" onclick="installRule('${rule.name}')">
-                    <span class="button-accent-icon">+</span>
-                    <span>${rule.name}</span>
-                </button>
-            `).join('');
-        }
-        
-        // Render agents
-        const agentsContainer = document.getElementById('sidebar-agents-container');
-        if (agentsContainer && data.agents) {
-            agentsContainer.innerHTML = data.agents.map(agent => `
-                <button class="sidebar-themed-button" onclick="installAgent('${agent.name}')">
-                    <span class="button-accent-icon">+</span>
-                    <span>${agent.name}</span>
-                </button>
+        if (container && items.length > 0) {
+            container.innerHTML = items.map(item => `
+                <div 
+                    class="dropdown-item"
+                    onclick="toggleDropdownItem(this, '${item.name}', '${type}')"
+                >
+                    <span class="dropdown-item-icon">+</span>
+                    <span>${item.name}</span>
+                </div>
             `).join('');
         }
     } catch (error) {
-        console.error('Error loading sidebar actions:', error);
+        console.error(`Error loading ${type}:`, error);
     }
 }
 
-// Install functions
+// Toggle individual dropdown item
+function toggleDropdownItem(element, itemName, type) {
+    element.classList.toggle('active');
+    const icon = element.querySelector('.dropdown-item-icon');
+    
+    if (element.classList.contains('active')) {
+        icon.textContent = '−';
+        // Install the specific item
+        if (type === 'mcps') {
+            installMCP(itemName);
+        } else if (type === 'rules') {
+            installRule(itemName);
+        } else if (type === 'agents') {
+            installAgent(itemName);
+        }
+    } else {
+        icon.textContent = '+';
+        // Remove the specific item
+        if (type === 'mcps') {
+            removeMCP(itemName);
+        } else if (type === 'rules') {
+            removeRule(itemName);
+        } else if (type === 'agents') {
+            removeAgent(itemName);
+        }
+    }
+}
+
+// Backend integration functions (from previous implementation)
 async function installAgent(agentName) {
     try {
         const response = await fetch(`/api/actions/agent-content/${encodeURIComponent(agentName)}`);
@@ -304,24 +531,19 @@ async function installAgent(agentName) {
         if (response.ok) {
             const result = await response.json();
             
-            // Add to virtual workspace
             if (window.workspaceManager && window.workspaceManager.currentState) {
                 window.workspaceManager.currentState.addFile(result.path, result.content);
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);
                 window.workspaceManager.render();
             }
-        } else {
-            const error = await response.json();
-            alert(`❌ Error: ${error.detail}`);
         }
     } catch (error) {
-        alert(`❌ Error installing agent: ${error.message}`);
+        console.error(`Error installing agent: ${error.message}`);
     }
 }
 
 async function installMCP(mcpName) {
     try {
-        // Get current .mcp.json content from workspace
         let currentConfig = {};
         if (window.workspaceManager && window.workspaceManager.getState()) {
             const mcpFile = window.workspaceManager.getState().files['.mcp.json'];
@@ -345,18 +567,14 @@ async function installMCP(mcpName) {
         if (response.ok) {
             const result = await response.json();
             
-            // Add to virtual workspace
             if (window.workspaceManager && window.workspaceManager.currentState) {
                 window.workspaceManager.currentState.addFile(result.path, result.content);
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);
                 window.workspaceManager.render();
             }
-        } else {
-            const error = await response.json();
-            alert(`❌ Error: ${error.detail}`);
         }
     } catch (error) {
-        alert(`❌ Error installing MCP: ${error.message}`);
+        console.error(`Error installing MCP: ${error.message}`);
     }
 }
 
@@ -367,7 +585,6 @@ async function installRule(ruleName) {
         if (response.ok) {
             const result = await response.json();
             
-            // Get current CLAUDE.md content from workspace
             let currentContent = '';
             if (window.workspaceManager && window.workspaceManager.getState()) {
                 const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
@@ -376,40 +593,94 @@ async function installRule(ruleName) {
                 }
             }
             
-            // Toggle behavior: if rule already exists, remove it; if not, add it
             const ruleContent = result.content.trim();
-            let newContent;
+            const newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
             
-            if (currentContent.includes(ruleContent)) {
-                // Remove the rule
-                newContent = currentContent
-                    .split('\n')
-                    .filter(line => line.trim() !== ruleContent)
-                    .join('\n')
-                    .replace(/\n\n+/g, '\n\n') // Clean up multiple newlines
-                    .trim();
-            } else {
-                // Add the rule
-                newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
-            }
-            
-            // Add to virtual workspace
             if (window.workspaceManager && window.workspaceManager.currentState) {
                 window.workspaceManager.currentState.addFile('CLAUDE.md', newContent);
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);
                 window.workspaceManager.render();
             }
-        } else {
-            const error = await response.json();
-            alert(`❌ Error: ${error.detail}`);
         }
     } catch (error) {
-        alert(`❌ Error installing rule: ${error.message}`);
+        console.error(`Error installing rule: ${error.message}`);
     }
 }
 
-// Load actions when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    loadSidebarActions();
-});
+// Remove functions for specific items
+async function removeMCP(mcpName) {
+    try {
+        if (window.workspaceManager && window.workspaceManager.getState()) {
+            const state = window.workspaceManager.getState();
+            const mcpFile = state.files['.mcp.json'];
+            
+            if (mcpFile) {
+                try {
+                    let config = JSON.parse(mcpFile);
+                    // Remove the specific MCP from config
+                    if (config.mcps && config.mcps[mcpName]) {
+                        delete config.mcps[mcpName];
+                    }
+                    
+                    // Update the file with cleaned config
+                    const newContent = JSON.stringify(config, null, 2);
+                    window.workspaceManager.currentState.addFile('.mcp.json', newContent);
+                    window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+                    window.workspaceManager.render();
+                } catch (e) {
+                    console.error('Error parsing MCP config:', e);
+                }
+            }
+        }
+    } catch (error) {
+        console.error(`Error removing MCP: ${error.message}`);
+    }
+}
+
+async function removeRule(ruleName) {
+    try {
+        // Get the rule content first to know what to remove
+        const response = await fetch(`/api/actions/rule-content/${encodeURIComponent(ruleName)}`);
+        
+        if (response.ok) {
+            const result = await response.json();
+            const ruleContent = result.content.trim();
+            
+            if (window.workspaceManager && window.workspaceManager.getState()) {
+                const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
+                if (claudeFile && claudeFile.includes(ruleContent)) {
+                    // Remove the rule content
+                    const newContent = claudeFile
+                        .replace(ruleContent, '')
+                        .replace(/\n\n+/g, '\n\n')
+                        .trim();
+                    
+                    window.workspaceManager.currentState.addFile('CLAUDE.md', newContent);
+                    window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+                    window.workspaceManager.render();
+                }
+            }
+        }
+    } catch (error) {
+        console.error(`Error removing rule: ${error.message}`);
+    }
+}
+
+async function removeAgent(agentName) {
+    try {
+        if (window.workspaceManager && window.workspaceManager.currentState) {
+            const state = window.workspaceManager.currentState;
+            
+            // Remove the specific agent file
+            const agentPath = `.gitrules/agents/${agentName}.md`;
+            if (state.files[agentPath]) {
+                delete state.files[agentPath];
+                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+                window.workspaceManager.render();
+            }
+        }
+    } catch (error) {
+        console.error(`Error removing agent: ${error.message}`);
+    }
+}
 </script>
