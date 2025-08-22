@@ -617,9 +617,14 @@ async function removeMCP(mcpName) {
             if (mcpFile) {
                 try {
                     let config = JSON.parse(mcpFile);
-                    // Remove the specific MCP from config
-                    if (config.mcps && config.mcps[mcpName]) {
-                        delete config.mcps[mcpName];
+                    // Remove the specific MCP from config - use correct property name
+                    if (config.mcpServers && config.mcpServers[mcpName]) {
+                        delete config.mcpServers[mcpName];
+                    }
+                    
+                    // If no MCPs left, keep the file with empty mcpServers object
+                    if (!config.mcpServers) {
+                        config.mcpServers = {};
                     }
                     
                     // Update the file with cleaned config
