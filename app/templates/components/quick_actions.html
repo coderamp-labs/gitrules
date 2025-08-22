@@ -173,14 +173,18 @@ function renderActions(data) {
         // Render agents (max 4)
         const agentsContainer = document.getElementById('agents-container');
         if (agentsContainer && data.agents) {
-            agentsContainer.innerHTML = data.agents.slice(0, 4).map(agent => `
-                <button class="action-button action-button--primary" onclick="addAgent('${agent.name}')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">${agent.name}</span>
-                    </div>
-                </button>
-            `).join('');
+            agentsContainer.innerHTML = data.agents.slice(0, 4).map(agent => {
+                const itemId = agent.slug || agent.name;
+                const displayName = agent.display_name || agent.name;
+                return `
+                    <button class="action-button action-button--primary" onclick="addAgent('${itemId}')">
+                        <div class="action-button__plus">+</div>
+                        <div class="action-button__content">
+                            <span class="action-button__label">${displayName}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
         }
         
         // Render MCPs (max 4)
@@ -199,14 +203,18 @@ function renderActions(data) {
         // Render rules (max 4)
         const rulesContainer = document.getElementById('rules-container');
         if (rulesContainer && data.rules) {
-            rulesContainer.innerHTML = data.rules.slice(0, 4).map(rule => `
-                <button class="action-button action-button--accent" onclick="addRule('${rule.name}')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">${rule.name}</span>
-                    </div>
-                </button>
-            `).join('');
+            rulesContainer.innerHTML = data.rules.slice(0, 4).map(rule => {
+                const itemId = rule.slug || rule.name;
+                const displayName = rule.display_name || rule.name;
+                return `
+                    <button class="action-button action-button--accent" onclick="addRule('${itemId}')">
+                        <div class="action-button__plus">+</div>
+                        <div class="action-button__content">
+                            <span class="action-button__label">${displayName}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
         }
     } catch (error) {
         console.error('Error loading actions:', error);

@@ -1,22 +1,30 @@
 import json
 import re
-from pathlib import Path
 from typing import Dict, Any, Set, Tuple
+from app.services.actions_loader import actions_loader
 
-def get_agent_content(agent_filename: str) -> str:
-    """Get agent content from actions/agents directory"""
-    source_path = Path(__file__).parent.parent / "actions" / "agents" / agent_filename
-    if source_path.exists():
-        with open(source_path, 'r') as f:
-            return f.read()
+def get_agent_content(agent_identifier: str) -> str:
+    """Get agent content from consolidated agents.yaml"""
+    # Try to find by slug first, then by name for backward compat
+    agent = actions_loader.get_agent_by_slug(agent_identifier)
+    if not agent:
+        # Fallback to finding by name
+        agent = next((a for a in actions_loader.get_agents() if a.name == agent_identifier), None)
+    
+    if agent and agent.content:
+        return agent.content
     return ""
 
-def get_rule_content(rule_filename: str) -> str:
-    """Get rule content from actions/rules directory"""
-    source_path = Path(__file__).parent.parent / "actions" / "rules" / rule_filename
-    if source_path.exists():
-        with open(source_path, 'r') as f:
-            return f.read()
+def get_rule_content(rule_identifier: str) -> str:
+    """Get rule content from consolidated rules.yaml"""
+    # Try to find by slug first, then by name for backward compat
+    rule = actions_loader.get_rule_by_slug(rule_identifier)
+    if not rule:
+        # Fallback to finding by name
+        rule = next((r for r in actions_loader.get_rules() if r.name == rule_identifier), None)
+    
+    if rule and rule.content:
+        return rule.content
     return ""
 
 def get_current_mcp_config() -> Dict[str, Any]:

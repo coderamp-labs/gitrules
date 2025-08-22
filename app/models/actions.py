@@ -1,13 +1,19 @@
 from pydantic import BaseModel
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 class Agent(BaseModel):
-    name: str
+    name: str  # For backward compatibility
     filename: str
+    display_name: Optional[str] = None
+    slug: Optional[str] = None
+    content: Optional[str] = None
 
 class Rule(BaseModel):
-    name: str
+    name: str  # For backward compatibility
     filename: str
+    display_name: Optional[str] = None
+    slug: Optional[str] = None
+    content: Optional[str] = None
 
 class MCP(BaseModel):
     name: str

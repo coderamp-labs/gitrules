@@ -1,0 +1,29 @@
+mcps:
+- display_name: Github
+  slug: GitHub
+  config:
+    type: http
+    url: https://api.githubcopilot.com/mcp
+    headers:
+      Authorization: Bearer ${GITHUB_TOKEN}
+- display_name: Firecrawl
+  slug: Firecrawl
+  config:
+    type: sse
+    url: https://mcp.firecrawl.dev/${FIRECRAWL_API_KEY}/sse
+- display_name: Playwright
+  slug: Playwright
+  config:
+    type: stdio
+    command: npx
+    args:
+    - '@playwright/mcp@latest'
+- display_name: Supabase
+  slug: Supabase
+  config:
+    command: npx
+    args:
+    - -y
+    - '@supabase/mcp-server-supabase@latest'
+    - --access-token
+    - ${SUPABASE_ACCESS_TOKEN}

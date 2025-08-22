@@ -1,5 +1,4 @@
-import os
-import json
+import yaml
 from typing import List, Dict, Any
 from pathlib import Path
 from app.models.actions import Agent, Rule, MCP
@@ -13,45 +12,67 @@ class ActionsLoader:
         self.load_all()
     
     def load_all(self):
-        """Load all actions on initialization"""
+        """Load all actions from consolidated YAML files"""
         self.load_agents()
         self.load_rules()
         self.load_mcps()
     
     def load_agents(self):
-        """Load all agent files from actions/agents directory"""
-        agents_dir = self.actions_dir / "agents"
-        if agents_dir.exists():
+        """Load all agents from agents.yaml"""
+        agents_file = self.actions_dir / "agents.yaml"
+        if agents_file.exists():
+            with open(agents_file, 'r') as f:
+                data = yaml.safe_load(f)
+                if data and 'agents' in data:
+                    self.agents = [
+                        Agent(
+                            name=agent.get('slug', ''),  # Use slug as name for backward compat
+                            filename=f"{agent.get('slug', '')}.yaml",  # Virtual filename
+                            display_name=agent.get('display_name'),
+                            slug=agent.get('slug'),
+                            content=agent.get('content')
+                        )
+                        for agent in data['agents']
+                    ]
+        else:
             self.agents = []
-            for file_path in agents_dir.glob("*.md"):
-                name = file_path.stem.replace('-', ' ').title()
-                self.agents.append(Agent(
-                    name=name,
-                    filename=file_path.name
-                ))
     
     def load_rules(self):
-        """Load all rule files from actions/rules directory"""
-        rules_dir = self.actions_dir / "rules"
-        if rules_dir.exists():
+        """Load all rules from rules.yaml"""
+        rules_file = self.actions_dir / "rules.yaml"
+        if rules_file.exists():
+            with open(rules_file, 'r') as f:
+                data = yaml.safe_load(f)
+                if data and 'rules' in data:
+                    self.rules = [
+                        Rule(
+                            name=rule.get('slug', ''),  # Use slug as name for backward compat
+                            filename=f"{rule.get('slug', '')}.yaml",  # Virtual filename
+                            display_name=rule.get('display_name'),
+                            slug=rule.get('slug'),
+                            content=rule.get('content')
+                        )
+                        for rule in data['rules']
+                    ]
+        else:
             self.rules = []
-            for file_path in rules_dir.glob("*.md"):
-                name = file_path.stem.replace('-', ' ').title()
-                self.rules.append(Rule(
-                    name=name,
-                    filename=file_path.name
-                ))
     
     def load_mcps(self):
-        """Load MCPs from actions/mcps.json"""
-        mcps_file = self.actions_dir / "mcps.json"
+        """Load all MCPs from mcps.yaml"""
+        mcps_file = self.actions_dir / "mcps.yaml"
         if mcps_file.exists():
             with open(mcps_file, 'r') as f:
-                mcps_data = json.load(f)
-                self.mcps = [
-                    MCP(name=name, config=config)
-                    for name, config in mcps_data.items()
-                ]
+                data = yaml.safe_load(f)
+                if data and 'mcps' in data:
+                    self.mcps = [
+                        MCP(
+                            name=mcp.get('slug', ''),
+                            config=mcp.get('config', {})
+                        )
+                        for mcp in data['mcps']
+                    ]
+        else:
+            self.mcps = []
     
     def get_all(self) -> Dict[str, Any]:
         """Get all loaded actions"""
@@ -72,6 +93,14 @@ class ActionsLoader:
     def get_mcps(self) -> List[MCP]:
         """Get all MCPs"""
         return self.mcps
+    
+    def get_agent_by_slug(self, slug: str) -> Agent:
+        """Get a specific agent by slug"""
+        return next((a for a in self.agents if a.slug == slug), None)
+    
+    def get_rule_by_slug(self, slug: str) -> Rule:
+        """Get a specific rule by slug"""
+        return next((r for r in self.rules if r.slug == slug), None)
 
 # Create singleton instance
 actions_loader = ActionsLoader()

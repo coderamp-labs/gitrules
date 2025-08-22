@@ -337,17 +337,22 @@ function searchActions(query) {
         }
         
         const searchTerm = query.toLowerCase();
-        const filtered = allActions.filter(action => 
-            action.name.toLowerCase().includes(searchTerm)
-        );
+        const filtered = allActions.filter(action => {
+            const displayName = action.display_name || action.name;
+            return displayName.toLowerCase().includes(searchTerm);
+        });
         
         if (filtered.length > 0) {
-            resultsContainer.innerHTML = filtered.map(action => `
-                <div class="search-result-item" onclick="selectSearchResult('${action.name}', '${action.type}')">
-                    <span class="search-result-type">${action.type}</span>
-                    <span>${action.name}</span>
-                </div>
-            `).join('');
+            resultsContainer.innerHTML = filtered.map(action => {
+                const itemId = action.slug || action.name;
+                const displayName = action.display_name || action.name;
+                return `
+                    <div class="search-result-item" onclick="selectSearchResult('${itemId}', '${action.type}')">
+                        <span class="search-result-type">${action.type}</span>
+                        <span>${displayName}</span>
+                    </div>
+                `;
+            }).join('');
             resultsContainer.style.display = 'block';
         } else {
             resultsContainer.innerHTML = '<div class="search-result-item">No results found</div>';
@@ -549,14 +554,17 @@ async function loadDropdownData(type) {
         if (container && items.length > 0) {
             const state = window.workspaceManager?.getState();
             container.innerHTML = items.map(item => {
-                const isChecked = state ? state.isActionItemChecked(type, item.name) : false;
+                // Use slug for internal ID, display_name for display
+                const itemId = item.slug || item.name;
+                const displayName = item.display_name || item.name;
+                const isChecked = state ? state.isActionItemChecked(type, itemId) : false;
                 return `
                     <div 
                         class="dropdown-item ${isChecked ? 'active' : ''}"
-                        onclick="toggleDropdownItem(this, '${item.name}', '${type}')"
+                        onclick="toggleDropdownItem(this, '${itemId}', '${type}')"
                     >
                         <span class="dropdown-item-icon">${isChecked ? '−' : '+'}</span>
-                        <span>${item.name}</span>
+                        <span>${displayName}</span>
                     </div>
                 `;
             }).join('');
@@ -802,13 +810,16 @@ async function removeAgent(agentName) {
             if (filesToRemove.length === 0) {
                 // Find files in .claude/agents/ directory that match this agent
                 filesToRemove = Object.keys(state.files).filter(path => {
-                    return path.startsWith('.claude/agents/') && 
-                           path.toLowerCase().includes(agentName.toLowerCase().replace(/[-\s]/g, '_'));
+                    // Check for both .yaml and .md extensions
+                    const normalizedAgentName = agentName.toLowerCase().replace(/[-\s]/g, '[-_]?');
+                    const regex = new RegExp(`\.claude/agents/.*${normalizedAgentName}.*\.(yaml|md)$`, 'i');
+                    return regex.test(path);
                 });
                 
                 // If still no match, try alternative path patterns
                 if (filesToRemove.length === 0) {
                     const alternativePaths = [
+                        `.claude/agents/${agentName}.yaml`,
                         `.claude/agents/${agentName}.md`,
                         `.claude/agents/${agentName.replace(/[-\s]/g, '_')}.md`,
                         `.claude/agents/${agentName.replace(/[-\s]/g, '-')}.md`
@@ -834,7 +845,7 @@ async function removeAgent(agentName) {
                 // Save state after agent mappings update
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);
             } else {
-                console.warn(`No agent files found for: ${agentName}`);
+                console.warn(`No agent files found for: ${agentName}. Mapped path: ${state.agentMappings?.[agentName] || 'none'}`);
                 // Still save state for the action state update
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);
             }

@@ -5,3 +5,4 @@ python-multipart==0.0.12
 pydantic==2.10.0
 api-analytics
 python-dotenv
+pyyaml==6.0.1
