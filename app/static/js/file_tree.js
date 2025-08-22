@@ -64,6 +64,24 @@ function renderFileTree() {
     
     treeContainer.innerHTML = '';
     
+    // Add simple CSS for tree lines if not already added
+    if (!document.getElementById('tree-lines-style')) {
+        const style = document.createElement('style');
+        style.id = 'tree-lines-style';
+        style.textContent = `
+            .tree-item {
+                position: relative;
+                padding-left: 4px;
+            }
+            .tree-item.level-1 { padding-left: 24px; }
+            .tree-item.level-2 { padding-left: 44px; }
+            .tree-item.level-3 { padding-left: 64px; }
+            .tree-item.level-4 { padding-left: 84px; }
+            .tree-item.level-5 { padding-left: 104px; }
+        `;
+        document.head.appendChild(style);
+    }
+    
     const state = window.workspaceManager?.getState();
     const hasFiles = state && Object.keys(state.files).length > 0;
     
@@ -71,6 +89,17 @@ function renderFileTree() {
         if (emptyStateEl) {
             emptyStateEl.classList.remove('hidden');
         }
+        // Still show the root folder even when empty
+        const rootDiv = document.createElement('div');
+        rootDiv.innerHTML = `
+            <div class="flex items-center p-1 text-gray-400 pointer-events-none" style="padding-left: 4px;">
+                <div class="flex items-center gap-1">
+                    <span class="mdi mdi-folder-open text-gray-400 text-base"></span>
+                    <span class="font-medium">/your-repo</span>
+                </div>
+            </div>
+        `;
+        treeContainer.appendChild(rootDiv);
         return;
     } else {
         if (emptyStateEl) {
@@ -78,9 +107,20 @@ function renderFileTree() {
         }
     }
     
+    // Add root folder styled like other folders but greyed out
+    const rootDiv = document.createElement('div');
+    rootDiv.innerHTML = `
+        <div class="flex items-center p-1 text-gray-400 pointer-events-none" style="padding-left: 4px;">
+            <div class="flex items-center gap-1">
+                <span class="mdi mdi-folder-open text-gray-400 text-base"></span>
+                <span class="font-medium">/your-repo</span>
+            </div>
+        </div>
+    `;
+    treeContainer.appendChild(rootDiv);
+    
     function renderNode(node, level = 0) {
         const div = document.createElement('div');
-        div.style.paddingLeft = `${level * 16}px`;
         
         if (node.type === 'folder') {
             const state = window.workspaceManager?.getState();
@@ -90,6 +130,8 @@ function renderFileTree() {
                 isExpanded = false;
             }
             const folderIcon = isExpanded ? 'mdi-folder-open' : 'mdi-folder';
+            
+            div.className = `tree-item level-${level}`;
             div.innerHTML = `
                 <div class="flex items-center justify-between p-1 hover:bg-gray-100 group">
                     <div class="flex items-center gap-1 cursor-pointer folder-toggle" data-path="${node.path}">
@@ -123,10 +165,11 @@ function renderFileTree() {
             // File node
             const state = window.workspaceManager?.getState();
             const isSelected = state && state.selectedFile === node.path;
+            
+            div.className = `tree-item level-${level}`;
             div.innerHTML = `
                 <div class="flex items-center justify-between p-1 hover:bg-gray-100 cursor-pointer file-item ${isSelected ? 'bg-cyan-100 font-medium' : ''}" data-path="${node.path}">
                     <div class="flex items-center gap-1">
-                        <span class="w-3"></span>
                         <span class="mdi mdi-file-document-outline text-gray-600 text-sm"></span>
                         <span>${node.name}</span>
                     </div>
@@ -146,7 +189,7 @@ function renderFileTree() {
     
     // Generate and render dynamic tree
     const fileTreeData = generateFileTreeData();
-    fileTreeData.forEach(node => renderNode(node));
+    fileTreeData.forEach(node => renderNode(node, 0));
     
     // Add event listeners
     treeContainer.addEventListener('click', handleTreeClick);
