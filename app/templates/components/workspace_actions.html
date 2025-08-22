@@ -301,9 +301,7 @@
 </style>
 
 <script>
-// Track toggled buttons and expanded states
-let toggledButtons = {};
-let expandedButtons = {};
+// Track loaded data
 let loadedData = {};
 
 // Search functionality
@@ -377,30 +375,90 @@ async function selectSearchResult(name, type) {
     }
 }
 
-// Initialize search on load
+// Restore action states from unified state
+function restoreActionStates() {
+    const state = window.workspaceManager?.getState();
+    if (!state) return;
+    
+    // Restore MCPs state
+    if (state.isActionCategoryActive('mcps')) {
+        const button = document.querySelector('[data-theme="yellow"]');
+        const dropdown = document.getElementById('dropdown-mcps');
+        if (button && dropdown) {
+            button.classList.add('toggled');
+            button.classList.add('expanded');
+            dropdown.style.display = 'block';
+            if (!loadedData['mcps']) {
+                loadDropdownData('mcps');
+                loadedData['mcps'] = true;
+            }
+        }
+    }
+    
+    // Restore Rules state
+    if (state.isActionCategoryActive('rules')) {
+        const button = document.querySelector('[data-theme="pink"]');
+        const dropdown = document.getElementById('dropdown-rules');
+        if (button && dropdown) {
+            button.classList.add('toggled');
+            button.classList.add('expanded');
+            dropdown.style.display = 'block';
+            if (!loadedData['rules']) {
+                loadDropdownData('rules');
+                loadedData['rules'] = true;
+            }
+        }
+    }
+    
+    // Restore Agents state
+    if (state.isActionCategoryActive('agents')) {
+        const button = document.querySelector('[data-theme="blue"]');
+        const dropdown = document.getElementById('dropdown-agents');
+        if (button && dropdown) {
+            button.classList.add('toggled');
+            button.classList.add('expanded');
+            dropdown.style.display = 'block';
+            if (!loadedData['agents']) {
+                loadDropdownData('agents');
+                loadedData['agents'] = true;
+            }
+        }
+    }
+}
+
+// Export for global use
+window.restoreActionStates = restoreActionStates;
+
+// Initialize on load
 document.addEventListener('DOMContentLoaded', function() {
     initSearchData();
+    // Wait a bit for workspace manager to initialize
+    setTimeout(() => {
+        restoreActionStates();
+    }, 100);
 });
 
 // Toggle menu button - handles both toggle and expand together
 function toggleMenuButton(button, type) {
-    const isToggled = button.classList.contains('toggled');
+    const state = window.workspaceManager?.getState();
+    if (!state) return;
+    
+    const isToggled = state.isActionCategoryActive(type);
     const dropdown = document.getElementById(`dropdown-${type}`);
     
-    // Toggle the button state
-    if (isToggled) {
+    // Toggle the button state in unified state
+    state.toggleActionCategory(type);
+    
+    // Update UI based on new state
+    if (!state.isActionCategoryActive(type)) {
         button.classList.remove('toggled');
         button.classList.remove('expanded');
-        toggledButtons[type] = false;
-        expandedButtons[type] = false;
         dropdown.style.display = 'none';
         // Remove from context
         removeFromContext(type);
     } else {
         button.classList.add('toggled');
         button.classList.add('expanded');
-        toggledButtons[type] = true;
-        expandedButtons[type] = true;
         dropdown.style.display = 'block';
         // Insert into context
         insertIntoContext(type);
@@ -410,6 +468,9 @@ function toggleMenuButton(button, type) {
             loadedData[type] = true;
         }
     }
+    
+    // Save state to localStorage
+    window.workspaceManager.saveState(window.workspaceManager.currentContextId);
 }
 
 // Insert action into context
@@ -431,27 +492,32 @@ async function insertIntoContext(type) {
 
 // Remove action from context
 async function removeFromContext(type) {
-    if (window.workspaceManager && window.workspaceManager.currentState) {
-        const state = window.workspaceManager.currentState;
+    if (window.workspaceManager) {
+        const state = window.workspaceManager.getState();
+        if (!state) return;
         
         if (type === 'agents') {
-            // Remove agent files
-            const agentFiles = Object.keys(state.files).filter(f => f.startsWith('.gitrules/agents/'));
+            // Remove agent files - use proper deleteFile method
+            const agentFiles = Object.keys(state.files).filter(f => 
+                f.startsWith('.gitrules/agents/') || f.startsWith('.claude/agents/')
+            );
             agentFiles.forEach(file => {
-                delete state.files[file];
+                // Use workspaceManager.deleteFile which triggers render
+                window.workspaceManager.deleteFile(file, true);
             });
         } else if (type === 'mcps') {
-            // Remove MCP config
-            delete state.files['.mcp.json'];
+            // Remove MCP config entirely when toggling off MCPs category
+            if (state.files['.mcp.json']) {
+                window.workspaceManager.deleteFile('.mcp.json', true);
+            }
         } else if (type === 'rules') {
-            // Clear rules from CLAUDE.md
+            // Remove CLAUDE.md entirely when toggling off Rules category
+            // (since having an empty CLAUDE.md provides no value)
             if (state.files['CLAUDE.md']) {
-                state.files['CLAUDE.md'] = '';
+                window.workspaceManager.deleteFile('CLAUDE.md', true);
             }
         }
-        
-        window.workspaceManager.saveState(window.workspaceManager.currentContextId);
-        window.workspaceManager.render();
+        // No need to manually save/render - deleteFile handles it
     }
 }
 
@@ -480,15 +546,19 @@ async function loadDropdownData(type) {
         }
         
         if (container && items.length > 0) {
-            container.innerHTML = items.map(item => `
-                <div 
-                    class="dropdown-item"
-                    onclick="toggleDropdownItem(this, '${item.name}', '${type}')"
-                >
-                    <span class="dropdown-item-icon">+</span>
-                    <span>${item.name}</span>
-                </div>
-            `).join('');
+            const state = window.workspaceManager?.getState();
+            container.innerHTML = items.map(item => {
+                const isChecked = state ? state.isActionItemChecked(type, item.name) : false;
+                return `
+                    <div 
+                        class="dropdown-item ${isChecked ? 'active' : ''}"
+                        onclick="toggleDropdownItem(this, '${item.name}', '${type}')"
+                    >
+                        <span class="dropdown-item-icon">${isChecked ? '−' : '+'}</span>
+                        <span>${item.name}</span>
+                    </div>
+                `;
+            }).join('');
         }
     } catch (error) {
         console.error(`Error loading ${type}:`, error);
@@ -497,10 +567,17 @@ async function loadDropdownData(type) {
 
 // Toggle individual dropdown item
 function toggleDropdownItem(element, itemName, type) {
-    element.classList.toggle('active');
-    const icon = element.querySelector('.dropdown-item-icon');
+    const state = window.workspaceManager?.getState();
+    if (!state) return;
     
-    if (element.classList.contains('active')) {
+    // Toggle in unified state
+    state.toggleActionItem(type, itemName);
+    const isChecked = state.isActionItemChecked(type, itemName);
+    
+    // Update UI
+    const icon = element.querySelector('.dropdown-item-icon');
+    if (isChecked) {
+        element.classList.add('active');
         icon.textContent = '−';
         // Install the specific item
         if (type === 'mcps') {
@@ -511,6 +588,7 @@ function toggleDropdownItem(element, itemName, type) {
             installAgent(itemName);
         }
     } else {
+        element.classList.remove('active');
         icon.textContent = '+';
         // Remove the specific item
         if (type === 'mcps') {
@@ -521,6 +599,9 @@ function toggleDropdownItem(element, itemName, type) {
             removeAgent(itemName);
         }
     }
+    
+    // Save state to localStorage
+    window.workspaceManager.saveState(window.workspaceManager.currentContextId);
 }
 
 // Backend integration functions (from previous implementation)
@@ -531,18 +612,18 @@ async function installAgent(agentName) {
         if (response.ok) {
             const result = await response.json();
             
-            if (window.workspaceManager && window.workspaceManager.currentState) {
-                // Store the agent file
-                window.workspaceManager.currentState.addFile(result.path, result.content);
-                
-                // Store agent name to path mapping in metadata (for easier removal)
-                if (!window.workspaceManager.currentState.agentMappings) {
-                    window.workspaceManager.currentState.agentMappings = {};
+            if (window.workspaceManager) {
+                const state = window.workspaceManager.getState();
+                if (state) {
+                    // Store agent name to path mapping in metadata (for easier removal)
+                    state.agentMappings[agentName] = result.path;
+                    
+                    // Mark the agent as checked in action state
+                    state.setActionItemState('agents', agentName, true);
                 }
-                window.workspaceManager.currentState.agentMappings[agentName] = result.path;
                 
-                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
-                window.workspaceManager.render();
+                // Use includeFile which properly handles saving and rendering
+                window.workspaceManager.includeFile(result.path, result.content, true);
             }
         }
     } catch (error) {
@@ -575,10 +656,17 @@ async function installMCP(mcpName) {
         if (response.ok) {
             const result = await response.json();
             
-            if (window.workspaceManager && window.workspaceManager.currentState) {
-                window.workspaceManager.currentState.addFile(result.path, result.content);
-                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
-                window.workspaceManager.render();
+            if (window.workspaceManager) {
+                const state = window.workspaceManager.getState();
+                if (state && !result.was_removed) {
+                    // Mark the MCP as checked in action state
+                    state.setActionItemState('mcps', mcpName, true);
+                } else if (state && result.was_removed) {
+                    // Mark the MCP as unchecked if it was removed
+                    state.setActionItemState('mcps', mcpName, false);
+                }
+                // Use includeFile which properly handles saving and rendering
+                window.workspaceManager.includeFile(result.path, result.content, true);
             }
         }
     } catch (error) {
@@ -604,10 +692,9 @@ async function installRule(ruleName) {
             const ruleContent = result.content.trim();
             const newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
             
-            if (window.workspaceManager && window.workspaceManager.currentState) {
-                window.workspaceManager.currentState.addFile('CLAUDE.md', newContent);
-                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
-                window.workspaceManager.render();
+            if (window.workspaceManager) {
+                // Use includeFile which properly handles saving and rendering
+                window.workspaceManager.includeFile('CLAUDE.md', newContent, true);
             }
         }
     } catch (error) {
@@ -630,16 +717,18 @@ async function removeMCP(mcpName) {
                         delete config.mcpServers[mcpName];
                     }
                     
-                    // If no MCPs left, keep the file with empty mcpServers object
-                    if (!config.mcpServers) {
-                        config.mcpServers = {};
-                    }
+                    // Check if there are any MCPs left
+                    const hasRemainingMCPs = config.mcpServers && Object.keys(config.mcpServers).length > 0;
                     
-                    // Update the file with cleaned config
-                    const newContent = JSON.stringify(config, null, 2);
-                    window.workspaceManager.currentState.addFile('.mcp.json', newContent);
-                    window.workspaceManager.saveState(window.workspaceManager.currentContextId);
-                    window.workspaceManager.render();
+                    if (hasRemainingMCPs) {
+                        // Update the file with cleaned config
+                        const newContent = JSON.stringify(config, null, 2);
+                        // Use includeFile which properly handles saving and rendering
+                        window.workspaceManager.includeFile('.mcp.json', newContent, true);
+                    } else {
+                        // No MCPs left, remove the file entirely
+                        window.workspaceManager.deleteFile('.mcp.json', true);
+                    }
                 } catch (e) {
                     console.error('Error parsing MCP config:', e);
                 }
@@ -668,9 +757,20 @@ async function removeRule(ruleName) {
                         .replace(/\n\n+/g, '\n\n')
                         .trim();
                     
-                    window.workspaceManager.currentState.addFile('CLAUDE.md', newContent);
-                    window.workspaceManager.saveState(window.workspaceManager.currentContextId);
-                    window.workspaceManager.render();
+                    // Mark the rule as unchecked in action state
+                    const state = window.workspaceManager.getState();
+                    if (state) {
+                        state.setActionItemState('rules', ruleName, false);
+                    }
+                    
+                    // Check if file is empty or only whitespace
+                    if (newContent === '' || newContent.match(/^\s*$/)) {
+                        // File is empty, remove it entirely
+                        window.workspaceManager.deleteFile('CLAUDE.md', true);
+                    } else {
+                        // Use includeFile which properly handles saving and rendering
+                        window.workspaceManager.includeFile('CLAUDE.md', newContent, true);
+                    }
                 }
             }
         }
@@ -681,8 +781,10 @@ async function removeRule(ruleName) {
 
 async function removeAgent(agentName) {
     try {
-        if (window.workspaceManager && window.workspaceManager.currentState) {
-            const state = window.workspaceManager.currentState;
+        if (window.workspaceManager) {
+            const state = window.workspaceManager.getState();
+            if (!state) return;
+            
             let filesToRemove = [];
             
             // First check if we have a stored mapping for this agent
@@ -719,15 +821,21 @@ async function removeAgent(agentName) {
                 }
             }
             
-            // Remove all found files
+            // Mark the agent as unchecked in action state
+            state.setActionItemState('agents', agentName, false);
+            
+            // Remove all found files - use workspaceManager.deleteFile for proper updates
             if (filesToRemove.length > 0) {
                 filesToRemove.forEach(path => {
-                    delete state.files[path];
+                    // Use workspaceManager.deleteFile which triggers render
+                    window.workspaceManager.deleteFile(path, true);
                 });
+                // Save state after agent mappings update
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);
-                window.workspaceManager.render();
             } else {
                 console.warn(`No agent files found for: ${agentName}`);
+                // Still save state for the action state update
+                window.workspaceManager.saveState(window.workspaceManager.currentContextId);
             }
         }
     } catch (error) {

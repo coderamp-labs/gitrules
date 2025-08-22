@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State Management Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid black;
+            box-shadow: 2px 2px 0 black;
+        }
+        .test-result {
+            padding: 5px;
+            margin: 5px 0;
+        }
+        .pass {
+            color: green;
+            font-weight: bold;
+        }
+        .fail {
+            color: red;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 20px;
+            background: #22D3EE;
+            border: 2px solid black;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #F472B6;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 State Management Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearState()">Clear State</button>
+        <button onclick="inspectState()">Inspect Current State</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>State Inspector</h2>
+        <pre id="state-inspector">Click "Inspect Current State" to view</pre>
+    </div>
+
+    <script src="/static/js/workspace_manager.js"></script>
+    <script>
+        // Initialize workspace manager
+        const workspaceManager = new WorkspaceManager();
+        workspaceManager.init();
+        
+        // Test utilities
+        function log(message, isPass = true) {
+            const resultsDiv = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = 'test-result';
+            div.innerHTML = `<span class="${isPass ? 'pass' : 'fail'}">${isPass ? '✓' : '✗'}</span> ${message}`;
+            resultsDiv.appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+        }
+        
+        // Test functions
+        async function testStateInitialization() {
+            const state = workspaceManager.getState();
+            
+            if (!state) {
+                log('State initialization failed', false);
+                return false;
+            }
+            
+            log('State initialized successfully');
+            
+            // Check for required properties
+            const requiredProps = ['files', 'selectedFile', 'expandedFolders', 'actionStates', 'agentMappings'];
+            for (const prop of requiredProps) {
+                if (!(prop in state)) {
+                    log(`Missing property: ${prop}`, false);
+                    return false;
+                }
+            }
+            log('All required properties present');
+            
+            // Check action states structure
+            const categories = ['mcps', 'agents', 'rules'];
+            for (const cat of categories) {
+                if (!state.actionStates[cat]) {
+                    log(`Missing action category: ${cat}`, false);
+                    return false;
+                }
+                if (!('active' in state.actionStates[cat])) {
+                    log(`Missing 'active' property in ${cat}`, false);
+                    return false;
+                }
+                if (!('expanded' in state.actionStates[cat])) {
+                    log(`Missing 'expanded' property in ${cat}`, false);
+                    return false;
+                }
+                if (!('items' in state.actionStates[cat])) {
+                    log(`Missing 'items' property in ${cat}`, false);
+                    return false;
+                }
+            }
+            log('Action states structure valid');
+            
+            return true;
+        }
+        
+        async function testActionToggling() {
+            const state = workspaceManager.getState();
+            
+            // Test category toggling
+            const initialActive = state.isActionCategoryActive('mcps');
+            state.toggleActionCategory('mcps');
+            const afterToggle = state.isActionCategoryActive('mcps');
+            
+            if (initialActive === afterToggle) {
+                log('Category toggle failed', false);
+                return false;
+            }
+            log('Category toggle working');
+            
+            // Test item toggling
+            state.setActionItemState('agents', 'test-agent', false);
+            const initialItemState = state.isActionItemChecked('agents', 'test-agent');
+            state.toggleActionItem('agents', 'test-agent');
+            const afterItemToggle = state.isActionItemChecked('agents', 'test-agent');
+            
+            if (initialItemState === afterItemToggle) {
+                log('Item toggle failed', false);
+                return false;
+            }
+            log('Item toggle working');
+            
+            return true;
+        }
+        
+        async function testStatePersistence() {
+            const state = workspaceManager.getState();
+            
+            // Set some test data
+            state.setActionCategoryState('mcps', true, true);
+            state.setActionItemState('mcps', 'test-mcp', true);
+            state.setActionItemState('agents', 'test-agent', true);
+            state.agentMappings['test-agent'] = '.claude/agents/test-agent.md';
+            
+            // Save state
+            workspaceManager.saveState(workspaceManager.currentContextId);
+            
+            // Create new state and load from storage
+            const savedData = localStorage.getItem(`app:workspace:${workspaceManager.currentContextId}`);
+            if (!savedData) {
+                log('State not saved to localStorage', false);
+                return false;
+            }
+            log('State saved to localStorage');
+            
+            // Parse and verify
+            const parsed = JSON.parse(savedData);
+            if (!parsed.actionStates || !parsed.actionStates.mcps.active) {
+                log('Action states not persisted correctly', false);
+                return false;
+            }
+            if (!parsed.actionStates.mcps.items['test-mcp']) {
+                log('Action items not persisted correctly', false);
+                return false;
+            }
+            if (!parsed.agentMappings || !parsed.agentMappings['test-agent']) {
+                log('Agent mappings not persisted correctly', false);
+                return false;
+            }
+            log('State persistence working correctly');
+            
+            return true;
+        }
+        
+        async function testStateRestoration() {
+            // Set test data
+            const testData = {
+                contextId: workspaceManager.currentContextId,
+                files: {
+                    'test.md': '# Test File',
+                    '.mcp.json': '{"mcpServers":{}}'
+                },
+                selectedFile: 'test.md',
+                expandedFolders: [],
+                actionStates: {
+                    mcps: { active: true, expanded: true, items: { 'filesystem': true } },
+                    agents: { active: false, expanded: false, items: { 'researcher': true } },
+                    rules: { active: true, expanded: false, items: { 'no-comments': true } }
+                },
+                agentMappings: {
+                    'researcher': '.claude/agents/researcher.md'
+                }
+            };
+            
+            // Save test data
+            localStorage.setItem(`app:workspace:test-restore`, JSON.stringify(testData));
+            
+            // Load state
+            const restoredState = WorkspaceState.deserialize('test-restore', localStorage.getItem('app:workspace:test-restore'));
+            
+            if (!restoredState) {
+                log('State restoration failed', false);
+                return false;
+            }
+            log('State restored from localStorage');
+            
+            // Verify restoration
+            if (!restoredState.isActionCategoryActive('mcps')) {
+                log('MCP active state not restored', false);
+                return false;
+            }
+            if (!restoredState.isActionItemChecked('mcps', 'filesystem')) {
+                log('MCP item state not restored', false);
+                return false;
+            }
+            if (!restoredState.isActionItemChecked('agents', 'researcher')) {
+                log('Agent item state not restored', false);
+                return false;
+            }
+            if (!restoredState.agentMappings['researcher']) {
+                log('Agent mappings not restored', false);
+                return false;
+            }
+            log('All state properties restored correctly');
+            
+            // Clean up
+            localStorage.removeItem('app:workspace:test-restore');
+            
+            return true;
+        }
+        
+        // Run all tests
+        async function runAllTests() {
+            clearResults();
+            log('Starting test suite...', true);
+            
+            let allPassed = true;
+            
+            // Run tests
+            allPassed = await testStateInitialization() && allPassed;
+            allPassed = await testActionToggling() && allPassed;
+            allPassed = await testStatePersistence() && allPassed;
+            allPassed = await testStateRestoration() && allPassed;
+            
+            if (allPassed) {
+                log('✨ All tests passed!', true);
+            } else {
+                log('❌ Some tests failed', false);
+            }
+        }
+        
+        // Clear state
+        function clearState() {
+            if (confirm('This will clear all state data. Continue?')) {
+                workspaceManager.reset();
+                log('State cleared', true);
+                inspectState();
+            }
+        }
+        
+        // Inspect current state
+        function inspectState() {
+            const state = workspaceManager.getState();
+            const display = {
+                contextId: state.contextId,
+                filesCount: Object.keys(state.files).length,
+                files: Object.keys(state.files),
+                selectedFile: state.selectedFile,
+                actionStates: state.actionStates,
+                agentMappings: state.agentMappings,
+                expandedFolders: Array.from(state.expandedFolders)
+            };
+            
+            document.getElementById('state-inspector').textContent = JSON.stringify(display, null, 2);
+        }
+        
+        // Auto-run tests on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runAllTests, 500);
+        });
+    </script>
+</body>
+</html>

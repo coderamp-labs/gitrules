@@ -7,6 +7,29 @@ class WorkspaceState {
         this.files = {};  // File path -> content mapping
         this.selectedFile = null;
         this.expandedFolders = new Set();
+        
+        // Action/Tool states - unified state for toggles
+        this.actionStates = {
+            mcps: {
+                expanded: false,
+                active: false,
+                items: {}  // name -> checked state
+            },
+            agents: {
+                expanded: false,
+                active: false,
+                items: {}  // name -> checked state
+            },
+            rules: {
+                expanded: false,
+                active: false,
+                items: {}  // name -> checked state
+            }
+        };
+        
+        // Agent name to file path mappings for easier removal
+        this.agentMappings = {};
+        
         this.history = {
             past: [],
             present: null,
@@ -20,6 +43,12 @@ class WorkspaceState {
         this.files = {};
         this.selectedFile = null;
         this.expandedFolders = new Set();
+        this.actionStates = {
+            mcps: { expanded: false, active: false, items: {} },
+            agents: { expanded: false, active: false, items: {} },
+            rules: { expanded: false, active: false, items: {} }
+        };
+        this.agentMappings = {};
         this.history.present = this.snapshot();
         this.history.past = [];
         this.history.future = [];
@@ -31,6 +60,8 @@ class WorkspaceState {
             files: { ...this.files },
             selectedFile: this.selectedFile,
             expandedFolders: Array.from(this.expandedFolders),
+            actionStates: JSON.parse(JSON.stringify(this.actionStates)),
+            agentMappings: { ...this.agentMappings },
             timestamp: new Date().toISOString()
         };
     }
@@ -95,6 +126,12 @@ class WorkspaceState {
         this.files = { ...snapshot.files };
         this.selectedFile = snapshot.selectedFile;
         this.expandedFolders = new Set(snapshot.expandedFolders || []);
+        this.actionStates = snapshot.actionStates ? JSON.parse(JSON.stringify(snapshot.actionStates)) : {
+            mcps: { expanded: false, active: false, items: {} },
+            agents: { expanded: false, active: false, items: {} },
+            rules: { expanded: false, active: false, items: {} }
+        };
+        this.agentMappings = snapshot.agentMappings ? { ...snapshot.agentMappings } : {};
     }
 
     // Reset to empty state
@@ -103,7 +140,61 @@ class WorkspaceState {
         this.files = {};
         this.selectedFile = null;
         this.expandedFolders = new Set();
+        this.actionStates = {
+            mcps: { expanded: false, active: false, items: {} },
+            agents: { expanded: false, active: false, items: {} },
+            rules: { expanded: false, active: false, items: {} }
+        };
+        this.agentMappings = {};
         this.history.present = this.snapshot();
+    }
+    
+    // Toggle action category (MCPs, Agents, Rules)
+    toggleActionCategory(category) {
+        if (this.actionStates[category]) {
+            this.actionStates[category].active = !this.actionStates[category].active;
+            this.actionStates[category].expanded = this.actionStates[category].active;
+        }
+    }
+    
+    // Set action category state
+    setActionCategoryState(category, active, expanded) {
+        if (this.actionStates[category]) {
+            this.actionStates[category].active = active;
+            this.actionStates[category].expanded = expanded;
+        }
+    }
+    
+    // Toggle individual action item
+    toggleActionItem(category, itemName) {
+        if (this.actionStates[category]) {
+            if (!this.actionStates[category].items[itemName]) {
+                this.actionStates[category].items[itemName] = false;
+            }
+            this.actionStates[category].items[itemName] = !this.actionStates[category].items[itemName];
+        }
+    }
+    
+    // Set action item state
+    setActionItemState(category, itemName, checked) {
+        if (this.actionStates[category]) {
+            this.actionStates[category].items[itemName] = checked;
+        }
+    }
+    
+    // Check if action category is active
+    isActionCategoryActive(category) {
+        return this.actionStates[category]?.active || false;
+    }
+    
+    // Check if action category is expanded
+    isActionCategoryExpanded(category) {
+        return this.actionStates[category]?.expanded || false;
+    }
+    
+    // Check if action item is checked
+    isActionItemChecked(category, itemName) {
+        return this.actionStates[category]?.items[itemName] || false;
     }
 
     // Check if we can undo/redo
@@ -122,6 +213,8 @@ class WorkspaceState {
             files: this.files,
             selectedFile: this.selectedFile,
             expandedFolders: Array.from(this.expandedFolders),
+            actionStates: this.actionStates,
+            agentMappings: this.agentMappings,
             history: {
                 past: this.history.past,
                 present: this.history.present,
@@ -139,6 +232,16 @@ class WorkspaceState {
                 state.files = parsed.files || {};
                 state.selectedFile = parsed.selectedFile || null;
                 state.expandedFolders = new Set(parsed.expandedFolders || []);
+                
+                // Restore action states
+                if (parsed.actionStates) {
+                    state.actionStates = parsed.actionStates;
+                }
+                
+                // Restore agent mappings
+                if (parsed.agentMappings) {
+                    state.agentMappings = parsed.agentMappings;
+                }
                 
                 if (parsed.history) {
                     state.history.past = parsed.history.past || [];
@@ -316,6 +419,11 @@ class WorkspaceManager {
             }
         }
         
+        // Restore action states UI
+        if (window.restoreActionStates) {
+            window.restoreActionStates();
+        }
+        
         this.updateHistoryButtons();
         this.updateContextDropdown();
     }
@@ -355,10 +463,10 @@ class WorkspaceManager {
     }
 
     // Include a file (main action for adding files)
-    includeFile(path, content) {
+    includeFile(path, content, skipConfirmation = false) {
         if (!this.currentState) return false;
         
-        if (this.currentState.files[path]) {
+        if (this.currentState.files[path] && !skipConfirmation) {
             if (!confirm(`File "${path}" already exists. Overwrite?`)) {
                 return false;
             }
@@ -371,10 +479,10 @@ class WorkspaceManager {
     }
 
     // Delete a file
-    deleteFile(path) {
+    deleteFile(path, skipConfirmation = false) {
         if (!this.currentState) return false;
         
-        if (!confirm(`Delete "${path}"?`)) {
+        if (!skipConfirmation && !confirm(`Delete "${path}"?`)) {
             return false;
         }
         
