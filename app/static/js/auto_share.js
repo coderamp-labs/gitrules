@@ -59,6 +59,9 @@ class AutoShareManager {
     markDirty() {
         this.dirty = true;
         
+        // Immediately gray out the UI to show context has changed
+        this.setUnsyncedState();
+        
         // Clear existing timer
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
@@ -179,6 +182,21 @@ class AutoShareManager {
         return JSON.stringify(payload);
     }
     
+    setUnsyncedState() {
+        // Gray out only the script input immediately when content changes
+        if (this.linkInput) {
+            this.linkInput.classList.add('opacity-50');
+            this.linkInput.disabled = true;
+            if (this.currentShareUrl) {
+                this.linkInput.value = this.currentShareUrl + ' (updating...)';
+            }
+        }
+        // Keep copy button enabled but just disable if no URL
+        if (this.copyButton) {
+            this.copyButton.disabled = !this.currentShareUrl;
+        }
+    }
+    
     setState(newState) {
         this.state = newState;
         
@@ -211,8 +229,9 @@ class AutoShareManager {
                     this.linkInput.disabled = true;
                 }
                 if (this.copyButton) {
-                    this.copyButton.disabled = true;
-                    this.copyButton.classList.add('opacity-50');
+                    this.copyButton.disabled = !this.currentShareUrl;
+                    // Don't gray out the copy button
+                    this.copyButton.classList.remove('opacity-50');
                 }
                 break;
                 
