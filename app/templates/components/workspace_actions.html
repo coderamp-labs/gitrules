@@ -406,14 +406,40 @@ function restoreActionStates() {
     const state = window.workspaceManager?.getState();
     if (!state) return;
     
+    // First, clear all states and reset loadedData
+    loadedData = {};
+    
+    // Clear MCPs state
+    const mcpButton = document.querySelector('[data-theme="yellow"]');
+    const mcpDropdown = document.getElementById('dropdown-mcps');
+    if (mcpButton && mcpDropdown) {
+        mcpButton.classList.remove('toggled', 'expanded');
+        mcpDropdown.style.display = 'none';
+    }
+    
+    // Clear Rules state
+    const rulesButton = document.querySelector('[data-theme="pink"]');
+    const rulesDropdown = document.getElementById('dropdown-rules');
+    if (rulesButton && rulesDropdown) {
+        rulesButton.classList.remove('toggled', 'expanded');
+        rulesDropdown.style.display = 'none';
+    }
+    
+    // Clear Agents state
+    const agentsButton = document.querySelector('[data-theme="blue"]');
+    const agentsDropdown = document.getElementById('dropdown-agents');
+    if (agentsButton && agentsDropdown) {
+        agentsButton.classList.remove('toggled', 'expanded');
+        agentsDropdown.style.display = 'none';
+    }
+    
+    // Now restore the active states
     // Restore MCPs state
     if (state.isActionCategoryActive('mcps')) {
-        const button = document.querySelector('[data-theme="yellow"]');
-        const dropdown = document.getElementById('dropdown-mcps');
-        if (button && dropdown) {
-            button.classList.add('toggled');
-            button.classList.add('expanded');
-            dropdown.style.display = 'block';
+        if (mcpButton && mcpDropdown) {
+            mcpButton.classList.add('toggled');
+            mcpButton.classList.add('expanded');
+            mcpDropdown.style.display = 'block';
             if (!loadedData['mcps']) {
                 loadDropdownData('mcps');
                 loadedData['mcps'] = true;
@@ -423,12 +449,10 @@ function restoreActionStates() {
     
     // Restore Rules state
     if (state.isActionCategoryActive('rules')) {
-        const button = document.querySelector('[data-theme="pink"]');
-        const dropdown = document.getElementById('dropdown-rules');
-        if (button && dropdown) {
-            button.classList.add('toggled');
-            button.classList.add('expanded');
-            dropdown.style.display = 'block';
+        if (rulesButton && rulesDropdown) {
+            rulesButton.classList.add('toggled');
+            rulesButton.classList.add('expanded');
+            rulesDropdown.style.display = 'block';
             if (!loadedData['rules']) {
                 loadDropdownData('rules');
                 loadedData['rules'] = true;
@@ -438,12 +462,10 @@ function restoreActionStates() {
     
     // Restore Agents state
     if (state.isActionCategoryActive('agents')) {
-        const button = document.querySelector('[data-theme="blue"]');
-        const dropdown = document.getElementById('dropdown-agents');
-        if (button && dropdown) {
-            button.classList.add('toggled');
-            button.classList.add('expanded');
-            dropdown.style.display = 'block';
+        if (agentsButton && agentsDropdown) {
+            agentsButton.classList.add('toggled');
+            agentsButton.classList.add('expanded');
+            agentsDropdown.style.display = 'block';
             if (!loadedData['agents']) {
                 loadDropdownData('agents');
                 loadedData['agents'] = true;
