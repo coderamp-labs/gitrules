@@ -209,7 +209,10 @@ async function openFile(path) {
     const state = window.workspaceManager?.getState();
     if (!state || !state.files[path]) {
         console.error('File not found:', path);
-        window.workspaceMonacoEditor.setValue(`⚠️ File not found: "${path}"`);
+        // Update file path label to show error
+        updateFilePathLabel(null, `⚠️ File not found: "${path}"`);
+        // Clear editor
+        window.workspaceMonacoEditor.setValue('');
         return;
     }
     
@@ -229,11 +232,15 @@ async function openFile(path) {
 }
 
 // Update file path label
-function updateFilePathLabel(path) {
+function updateFilePathLabel(path, errorMessage) {
     const filePathElement = document.getElementById('current-file-path');
     if (!filePathElement) return;
     
-    if (path) {
+    if (errorMessage) {
+        filePathElement.textContent = errorMessage;
+        filePathElement.className = 'text-xs text-red-600 bg-red-50 px-2 py-1 border border-red-300 rounded';
+        filePathElement.style.fontFamily = "'Courier New', monospace";
+    } else if (path) {
         filePathElement.textContent = path;
         filePathElement.className = 'text-xs text-gray-600 bg-gray-50 px-2 py-1 border border-gray-300 rounded';
         filePathElement.style.fontFamily = "'Courier New', monospace";

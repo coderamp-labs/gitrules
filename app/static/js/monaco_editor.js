@@ -73,62 +73,9 @@ function initializeQuickActionHandlers() {
 }
 
 function updateWorkspaceEditor(tabId) {
-    if (!workspaceMonacoEditor) return;
-    
-    const editorContent = {
-        'tab-claude': {
-            content: `# Claude Configuration
-
-## Subagents
-- Researcher: Information gathering specialist
-- Memory Manager: Context and history management
-
-## Guidelines
-- Python: PEP 8 compliance, type hints
-- Code quality: Clean, documented, tested
-
-## MCPs (Model Context Protocols)
-- Database integration
-- File system access
-- API connections`,
-            language: 'markdown'
-        },
-        'tab-cursor': {
-            content: `// Cursor/VS Code Configuration
-
-{
-  "rules": [
-    "Always use TypeScript for new files",
-    "Prefer functional components in React",
-    "Use meaningful variable names",
-    "Add JSDoc comments for functions"
-  ],
-  "preferences": {
-    "tabSize": 2,
-    "insertSpaces": true,
-    "trimTrailingWhitespace": true
-  },
-  "extensions": [
-    "Prettier",
-    "ESLint",
-    "GitLens",
-    "Auto Rename Tag"
-  ]
-}`,
-            language: 'json'
-        }
-    };
-    
-    const config = editorContent[tabId];
-    if (config) {
-        workspaceMonacoEditor.setValue(config.content);
-        monaco.editor.setModelLanguage(workspaceMonacoEditor.getModel(), config.language);
-        console.log("Updated workspace editor:", config.content);
-        const languageSelect = document.getElementById('workspace-language-select');
-        if (languageSelect) {
-            languageSelect.value = config.language;
-        }
-    }
+    // This function is no longer needed as we're using file-based content
+    // Kept for compatibility but does nothing
+    return;
 }
 
 // Export functions for global use
