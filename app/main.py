@@ -37,7 +37,40 @@ async def favicon():
 async def index(request: Request):
     # Get all actions data for server-side rendering
     agents = [agent.dict() for agent in actions_loader.get_agents()]
-    rules = [rule.dict() for rule in actions_loader.get_rules()]
+    all_rules = actions_loader.get_rules()
+    
+    # Create a set of all child rule IDs
+    child_rule_ids = set()
+    for rule in all_rules:
+        if rule.children:
+            child_rule_ids.update(rule.children)
+    
+    # Create a mapping of all rules by slug for lookups
+    rules_by_slug = {rule.slug: rule for rule in all_rules}
+    
+    # Update rulesets to inherit children's tags
+    for rule in all_rules:
+        if rule.type == 'ruleset' and rule.children:
+            # Collect all tags from children
+            inherited_tags = set(rule.tags or [])
+            for child_slug in rule.children:
+                child_rule = rules_by_slug.get(child_slug)
+                if child_rule and child_rule.tags:
+                    inherited_tags.update(child_rule.tags)
+            rule.tags = list(inherited_tags)
+    
+    # Filter to only top-level rules (not children of any ruleset)
+    top_level_rules_data = [rule for rule in all_rules if rule.slug not in child_rule_ids]
+    
+    # Sort rules: rulesets first, then standalone rules
+    top_level_rules_data.sort(key=lambda rule: (rule.type != 'ruleset', rule.display_name or rule.name))
+    
+    # Convert to dict
+    top_level_rules = [rule.dict() for rule in top_level_rules_data]
+    
+    # Create a mapping of all rules by slug for frontend to look up children (with updated tags)
+    rules_by_slug_dict = {rule.slug: rule.dict() for rule in all_rules}
+    
     mcps = [mcp.dict() for mcp in actions_loader.get_mcps()]
     
     return templates.TemplateResponse(
@@ -45,7 +78,8 @@ async def index(request: Request):
         {
             "request": request,
             "agents": agents,
-            "rules": rules,
+            "rules": top_level_rules,
+            "rules_by_slug": rules_by_slug_dict,
             "mcps": mcps
         }
     )

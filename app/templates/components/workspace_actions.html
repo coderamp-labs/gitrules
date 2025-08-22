@@ -9,10 +9,11 @@
                 <input 
                     type="text" 
                     class="search-input"
-                    placeholder="Search actions..."
-                    onkeyup="searchActions(this.value)"
+                    placeholder="Search actions, tags..."
+                    onkeyup="filterActions(this.value)"
+                    onkeydown="handleSearchKeydown(event)"
                 />
-                <div class="search-results" id="search-results" style="display: none;"></div>
+                <div class="search-clear" id="search-clear" style="display: none;" onclick="clearSearch()">×</div>
             </div>
         </div>
 
@@ -60,10 +61,27 @@
                 <div class="menu-dropdown" id="dropdown-rules" style="display: none;">
                     <div id="rules-list" class="p-2">
                         {% for rule in rules %}
-                        <div class="dropdown-item" onclick="toggleDropdownItem(this, '{{ rule.slug or rule.name }}', 'rules')">
+                        <div class="dropdown-item {% if rule.type == 'ruleset' %}ruleset-item{% endif %}" 
+                             {% if rule.type == 'ruleset' %}
+                             onclick="toggleRuleset(event, this, '{{ rule.slug }}')"
+                             {% else %}
+                             onclick="toggleDropdownItem(this, '{{ rule.slug or rule.name }}', 'rules')"
+                             {% endif %}
+                             data-rule-type="{{ rule.type }}"
+                             data-rule-slug="{{ rule.slug }}">
+                            {% if rule.type == 'ruleset' %}
+                            <span class="dropdown-item-icon ruleset-expand">▶</span>
+                            <span class="dropdown-item-checkbox" onclick="toggleRulesetItems(event, '{{ rule.slug }}')">+</span>
+                            {% else %}
                             <span class="dropdown-item-icon">+</span>
+                            {% endif %}
                             <span>{{ rule.display_name or rule.name }}</span>
                         </div>
+                        {% if rule.type == 'ruleset' and rule.children %}
+                        <div class="ruleset-children" id="children-{{ rule.slug }}" style="display: none; margin-left: 20px;">
+                            <!-- Children will be populated by JavaScript -->
+                        </div>
+                        {% endif %}
                         {% endfor %}
                         {% if not rules %}
                         <div class="text-xs text-gray-500">No rules available</div>
@@ -117,7 +135,7 @@
 
 .search-input {
     width: 100%;
-    padding: 8px 12px;
+    padding: 8px 32px 8px 12px;
     border: 2px solid black;
     font-size: 14px;
     background: white;
@@ -129,6 +147,29 @@
     outline: none;
     box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
     transform: translate(-1px, -1px);
+}
+
+.search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #666;
+    border-radius: 50%;
+    transition: all 150ms ease;
+}
+
+.search-clear:hover {
+    background: #f3f4f6;
+    color: black;
 }
 
 .search-results {
@@ -321,6 +362,66 @@
     background: black;
     color: white;
 }
+
+/* Ruleset specific styles */
+.ruleset-item {
+    font-weight: 600;
+    gap: 4px;
+}
+
+.ruleset-expand {
+    transition: transform 150ms ease;
+    flex-shrink: 0;
+}
+
+.ruleset-item.expanded .ruleset-expand {
+    transform: rotate(90deg);
+}
+
+.dropdown-item-checkbox {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border: 1px solid black;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.dropdown-item-checkbox:hover {
+    background: #f3f4f6;
+}
+
+.dropdown-item-checkbox.checked {
+    background: black;
+    color: white;
+}
+
+.dropdown-item-checkbox.partial {
+    background: #6b7280;
+    color: white;
+}
+
+.ruleset-children {
+    border-left: 2px solid #e5e7eb;
+    margin-bottom: 8px;
+}
+
+.ruleset-children .dropdown-item {
+    font-size: 11px;
+}
+
+/* Search filtering */
+.menu-item.filtered-hidden,
+.dropdown-item.filtered-hidden {
+    display: none !important;
+}
+
+.search-match {
+    background: #fef3c7;
+}
 </style>
 
 <script>
@@ -330,6 +431,9 @@ const serverActions = {
     rules: {{ rules | tojson | safe }},
     mcps: {{ mcps | tojson | safe }}
 };
+
+// Store all rules by slug for lookups
+const rulesBySlug = {{ rules_by_slug | tojson | safe }};
 
 // Track loaded data
 let loadedData = {};
@@ -345,58 +449,213 @@ let searchTimeout = null;
 // Initialize search data - no longer needed as data comes from server
 // The allActions array is already initialized with server data above
 
-// Search actions
-function searchActions(query) {
+// Filter actions in-place
+function filterActions(query) {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        const resultsContainer = document.getElementById('search-results');
+        const searchClear = document.getElementById('search-clear');
         
         if (!query || query.trim() === '') {
-            resultsContainer.style.display = 'none';
+            // Show all items
+            showAllItems();
+            searchClear.style.display = 'none';
             return;
         }
         
-        const searchTerm = query.toLowerCase();
-        const filtered = allActions.filter(action => {
-            const displayName = action.display_name || action.name;
-            return displayName.toLowerCase().includes(searchTerm);
-        });
+        searchClear.style.display = 'block';
         
-        if (filtered.length > 0) {
-            resultsContainer.innerHTML = filtered.map(action => {
-                const itemId = action.slug || action.name;
-                const displayName = action.display_name || action.name;
-                return `
-                    <div class="search-result-item" onclick="selectSearchResult('${itemId}', '${action.type}')">
-                        <span class="search-result-type">${action.type}</span>
-                        <span>${displayName}</span>
-                    </div>
-                `;
-            }).join('');
-            resultsContainer.style.display = 'block';
-        } else {
-            resultsContainer.innerHTML = '<div class="search-result-item">No results found</div>';
-            resultsContainer.style.display = 'block';
-        }
+        const searchTerm = query.toLowerCase();
+        
+        // Filter each category
+        filterCategory('mcps', searchTerm);
+        filterCategory('rules', searchTerm);
+        filterCategory('agents', searchTerm);
     }, 200);
 }
 
-// Select search result
-async function selectSearchResult(name, type) {
-    const resultsContainer = document.getElementById('search-results');
+// Filter items within a category
+function filterCategory(categoryType, searchTerm) {
+    const menuItem = document.querySelector(`[onclick*="${categoryType}"]`).closest('.menu-item');
+    const dropdown = document.getElementById(`dropdown-${categoryType}`);
+    
+    if (!dropdown) return;
+    
+    let hasVisibleItems = false;
+    
+    // Get the data for this category
+    const categoryData = serverActions[categoryType] || [];
+    
+    // Filter top-level items
+    const items = dropdown.querySelectorAll('.dropdown-item:not(.ruleset-children .dropdown-item)');
+    items.forEach(item => {
+        const itemSlug = item.getAttribute('data-rule-slug') || 
+                        item.onclick?.toString().match(/toggleDropdownItem\(this,\s*'([^']+)'/)?.[1];
+        
+        if (!itemSlug) return;
+        
+        const itemData = categoryType === 'rules' ? 
+            rulesBySlug[itemSlug] : 
+            categoryData.find(d => (d.slug || d.name) === itemSlug);
+        
+        if (!itemData) return;
+        
+        // Check if item itself matches
+        const itemMatch = fuzzyMatch(itemData, searchTerm);
+        
+        // For rulesets, also check if any children match
+        let hasMatchingChildren = false;
+        if (itemData.type === 'ruleset' && itemData.children) {
+            hasMatchingChildren = itemData.children.some(childSlug => {
+                const childData = rulesBySlug[childSlug];
+                return childData && fuzzyMatch(childData, searchTerm).score > 0;
+            });
+        }
+        
+        const shouldShow = itemMatch.score > 0 || hasMatchingChildren;
+        
+        if (shouldShow) {
+            item.classList.remove('filtered-hidden');
+            if (itemMatch.score > 0) {
+                item.classList.add('search-match');
+            } else {
+                item.classList.remove('search-match');
+            }
+            hasVisibleItems = true;
+            
+            // If it's a ruleset, filter children
+            if (itemData.type === 'ruleset' && itemData.children) {
+                const childrenContainer = document.getElementById(`children-${itemSlug}`);
+                if (childrenContainer && childrenContainer.style.display !== 'none') {
+                    filterRulesetChildren(itemSlug, searchTerm);
+                }
+            }
+        } else {
+            item.classList.add('filtered-hidden');
+            item.classList.remove('search-match');
+        }
+    });
+    
+    // Hide/show the entire category based on whether it has matches
+    if (hasVisibleItems) {
+        menuItem.classList.remove('filtered-hidden');
+    } else {
+        menuItem.classList.add('filtered-hidden');
+    }
+}
+
+// Filter children of a ruleset
+function filterRulesetChildren(rulesetSlug, searchTerm) {
+    const childrenContainer = document.getElementById(`children-${rulesetSlug}`);
+    if (!childrenContainer) return;
+    
+    const childItems = childrenContainer.querySelectorAll('.dropdown-item');
+    childItems.forEach(child => {
+        const childSlug = child.getAttribute('data-rule-slug');
+        if (!childSlug) return;
+        
+        const childData = rulesBySlug[childSlug];
+        if (!childData) return;
+        
+        const matchResult = fuzzyMatch(childData, searchTerm);
+        
+        if (matchResult.score > 0) {
+            child.classList.remove('filtered-hidden');
+            child.classList.add('search-match');
+        } else {
+            child.classList.add('filtered-hidden');
+            child.classList.remove('search-match');
+        }
+    });
+}
+
+// Fuzzy matching function
+function fuzzyMatch(item, searchTerm) {
+    const displayName = (item.display_name || item.name || '').toLowerCase();
+    const tags = (item.tags || []).join(' ').toLowerCase();
+    const content = (item.content || '').toLowerCase();
+    
+    // Combine all searchable text
+    const searchableText = `${displayName} ${tags} ${content}`;
+    
+    // Calculate fuzzy match score
+    const score = calculateFuzzyScore(searchableText, searchTerm.toLowerCase());
+    
+    return {
+        score: score,
+        text: searchableText
+    };
+}
+
+// Calculate fuzzy match score using a simple algorithm
+function calculateFuzzyScore(text, pattern) {
+    if (!pattern) return 1;
+    if (!text) return 0;
+    
+    // Exact match gets highest score
+    if (text.includes(pattern)) {
+        return 100;
+    }
+    
+    // Check for subsequence match (letters in order but not necessarily consecutive)
+    let patternIndex = 0;
+    let matches = 0;
+    let consecutiveMatches = 0;
+    let maxConsecutive = 0;
+    
+    for (let i = 0; i < text.length && patternIndex < pattern.length; i++) {
+        if (text[i] === pattern[patternIndex]) {
+            matches++;
+            patternIndex++;
+            consecutiveMatches++;
+            maxConsecutive = Math.max(maxConsecutive, consecutiveMatches);
+        } else {
+            consecutiveMatches = 0;
+        }
+    }
+    
+    // If we didn't match all pattern characters, score is 0
+    if (patternIndex < pattern.length) {
+        return 0;
+    }
+    
+    // Calculate score based on:
+    // - How many characters matched (coverage)
+    // - How consecutive the matches were (density)
+    // - Length penalty (prefer shorter matches)
+    const coverage = matches / pattern.length;
+    const density = maxConsecutive / pattern.length;
+    const lengthPenalty = pattern.length / text.length;
+    
+    return Math.floor((coverage * 40 + density * 40 + lengthPenalty * 20));
+}
+
+// Show all items (clear filter)
+function showAllItems() {
+    const hiddenItems = document.querySelectorAll('.filtered-hidden');
+    hiddenItems.forEach(item => {
+        item.classList.remove('filtered-hidden');
+    });
+    
+    const matchedItems = document.querySelectorAll('.search-match');
+    matchedItems.forEach(item => {
+        item.classList.remove('search-match');
+    });
+}
+
+// Clear search
+function clearSearch() {
     const searchInput = document.querySelector('.search-input');
+    const searchClear = document.getElementById('search-clear');
     
-    // Clear search
     searchInput.value = '';
-    resultsContainer.style.display = 'none';
-    
-    // Install the selected action
-    if (type === 'MCP') {
-        await installMCP(name);
-    } else if (type === 'Rule') {
-        await installRule(name);
-    } else if (type === 'Agent') {
-        await installAgent(name);
+    searchClear.style.display = 'none';
+    showAllItems();
+}
+
+// Handle search keyboard shortcuts
+function handleSearchKeydown(event) {
+    if (event.key === 'Escape') {
+        clearSearch();
     }
 }
 
@@ -486,6 +745,157 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 });
 
+// Toggle ruleset expansion
+function toggleRuleset(event, element, rulesetSlug) {
+    // Prevent event from bubbling to checkbox
+    if (event.target.classList.contains('dropdown-item-checkbox')) {
+        return;
+    }
+    
+    const childrenContainer = document.getElementById(`children-${rulesetSlug}`);
+    const icon = element.querySelector('.ruleset-expand');
+    const ruleset = rulesBySlug[rulesetSlug];
+    
+    if (!childrenContainer || !ruleset) return;
+    
+    const isExpanded = element.classList.contains('expanded');
+    
+    if (isExpanded) {
+        // Collapse
+        element.classList.remove('expanded');
+        childrenContainer.style.display = 'none';
+        icon.textContent = '▶';
+    } else {
+        // Expand
+        element.classList.add('expanded');
+        childrenContainer.style.display = 'block';
+        icon.textContent = '▼';
+        
+        // Populate children if not already done
+        if (childrenContainer.children.length === 0 && ruleset.children) {
+            ruleset.children.forEach(childSlug => {
+                const childRule = rulesBySlug[childSlug];
+                if (childRule) {
+                    const childDiv = document.createElement('div');
+                    childDiv.className = 'dropdown-item';
+                    childDiv.setAttribute('data-rule-slug', childSlug);
+                    childDiv.onclick = function() {
+                        toggleDropdownItem(this, childSlug, 'rules');
+                        updateRulesetCheckbox(rulesetSlug);
+                    };
+                    childDiv.innerHTML = `
+                        <span class="dropdown-item-icon">+</span>
+                        <span>${childRule.display_name || childRule.name}</span>
+                    `;
+                    
+                    // Check if this child is already active
+                    const state = window.workspaceManager?.getState();
+                    if (state && state.isActionItemChecked('rules', childSlug)) {
+                        childDiv.classList.add('active');
+                        childDiv.querySelector('.dropdown-item-icon').textContent = '−';
+                    }
+                    
+                    childrenContainer.appendChild(childDiv);
+                }
+            });
+            
+            // Update checkbox state after populating children
+            updateRulesetCheckbox(rulesetSlug);
+        }
+    }
+}
+
+// Toggle all items in a ruleset
+function toggleRulesetItems(event, rulesetSlug) {
+    event.stopPropagation();
+    
+    const ruleset = rulesBySlug[rulesetSlug];
+    if (!ruleset || !ruleset.children) return;
+    
+    const state = window.workspaceManager?.getState();
+    if (!state) return;
+    
+    // Check current state of all children
+    const checkedChildren = ruleset.children.filter(childSlug => 
+        state.isActionItemChecked('rules', childSlug)
+    );
+    
+    // If all or some are checked, uncheck all. If none are checked, check all.
+    const shouldCheck = checkedChildren.length === 0;
+    
+    // Toggle all children
+    ruleset.children.forEach(childSlug => {
+        if (shouldCheck) {
+            if (!state.isActionItemChecked('rules', childSlug)) {
+                installRule(childSlug);
+                state.setActionItemState('rules', childSlug, true);
+            }
+        } else {
+            if (state.isActionItemChecked('rules', childSlug)) {
+                removeRule(childSlug);
+                state.setActionItemState('rules', childSlug, false);
+            }
+        }
+    });
+    
+    // Update UI for all visible children
+    const childrenContainer = document.getElementById(`children-${rulesetSlug}`);
+    if (childrenContainer) {
+        const childItems = childrenContainer.querySelectorAll('.dropdown-item');
+        childItems.forEach(item => {
+            const childSlug = item.getAttribute('data-rule-slug');
+            if (childSlug) {
+                const icon = item.querySelector('.dropdown-item-icon');
+                if (shouldCheck) {
+                    item.classList.add('active');
+                    if (icon) icon.textContent = '−';
+                } else {
+                    item.classList.remove('active');
+                    if (icon) icon.textContent = '+';
+                }
+            }
+        });
+    }
+    
+    // Update the checkbox appearance
+    updateRulesetCheckbox(rulesetSlug);
+    
+    // Save state
+    window.workspaceManager.saveState(window.workspaceManager.currentContextId);
+}
+
+// Update ruleset checkbox based on children state
+function updateRulesetCheckbox(rulesetSlug) {
+    const ruleset = rulesBySlug[rulesetSlug];
+    if (!ruleset || !ruleset.children) return;
+    
+    const state = window.workspaceManager?.getState();
+    if (!state) return;
+    
+    const rulesetElement = document.querySelector(`[data-rule-slug="${rulesetSlug}"]`);
+    if (!rulesetElement) return;
+    
+    const checkbox = rulesetElement.querySelector('.dropdown-item-checkbox');
+    if (!checkbox) return;
+    
+    // Count checked children
+    const checkedChildren = ruleset.children.filter(childSlug => 
+        state.isActionItemChecked('rules', childSlug)
+    );
+    
+    // Update checkbox state
+    checkbox.classList.remove('checked', 'partial');
+    if (checkedChildren.length === 0) {
+        checkbox.textContent = '+';
+    } else if (checkedChildren.length === ruleset.children.length) {
+        checkbox.classList.add('checked');
+        checkbox.textContent = '−';
+    } else {
+        checkbox.classList.add('partial');
+        checkbox.textContent = '−';
+    }
+}
+
 // Toggle menu button - handles both toggle and expand together
 function toggleMenuButton(button, type) {
     const state = window.workspaceManager?.getState();
@@ -572,17 +982,30 @@ function loadDropdownData(type) {
     // Update each dropdown item's state
     const items = container.querySelectorAll('.dropdown-item');
     items.forEach(item => {
+        // Handle ruleset items separately
+        if (item.classList.contains('ruleset-item')) {
+            const rulesetSlug = item.getAttribute('data-rule-slug');
+            if (rulesetSlug) {
+                updateRulesetCheckbox(rulesetSlug);
+            }
+            return;
+        }
+        
         const itemName = item.getAttribute('data-item-id') || 
-                        item.onclick.toString().match(/toggleDropdownItem\(this,\s*'([^']+)'/)?.[1];
+                        item.onclick?.toString().match(/toggleDropdownItem\(this,\s*'([^']+)'/)?.[1];
         if (itemName) {
             const isChecked = state.isActionItemChecked(type, itemName);
             const icon = item.querySelector('.dropdown-item-icon');
             if (isChecked) {
                 item.classList.add('active');
-                if (icon) icon.textContent = '−';
+                if (icon && !item.classList.contains('ruleset-item')) {
+                    icon.textContent = '−';
+                }
             } else {
                 item.classList.remove('active');
-                if (icon) icon.textContent = '+';
+                if (icon && !item.classList.contains('ruleset-item')) {
+                    icon.textContent = '+';
+                }
             }
         }
     });

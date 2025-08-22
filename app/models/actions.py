@@ -14,6 +14,11 @@ class Rule(BaseModel):
     display_name: Optional[str] = None
     slug: Optional[str] = None
     content: Optional[str] = None
+    author: Optional[str] = None
+    tags: Optional[List[str]] = None
+    children: Optional[List[str]] = None  # List of rule IDs
+    type: str = "rule"  # "rule" or "ruleset"
+    namespace: Optional[str] = None
 
 class MCP(BaseModel):
     name: str

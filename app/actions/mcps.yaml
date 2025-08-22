@@ -27,3 +27,15 @@ mcps:
     - '@supabase/mcp-server-supabase@latest'
     - --access-token
     - ${SUPABASE_ACCESS_TOKEN}
+- display_name: Context7
+  slug: Context7
+  config:
+    type: http
+    url: https://mcp.context7.com/mcp/
+    headers:
+      "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+- display_name: Exa Search
+  slug: ExaSearch
+  config:
+    type: http
+    url: https://mcp.exa.ai/mcp?exa_api_key=${EXA_API_KEY}

@@ -37,23 +37,35 @@ class ActionsLoader:
         else:
             self.agents = []
     
+    def _parse_rule(self, slug: str, rule_data: Dict[str, Any]) -> Rule:
+        """Parse a single rule or ruleset from the YAML data"""
+        rule = Rule(
+            name=slug,  # Use slug as name for backward compat
+            filename=f"{slug}.yaml",  # Virtual filename
+            display_name=rule_data.get('display_name'),
+            slug=slug,
+            content=rule_data.get('content'),
+            author=rule_data.get('author'),
+            tags=rule_data.get('tags'),
+            type=rule_data.get('type', 'rule'),
+            namespace=rule_data.get('namespace'),
+            children=rule_data.get('children')  # Now just a list of rule IDs
+        )
+        
+        return rule
+    
     def load_rules(self):
         """Load all rules from rules.yaml"""
         rules_file = self.actions_dir / "rules.yaml"
         if rules_file.exists():
             with open(rules_file, 'r') as f:
                 data = yaml.safe_load(f)
-                if data and 'rules' in data:
-                    self.rules = [
-                        Rule(
-                            name=rule.get('slug', ''),  # Use slug as name for backward compat
-                            filename=f"{rule.get('slug', '')}.yaml",  # Virtual filename
-                            display_name=rule.get('display_name'),
-                            slug=rule.get('slug'),
-                            content=rule.get('content')
-                        )
-                        for rule in data['rules']
-                    ]
+                if data:
+                    self.rules = []
+                    # Now the top-level keys are the slugs
+                    for slug, rule_data in data.items():
+                        rule = self._parse_rule(slug, rule_data)
+                        self.rules.append(rule)
         else:
             self.rules = []
     
