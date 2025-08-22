@@ -463,14 +463,8 @@ class WorkspaceManager {
     }
 
     // Include a file (main action for adding files)
-    includeFile(path, content, skipConfirmation = false) {
+    includeFile(path, content) {
         if (!this.currentState) return false;
-        
-        if (this.currentState.files[path] && !skipConfirmation) {
-            if (!confirm(`File "${path}" already exists. Overwrite?`)) {
-                return false;
-            }
-        }
         
         this.currentState.addFile(path, content);
         this.saveState(this.currentContextId);
@@ -479,12 +473,8 @@ class WorkspaceManager {
     }
 
     // Delete a file
-    deleteFile(path, skipConfirmation = false) {
+    deleteFile(path) {
         if (!this.currentState) return false;
-        
-        if (!skipConfirmation && !confirm(`Delete "${path}"?`)) {
-            return false;
-        }
         
         this.currentState.deleteFile(path);
         this.saveState(this.currentContextId);
@@ -516,11 +506,10 @@ class WorkspaceManager {
     reset() {
         if (!this.currentState) return;
         
-        if (confirm('Reset will clear all files. Are you sure?')) {
-            this.currentState.reset();
-            this.saveState(this.currentContextId);
-            this.render();
-        }
+        // Reset without confirmation
+        this.currentState.reset();
+        this.saveState(this.currentContextId);
+        this.render();
     }
 }
 

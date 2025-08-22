@@ -504,18 +504,18 @@ async function removeFromContext(type) {
             );
             agentFiles.forEach(file => {
                 // Use workspaceManager.deleteFile which triggers render
-                window.workspaceManager.deleteFile(file, true);
+                window.workspaceManager.deleteFile(file);
             });
         } else if (type === 'mcps') {
             // Remove MCP config entirely when toggling off MCPs category
             if (state.files['.mcp.json']) {
-                window.workspaceManager.deleteFile('.mcp.json', true);
+                window.workspaceManager.deleteFile('.mcp.json');
             }
         } else if (type === 'rules') {
             // Remove CLAUDE.md entirely when toggling off Rules category
             // (since having an empty CLAUDE.md provides no value)
             if (state.files['CLAUDE.md']) {
-                window.workspaceManager.deleteFile('CLAUDE.md', true);
+                window.workspaceManager.deleteFile('CLAUDE.md');
             }
         }
         // No need to manually save/render - deleteFile handles it
@@ -624,7 +624,7 @@ async function installAgent(agentName) {
                 }
                 
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile(result.path, result.content, true);
+                window.workspaceManager.includeFile(result.path, result.content);
             }
         }
     } catch (error) {
@@ -667,7 +667,7 @@ async function installMCP(mcpName) {
                     state.setActionItemState('mcps', mcpName, false);
                 }
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile(result.path, result.content, true);
+                window.workspaceManager.includeFile(result.path, result.content);
             }
         }
     } catch (error) {
@@ -695,7 +695,7 @@ async function installRule(ruleName) {
             
             if (window.workspaceManager) {
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile('CLAUDE.md', newContent, true);
+                window.workspaceManager.includeFile('CLAUDE.md', newContent);
             }
         }
     } catch (error) {
@@ -725,10 +725,10 @@ async function removeMCP(mcpName) {
                         // Update the file with cleaned config
                         const newContent = JSON.stringify(config, null, 2);
                         // Use includeFile which properly handles saving and rendering
-                        window.workspaceManager.includeFile('.mcp.json', newContent, true);
+                        window.workspaceManager.includeFile('.mcp.json', newContent);
                     } else {
                         // No MCPs left, remove the file entirely
-                        window.workspaceManager.deleteFile('.mcp.json', true);
+                        window.workspaceManager.deleteFile('.mcp.json');
                     }
                 } catch (e) {
                     console.error('Error parsing MCP config:', e);
@@ -767,10 +767,10 @@ async function removeRule(ruleName) {
                     // Check if file is empty or only whitespace
                     if (newContent === '' || newContent.match(/^\s*$/)) {
                         // File is empty, remove it entirely
-                        window.workspaceManager.deleteFile('CLAUDE.md', true);
+                        window.workspaceManager.deleteFile('CLAUDE.md');
                     } else {
                         // Use includeFile which properly handles saving and rendering
-                        window.workspaceManager.includeFile('CLAUDE.md', newContent, true);
+                        window.workspaceManager.includeFile('CLAUDE.md', newContent);
                     }
                 }
             }
@@ -829,7 +829,7 @@ async function removeAgent(agentName) {
             if (filesToRemove.length > 0) {
                 filesToRemove.forEach(path => {
                     // Use workspaceManager.deleteFile which triggers render
-                    window.workspaceManager.deleteFile(path, true);
+                    window.workspaceManager.deleteFile(path);
                 });
                 // Save state after agent mappings update
                 window.workspaceManager.saveState(window.workspaceManager.currentContextId);

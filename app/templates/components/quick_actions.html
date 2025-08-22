@@ -394,7 +394,7 @@ async function installAgentInContext(agentName) {
                 }
                 
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile(result.path, result.content, true);
+                window.workspaceManager.includeFile(result.path, result.content);
             }
         } else {
             const error = await response.json();
@@ -438,7 +438,7 @@ async function installMCPInContext(mcpName) {
                     state.setActionItemState('mcps', mcpName, true);
                 }
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile(result.path, result.content, true);
+                window.workspaceManager.includeFile(result.path, result.content);
             }
         } else {
             const error = await response.json();
@@ -476,7 +476,7 @@ async function insertRuleInContext(ruleName) {
                     state.setActionItemState('rules', ruleName, true);
                 }
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile('CLAUDE.md', newContent, true);
+                window.workspaceManager.includeFile('CLAUDE.md', newContent);
             }
         } else {
             const error = await response.json();

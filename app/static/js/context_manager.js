@@ -23,14 +23,15 @@ function initializeContextUI() {
     
     // Handle new context creation
     if (newContextBtn && !newContextBtn.hasAttribute('data-initialized')) {
-        newContextBtn.addEventListener('click', function() {
-            const name = prompt('Enter name for new context:');
+        newContextBtn.addEventListener('click', async function() {
+            const name = await openContextModal();
             if (name && name.trim()) {
                 const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
                 if (window.workspaceManager?.createContext(id, name.trim())) {
                     window.workspaceManager?.switchContext(id);
                 } else {
-                    alert('Context with this ID already exists');
+                    // Silently handle existing context
+                    // Could show error in modal but for now just skip
                 }
             }
         });
@@ -41,16 +42,12 @@ function initializeContextUI() {
     if (deleteContextBtn && !deleteContextBtn.hasAttribute('data-initialized')) {
         deleteContextBtn.addEventListener('click', function() {
             if (window.workspaceManager?.currentContextId === 'default') {
-                alert('Cannot delete the default context');
+                // Silently return without deleting default context
                 return;
             }
             
-            const contexts = window.workspaceManager?.loadContextsList();
-            const currentName = contexts?.[window.workspaceManager?.currentContextId]?.name || window.workspaceManager?.currentContextId;
-            
-            if (confirm(`Delete context "${currentName}"? This will remove all associated files.`)) {
-                window.workspaceManager?.deleteContext(window.workspaceManager?.currentContextId);
-            }
+            // Delete context without confirmation
+            window.workspaceManager?.deleteContext(window.workspaceManager?.currentContextId);
         });
         deleteContextBtn.setAttribute('data-initialized', 'true');
     }

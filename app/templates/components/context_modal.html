@@ -1,0 +1,139 @@
+<!-- Context Creation Modal -->
+<div id="context-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4" onclick="closeContextModal()">
+        <div id="context-modal" class="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-md w-full" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <h2 class="text-xl font-black text-black mb-4">Create new context</h2>
+            
+            <!-- Modal Body -->
+            <div class="mb-6">
+                <label for="context-name-input" class="block text-sm font-bold text-black mb-2">Context name</label>
+                <input 
+                    type="text" 
+                    id="context-name-input" 
+                    class="w-full px-3 py-2 border-2 border-black focus:outline-none"
+                    placeholder="e.g. My Project"
+                    autocomplete="off"
+                />
+                <div id="context-modal-error" class="text-red-600 text-sm mt-2 hidden"></div>
+            </div>
+            
+            <!-- Modal Actions -->
+            <div class="flex gap-2 justify-end">
+                <button 
+                    onclick="closeContextModal()" 
+                    class="px-4 py-2 bg-gray-200 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all">
+                    Cancel
+                </button>
+                <button 
+                    onclick="submitContextModal()" 
+                    class="px-4 py-2 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all">
+                    Create
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let contextModalCallback = null;
+let previousContextFocusElement = null;
+
+function openContextModal() {
+    const modal = document.getElementById('context-modal-overlay');
+    const input = document.getElementById('context-name-input');
+    const error = document.getElementById('context-modal-error');
+    
+    // Reset any previous callback
+    if (contextModalCallback) {
+        contextModalCallback(null);
+        contextModalCallback = null;
+    }
+    
+    // Store the currently focused element
+    previousContextFocusElement = document.activeElement;
+    
+    // Reset and show modal
+    modal.classList.remove('hidden');
+    error.classList.add('hidden');
+    error.textContent = '';
+    input.value = '';
+    
+    // Focus input
+    setTimeout(() => {
+        input.focus();
+    }, 50);
+    
+    // Remove any existing event listeners
+    input.onkeydown = null;
+    
+    // Handle Enter and Escape keys
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitContextModal();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeContextModal();
+        }
+    });
+    
+    return new Promise((resolve) => {
+        contextModalCallback = resolve;
+    });
+}
+
+function closeContextModal() {
+    const modal = document.getElementById('context-modal-overlay');
+    modal.classList.add('hidden');
+    
+    // Restore focus
+    if (previousContextFocusElement) {
+        previousContextFocusElement.focus();
+    }
+    
+    if (contextModalCallback) {
+        contextModalCallback(null);
+        contextModalCallback = null;
+    }
+}
+
+function submitContextModal() {
+    const input = document.getElementById('context-name-input');
+    const error = document.getElementById('context-modal-error');
+    const contextName = input.value.trim();
+    
+    // Validation
+    if (!contextName) {
+        error.textContent = 'Please enter a context name';
+        error.classList.remove('hidden');
+        return;
+    }
+    
+    // Check for invalid characters (very permissive for context names)
+    if (contextName.length > 100) {
+        error.textContent = 'Context name is too long (max 100 characters)';
+        error.classList.remove('hidden');
+        return;
+    }
+    
+    // Close modal and return result
+    const modal = document.getElementById('context-modal-overlay');
+    modal.classList.add('hidden');
+    
+    // Restore focus
+    if (previousContextFocusElement) {
+        previousContextFocusElement.focus();
+    }
+    
+    if (contextModalCallback) {
+        contextModalCallback(contextName);
+        contextModalCallback = null;
+    }
+}
+
+// Export for global use
+window.openContextModal = openContextModal;
+window.closeContextModal = closeContextModal;
+window.submitContextModal = submitContextModal;
+</script>
