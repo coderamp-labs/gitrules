@@ -1,6 +1,0 @@
-## Environment Variables
-
-- Store secrets in a .env file (never commit it)
-- A .env.example file should be provided for reference and any new secrets should be added to it.
-- The implementation should use the dotenv (or similar) library to load environment variables from .env files.
-- Variables should also be loaded from the environment.

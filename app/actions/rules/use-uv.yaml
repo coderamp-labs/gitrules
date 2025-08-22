@@ -1,5 +1,0 @@
-display_name: Use Uv
-slug: use-uv
-content: "## UV\n\n- This project uses UV for package management.\n- Use:\n  - `uv\
-  \ venv` to create a virtual environment.\n  - `uv pip install -r requirements.txt|pyproject.toml`\
-  \ to install dependencies.\n"

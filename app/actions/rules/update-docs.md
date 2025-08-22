@@ -1,1 +1,0 @@
-- Update any documentation when it's relevant, including CLAUDE.md.
