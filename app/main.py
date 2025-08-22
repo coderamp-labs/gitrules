@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from app.routes import install, actions
+from app.services.actions_loader import actions_loader
 from api_analytics.fastapi import Analytics
 import os
 from dotenv import load_dotenv
@@ -34,9 +35,19 @@ async def favicon():
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
+    # Get all actions data for server-side rendering
+    agents = [agent.dict() for agent in actions_loader.get_agents()]
+    rules = [rule.dict() for rule in actions_loader.get_rules()]
+    mcps = [mcp.dict() for mcp in actions_loader.get_mcps()]
+    
     return templates.TemplateResponse(
         "index.html",
-        {"request": request}
+        {
+            "request": request,
+            "agents": agents,
+            "rules": rules,
+            "mcps": mcps
+        }
     )
 
 @app.get("/health")

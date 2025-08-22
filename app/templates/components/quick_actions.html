@@ -16,25 +16,23 @@
                 <span class="text-sm">🤖</span> Agents
             </div>
             <div id="agents-container" class="flex flex-wrap gap-2">
-                <!-- Placeholder buttons to prevent layout shift -->
+                {% for agent in agents[:4] %}
+                <button class="action-button action-button--primary" onclick="addAgent('{{ agent.slug or agent.name }}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">{{ agent.display_name or agent.name }}</span>
+                    </div>
+                </button>
+                {% endfor %}
+                {% if not agents %}
+                <!-- Placeholder if no agents available -->
                 <button class="action-button action-button--primary opacity-50 cursor-not-allowed" disabled>
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
+                        <span class="action-button__label">No agents available</span>
                     </div>
                 </button>
-                <button class="action-button action-button--primary opacity-50 cursor-not-allowed" disabled>
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--primary opacity-50 cursor-not-allowed" disabled>
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
-                    </div>
-                </button>
+                {% endif %}
             </div>
         </div>
         
@@ -44,25 +42,23 @@
                 <span class="text-sm">🔌</span> MCPs
             </div>
             <div id="mcps-container" class="flex flex-wrap gap-2">
-                <!-- Placeholder buttons to prevent layout shift -->
+                {% for mcp in mcps[:4] %}
+                <button class="action-button action-button--secondary" onclick="addMCP('{{ mcp.name }}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">{{ mcp.name }}</span>
+                    </div>
+                </button>
+                {% endfor %}
+                {% if not mcps %}
+                <!-- Placeholder if no MCPs available -->
                 <button class="action-button action-button--secondary opacity-50 cursor-not-allowed" disabled>
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
+                        <span class="action-button__label">No MCPs available</span>
                     </div>
                 </button>
-                <button class="action-button action-button--secondary opacity-50 cursor-not-allowed" disabled>
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--secondary opacity-50 cursor-not-allowed" disabled>
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
-                    </div>
-                </button>
+                {% endif %}
             </div>
         </div>
         
@@ -72,25 +68,23 @@
                 <span class="text-sm">📋</span> Rules
             </div>
             <div id="rules-container" class="flex flex-wrap gap-2">
-                <!-- Placeholder buttons to prevent layout shift -->
+                {% for rule in rules[:4] %}
+                <button class="action-button action-button--accent" onclick="addRule('{{ rule.slug or rule.name }}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">{{ rule.display_name or rule.name }}</span>
+                    </div>
+                </button>
+                {% endfor %}
+                {% if not rules %}
+                <!-- Placeholder if no rules available -->
                 <button class="action-button action-button--accent opacity-50 cursor-not-allowed" disabled>
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
+                        <span class="action-button__label">No rules available</span>
                     </div>
                 </button>
-                <button class="action-button action-button--accent opacity-50 cursor-not-allowed" disabled>
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
-                    </div>
-                </button>
-                <button class="action-button action-button--accent opacity-50 cursor-not-allowed" disabled>
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">[...]</span>
-                    </div>
-                </button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -138,33 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
         workspaceSection.style.display = 'none';
         workspaceSection.style.transition = 'opacity 300ms ease-in-out';
     }
-    
-    // Load actions from backend
-    loadActionsFromBackend();
 });
 
-// Fetch and display actions from backend API
-async function loadActionsFromBackend() {
-    try {
-        // Use cached data if available
-        if (actionsCache) {
-            renderActions(actionsCache);
-            return;
-        }
-        
-        const response = await fetch('/api/actions/');
-        if (!response.ok) throw new Error('Failed to fetch actions');
-        
-        const data = await response.json();
-        
-        // Cache the data
-        actionsCache = data;
-        
-        renderActions(data);
-    } catch (error) {
-        console.error('Error loading actions:', error);
-    }
-}
 
 // Render actions from data
 function renderActions(data) {

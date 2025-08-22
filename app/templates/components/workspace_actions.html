@@ -34,7 +34,15 @@
                 </button>
                 <div class="menu-dropdown" id="dropdown-mcps" style="display: none;">
                     <div id="mcps-list" class="p-2">
-                        <div class="text-xs text-gray-500">Loading...</div>
+                        {% for mcp in mcps %}
+                        <div class="dropdown-item" onclick="toggleDropdownItem(this, '{{ mcp.name }}', 'mcps')">
+                            <span class="dropdown-item-icon">+</span>
+                            <span>{{ mcp.name }}</span>
+                        </div>
+                        {% endfor %}
+                        {% if not mcps %}
+                        <div class="text-xs text-gray-500">No MCPs available</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -52,7 +60,15 @@
                 </button>
                 <div class="menu-dropdown" id="dropdown-rules" style="display: none;">
                     <div id="rules-list" class="p-2">
-                        <div class="text-xs text-gray-500">Loading...</div>
+                        {% for rule in rules %}
+                        <div class="dropdown-item" onclick="toggleDropdownItem(this, '{{ rule.slug or rule.name }}', 'rules')">
+                            <span class="dropdown-item-icon">+</span>
+                            <span>{{ rule.display_name or rule.name }}</span>
+                        </div>
+                        {% endfor %}
+                        {% if not rules %}
+                        <div class="text-xs text-gray-500">No rules available</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -70,7 +86,15 @@
                 </button>
                 <div class="menu-dropdown" id="dropdown-agents" style="display: none;">
                     <div id="agents-list" class="p-2">
-                        <div class="text-xs text-gray-500">Loading...</div>
+                        {% for agent in agents %}
+                        <div class="dropdown-item" onclick="toggleDropdownItem(this, '{{ agent.slug or agent.name }}', 'agents')">
+                            <span class="dropdown-item-icon">+</span>
+                            <span>{{ agent.display_name or agent.name }}</span>
+                        </div>
+                        {% endfor %}
+                        {% if not agents %}
+                        <div class="text-xs text-gray-500">No agents available</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -301,29 +325,26 @@
 </style>
 
 <script>
+// Initialize actions data from server-side rendering
+const serverActions = {
+    agents: {{ agents | tojson | safe }},
+    rules: {{ rules | tojson | safe }},
+    mcps: {{ mcps | tojson | safe }}
+};
+
 // Track loaded data
 let loadedData = {};
 
-// Search functionality
-let allActions = [];
+// Search functionality - initialize with server data
+let allActions = [
+    ...(serverActions.mcps || []).map(item => ({...item, type: 'MCP'})),
+    ...(serverActions.rules || []).map(item => ({...item, type: 'Rule'})),
+    ...(serverActions.agents || []).map(item => ({...item, type: 'Agent'}))
+];
 let searchTimeout = null;
 
-// Initialize search data
-async function initSearchData() {
-    try {
-        const response = await fetch('/api/actions/');
-        if (response.ok) {
-            const data = await response.json();
-            allActions = [
-                ...(data.mcps || []).map(item => ({...item, type: 'MCP'})),
-                ...(data.rules || []).map(item => ({...item, type: 'Rule'})),
-                ...(data.agents || []).map(item => ({...item, type: 'Agent'}))
-            ];
-        }
-    } catch (error) {
-        console.error('Error loading search data:', error);
-    }
-}
+// Initialize search data - no longer needed as data comes from server
+// The allActions array is already initialized with server data above
 
 // Search actions
 function searchActions(query) {
@@ -437,7 +458,7 @@ window.loadDropdownData = loadDropdownData;
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', function() {
-    initSearchData();
+    // No need to call initSearchData - data is already loaded from server
     // Wait a bit for workspace manager to initialize
     setTimeout(() => {
         restoreActionStates();
@@ -481,19 +502,9 @@ function toggleMenuButton(button, type) {
 
 // Insert action into context
 async function insertIntoContext(type) {
-    if (type === 'agents') {
-        // Default agent insertion
-        const defaultAgent = 'code-searcher';
-        await installAgent(defaultAgent);
-    } else if (type === 'mcps') {
-        // Default MCP insertion
-        const defaultMcp = 'filesystem';
-        await installMCP(defaultMcp);
-    } else if (type === 'rules') {
-        // Default rule insertion
-        const defaultRule = 'code-quality';
-        await installRule(defaultRule);
-    }
+    // No longer auto-install default items
+    // Users should explicitly choose which items they want
+    // This function is kept for potential future use
 }
 
 // Remove action from context
@@ -527,51 +538,33 @@ async function removeFromContext(type) {
     }
 }
 
-// Load dropdown data
-async function loadDropdownData(type) {
-    try {
-        const response = await fetch('/api/actions/');
-        if (!response.ok) throw new Error('Failed to fetch actions');
-        
-        const data = await response.json();
-        let container, items;
-        
-        switch(type) {
-            case 'mcps':
-                container = document.getElementById('mcps-list');
-                items = data.mcps || [];
-                break;
-            case 'rules':
-                container = document.getElementById('rules-list');
-                items = data.rules || [];
-                break;
-            case 'agents':
-                container = document.getElementById('agents-list');
-                items = data.agents || [];
-                break;
+// Load dropdown data - now just updates the UI state based on what's already rendered
+function loadDropdownData(type) {
+    // The dropdown items are now rendered server-side with Jinja
+    // This function just needs to update the UI state (active/inactive)
+    const state = window.workspaceManager?.getState();
+    if (!state) return;
+    
+    const container = document.getElementById(`${type}-list`);
+    if (!container) return;
+    
+    // Update each dropdown item's state
+    const items = container.querySelectorAll('.dropdown-item');
+    items.forEach(item => {
+        const itemName = item.getAttribute('data-item-id') || 
+                        item.onclick.toString().match(/toggleDropdownItem\(this,\s*'([^']+)'/)?.[1];
+        if (itemName) {
+            const isChecked = state.isActionItemChecked(type, itemName);
+            const icon = item.querySelector('.dropdown-item-icon');
+            if (isChecked) {
+                item.classList.add('active');
+                if (icon) icon.textContent = '−';
+            } else {
+                item.classList.remove('active');
+                if (icon) icon.textContent = '+';
+            }
         }
-        
-        if (container && items.length > 0) {
-            const state = window.workspaceManager?.getState();
-            container.innerHTML = items.map(item => {
-                // Use slug for internal ID, display_name for display
-                const itemId = item.slug || item.name;
-                const displayName = item.display_name || item.name;
-                const isChecked = state ? state.isActionItemChecked(type, itemId) : false;
-                return `
-                    <div 
-                        class="dropdown-item ${isChecked ? 'active' : ''}"
-                        onclick="toggleDropdownItem(this, '${itemId}', '${type}')"
-                    >
-                        <span class="dropdown-item-icon">${isChecked ? '−' : '+'}</span>
-                        <span>${displayName}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-    } catch (error) {
-        console.error(`Error loading ${type}:`, error);
-    }
+    });
 }
 
 // Toggle individual dropdown item
