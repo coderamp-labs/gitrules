@@ -70,12 +70,13 @@
                              data-rule-type="{{ rule.type }}"
                              data-rule-slug="{{ rule.slug }}">
                             {% if rule.type == 'ruleset' %}
-                            <span class="dropdown-item-icon ruleset-expand">▶</span>
                             <span class="dropdown-item-checkbox" onclick="toggleRulesetItems(event, '{{ rule.slug }}')">+</span>
+                            <span class="flex-1">{{ rule.display_name or rule.name }}</span>
+                            <span class="ruleset-expand">▲</span>
                             {% else %}
                             <span class="dropdown-item-icon">+</span>
-                            {% endif %}
                             <span>{{ rule.display_name or rule.name }}</span>
+                            {% endif %}
                         </div>
                         {% if rule.type == 'ruleset' and rule.children %}
                         <div class="ruleset-children" id="children-{{ rule.slug }}" style="display: none; margin-left: 20px;">
@@ -367,15 +368,27 @@
 .ruleset-item {
     font-weight: 600;
     gap: 4px;
+    justify-content: space-between;
 }
 
 .ruleset-expand {
     transition: transform 150ms ease;
     flex-shrink: 0;
+    margin-left: auto;
+    font-size: 10px;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ruleset-item:not(.expanded) .ruleset-expand {
+    transform: rotate(180deg);  /* ▲ becomes ▼ */
 }
 
 .ruleset-item.expanded .ruleset-expand {
-    transform: rotate(90deg);
+    transform: rotate(0deg);  /* ▲ stays as ▲ */
 }
 
 .dropdown-item-checkbox {
