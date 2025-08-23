@@ -39,10 +39,10 @@
             </div>
             
             <!-- Card content -->
-            <div id="auto-share-panel" class="bg-pink-400 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] p-3 relative z-0 w-full" style="margin-top: -2px;">
-                <div class="flex gap-2 items-center justify-center">
-                    <input id="share-link-input" type="text" readonly class="px-3 py-1 bg-white border-2 border-black text-black font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" style="min-width: 450px; cursor: text;" value="Waiting for first save...">
-                    <button id="copy-share-link" class="px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <div id="auto-share-panel" class="bg-pink-400 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] p-3 relative z-0 w-full" style="margin-top: -2px; overflow: hidden;">
+                <div class="flex gap-2 items-center justify-center" style="min-width: 0;">
+                    <input id="share-link-input" type="text" readonly class="share-link-input px-3 py-1 bg-white border-2 border-black text-black font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" style="cursor: text;" value="Waiting for first save...">
+                    <button id="copy-share-link" class="flex-shrink-0 px-3 py-1 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         Copy
                     </button>
                 </div>
@@ -50,6 +50,24 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Share link input responsive behavior */
+.share-link-input {
+    width: 450px;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+/* When container gets smaller, allow input to shrink */
+@media (max-width: 600px) {
+    .share-link-input {
+        width: auto;
+        flex: 1;
+        min-width: 200px;
+    }
+}
+</style>
 
 <!-- Tab switching for share panel -->
 <script>

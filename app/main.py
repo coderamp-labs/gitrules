@@ -34,6 +34,10 @@ async def favicon():
     favicon_path = static_dir / "favicon.ico"
     return FileResponse(favicon_path, media_type="image/x-icon")
 
+@app.get("/doc", response_class=HTMLResponse, operation_id="get_docs_page")
+async def doc(request: Request):
+    return templates.TemplateResponse("docs.html", {"request": request})
+
 @app.get("/", response_class=HTMLResponse, operation_id="get_index_page")
 async def index(request: Request):
     # Get all actions data for server-side rendering

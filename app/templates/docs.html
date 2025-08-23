@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Gitrules - How it works{% endblock %}
+
+{% block content %}
+<div style="margin-top: -5rem; margin-left: -1rem; margin-right: -1rem;">
+    <!-- Hero Section -->
+    <div class="hero-gradient border-b-2 border-black" style="padding-top: 2rem;">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <h1 class="text-4xl sm:text-5xl font-black mb-6">
+                Supercharge Claude with<br>
+                <span class="text-cyan-500">CLAUDE.md</span> files and more
+            </h1>
+            <p class="text-xl text-gray-700 mb-4">
+                Create <strong>CLAUDE.md</strong>, <strong>.cursorrules</strong>, and agent files that tell Claude exactly how to work on your codebase.
+            </p>
+            <p class="text-lg text-gray-600 mb-8">
+                Drop them into your repo with a single command. Plain files your team owns.
+            </p>
+            
+            <div class="flex flex-wrap gap-3">
+                <div class="inline-block bg-cyan-50 border-2 border-cyan-400 px-4 py-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    <span class="text-sm font-bold">📝 CLAUDE.md</span>
+                    <span class="text-sm ml-2">Project rules</span>
+                </div>
+                <div class="inline-block bg-pink-50 border-2 border-pink-400 px-4 py-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    <span class="text-sm font-bold">🧠 .claude/agents/</span>
+                    <span class="text-sm ml-2">AI helpers</span>
+                </div>
+                <div class="inline-block bg-yellow-50 border-2 border-yellow-400 px-4 py-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    <span class="text-sm font-bold">🔌 .mcp.json</span>
+                    <span class="text-sm ml-2">Claude plugins</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-6 py-12">
+        
+        <!-- Why This Matters -->
+        <section class="docs-section p-6 mb-8">
+            <h2 class="text-2xl font-black mb-4 flex items-center gap-2">
+                <span class="text-pink-400">◆</span> Why this matters for Claude users
+            </h2>
+            <ul class="space-y-3 text-gray-700">
+                <li class="flex items-start gap-2">
+                    <span class="text-cyan-400 mt-1">▸</span>
+                    <span>Claude & Claude Code automatically read <strong>CLAUDE.md</strong> files to understand your project's rules and conventions.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-cyan-400 mt-1">▸</span>
+                    <span>Today your instructions to Claude live in scattered chats and one-off prompts. Hard to share. Easy to lose.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-cyan-400 mt-1">▸</span>
+                    <span>Gitrules creates <strong>CLAUDE.md</strong> and other config files that make Claude work consistently for your whole team.</span>
+                </li>
+            </ul>
+        </section>
+
+        <!-- How It Works -->
+        <section class="docs-section p-6 mb-8">
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
+                <span class="text-cyan-400">◆</span> How it works
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="flex gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-pink-400 border-2 border-black flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                        1
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">Pick what you want</h3>
+                        <p class="text-gray-700">Choose from simple building blocks:</p>
+                        <ul class="mt-2 space-y-1 text-sm">
+                            <li><strong>Guidelines</strong> - your "house rules" for coding and reviews</li>
+                            <li><strong>Helpers</strong> - ready-made roles, like a "researcher" or "reviewer"</li>
+                            <li><strong>Add-ons</strong> - optional extras—think "plugins" your AI can use</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-cyan-400 border-2 border-black flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                        2
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">Tweak the text</h3>
+                        <p class="text-gray-700">Open and edit the wording directly on the page—like writing a checklist or a policy in plain English.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-yellow-300 border-2 border-black flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                        3
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">Install in your repo</h3>
+                        <p class="text-gray-700">Copy one command. It creates the same files in your repository.</p>
+                        <p class="text-gray-700 mt-1">No black box. You can read, version, and edit everything.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- What Shows Up -->
+        <section class="docs-section p-6 mb-8">
+            <h2 class="text-2xl font-black mb-4 flex items-center gap-2">
+                <span class="text-yellow-300">◆</span> Files Claude understands
+            </h2>
+            <div class="space-y-3">
+                <div class="flex items-start gap-2">
+                    <span class="text-green-500 font-bold mt-1">✓</span>
+                    <div>
+                        <strong>CLAUDE.md</strong> - Your project's house rules
+                        <p class="text-gray-600 text-sm mt-1">Claude reads this automatically. Define coding standards, architecture patterns, and project-specific instructions.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2">
+                    <span class="text-green-500 font-bold mt-1">✓</span>
+                    <div>
+                        <strong>.claude/agents/*.yaml</strong> - Specialized AI helpers
+                        <p class="text-gray-600 text-sm mt-1">Give Claude different "modes" like researcher, reviewer, or debugger.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2">
+                    <span class="text-green-500 font-bold mt-1">✓</span>
+                    <div>
+                        <strong>.mcp.json</strong> - Claude Code plugins (MCPs)
+                        <p class="text-gray-600 text-sm mt-1">Add capabilities like database access, API integrations, and more.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 p-3 bg-cyan-100 border-2 border-cyan-400">
+                <p class="text-sm">🎯 <strong>Claude Code reads these automatically:</strong> Just drop them in your repo and Claude instantly follows your rules.</p>
+            </div>
+        </section>
+
+        <!-- Example Flows -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-black mb-6">Simple example flows</h2>
+            
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="example-flow p-4">
+                    <h3 class="font-bold mb-3">A. "Make our AI code reviews consistent"</h3>
+                    <ol class="space-y-2 text-sm">
+                        <li>1. Add a <strong>Code Quality</strong> bundle.</li>
+                        <li>2. Skim the checklist; edit anything in plain English.</li>
+                        <li>3. Install.</li>
+                    </ol>
+                    <p class="text-sm text-gray-600 mt-3 pt-3 border-t border-gray-300">
+                        → Now everyone's AI uses the same review standards.
+                    </p>
+                </div>
+                
+                <div class="example-flow p-4">
+                    <h3 class="font-bold mb-3">B. "Give our AI a researcher persona"</h3>
+                    <ol class="space-y-2 text-sm">
+                        <li>1. Add a <strong>Researcher</strong> helper.</li>
+                        <li>2. Personalize the brief ("be concise," "cite sources," etc.).</li>
+                        <li>3. Install.</li>
+                    </ol>
+                    <p class="text-sm text-gray-600 mt-3 pt-3 border-t border-gray-300">
+                        → Your AI now has a reusable, team-wide "research mode."
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Safety & Control -->
+        <section class="docs-section p-6 mb-8">
+            <h2 class="text-2xl font-black mb-4 flex items-center gap-2">
+                <span class="text-green-500">◆</span> Safety & control
+            </h2>
+            <div class="grid gap-4 md:grid-cols-3">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">🛡️</div>
+                    <h3 class="font-bold mb-1">You stay in charge</h3>
+                    <p class="text-sm text-gray-600">Nothing touches your repo until you run the command.</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl mb-2">👁️</div>
+                    <h3 class="font-bold mb-1">Inspect first</h3>
+                    <p class="text-sm text-gray-600">All content is visible before you install.</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl mb-2">↩️</div>
+                    <h3 class="font-bold mb-1">Easy to undo</h3>
+                    <p class="text-sm text-gray-600">It's just files—use Git like always.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Who It's For -->
+        <section class="docs-section p-6 mb-8">
+            <h2 class="text-2xl font-black mb-4 flex items-center gap-2">
+                <span class="text-purple-500">◆</span> Who it's for
+            </h2>
+            <div class="space-y-3">
+                <div class="p-3 bg-cyan-50 border-l-4 border-cyan-400">
+                    <strong>Developers</strong> who want predictable AI help across projects.
+                </div>
+                <div class="p-3 bg-pink-50 border-l-4 border-pink-400">
+                    <strong>Team leads</strong> who want shared standards the AI actually follows.
+                </div>
+                <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400">
+                    <strong>Newcomers</strong> who want results without learning prompt jargon.
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-black mb-6">FAQ</h2>
+            
+            <div class="space-y-4">
+                <div class="faq-item pl-4 py-3">
+                    <h3 class="font-bold mb-2">Do I need to know anything about "AI agents" or "MCPs"?</h3>
+                    <p class="text-gray-700">No. You'll pick items with friendly names and edit normal text. The site handles the wiring.</p>
+                </div>
+                
+                <div class="faq-item pl-4 py-3">
+                    <h3 class="font-bold mb-2">What if our needs change?</h3>
+                    <p class="text-gray-700">Edit the files in your repo. Reinstall, or just commit changes like any document.</p>
+                </div>
+                
+                <div class="faq-item pl-4 py-3">
+                    <h3 class="font-bold mb-2">Will this lock us in?</h3>
+                    <p class="text-gray-700">No. The output is regular text files you own.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block styles %}
+<style>
+    /* Override base template gradient for docs page */
+    body {
+        background: #f9fafb !important;
+    }
+    .docs-section {
+        background: white;
+        border: 2px solid black;
+        box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        transition: all 150ms ease;
+    }
+    .docs-section:hover {
+        box-shadow: 6px 6px 0px 0px rgba(0,0,0,1);
+        transform: translate(-1px, -1px);
+    }
+    .faq-item {
+        border-left: 4px solid #F472B6;
+    }
+    .example-flow {
+        background: #FCE7F3;
+        border: 2px solid black;
+        box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
+    }
+    .hero-gradient {
+        background: linear-gradient(135deg, #ECFEFF 0%, #FCE7F3 100%);
+    }
+</style>
+{% endblock %}
