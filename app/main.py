@@ -6,6 +6,7 @@ from pathlib import Path
 from app.routes import install, actions
 from app.services.actions_loader import actions_loader
 from api_analytics.fastapi import Analytics
+from fastapi_mcp import FastApiMCP
 import os
 from dotenv import load_dotenv
 
@@ -28,12 +29,12 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 app.include_router(install.router)
 app.include_router(actions.router)
 
-@app.get("/favicon.ico")
+@app.get("/favicon.ico", operation_id="get_favicon")
 async def favicon():
     favicon_path = static_dir / "favicon.ico"
     return FileResponse(favicon_path, media_type="image/x-icon")
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, operation_id="get_index_page")
 async def index(request: Request):
     # Get all actions data for server-side rendering
     agents = [agent.dict() for agent in actions_loader.get_agents()]
@@ -84,6 +85,16 @@ async def index(request: Request):
         }
     )
 
-@app.get("/health")
+@app.get("/health", operation_id="health_check")
 async def health_check():
     return {"status": "healthy"}
+
+# Create MCP server that only exposes endpoints tagged with "mcp"
+mcp = FastApiMCP(
+    app,
+    name="gitrules-search",
+    include_tags=["mcp"]
+)
+
+# Mount the MCP server with HTTP/SSE transport
+mcp.mount_http(mount_path="/mcp")

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "gitrules-search": {
+      "command": "python",
+      "args": ["-m", "mcp.client.sse", "http://localhost:8000/mcp"],
+      "env": {}
+    }
+  }
+}

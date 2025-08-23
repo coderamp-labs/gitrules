@@ -25,7 +25,7 @@ def extract_env_vars_from_files(files: Dict[str, str]) -> Set[str]:
         env_vars.update(matches)
     return env_vars
 
-@router.post("/api/install")
+@router.post("/api/install", operation_id="create_install_script")
 async def create_install(request: Request, install: InstallCreate):
     """Generate install script from files and store by hash"""
     # Extract unique directories
@@ -53,7 +53,7 @@ async def create_install(request: Request, install: InstallCreate):
     
     return {"hash": content_hash}
 
-@router.get("/api/install/{hash_id}.sh", response_class=PlainTextResponse)
+@router.get("/api/install/{hash_id}.sh", response_class=PlainTextResponse, operation_id="get_install_script")
 async def get_install(hash_id: str):
     """Retrieve install by hash"""
     if hash_id not in installs_store:

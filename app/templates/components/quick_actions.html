@@ -352,26 +352,29 @@ function createNewContextAndInsertRule(ruleName) {
 // Helper functions that use the same API as workspace sidebar
 async function installAgentInContext(agentName) {
     try {
-        const response = await fetch(`/api/actions/agent-content/${encodeURIComponent(agentName)}`);
+        const response = await fetch(`/api/agents/${encodeURIComponent(agentName)}`);
         
         if (response.ok) {
-            const result = await response.json();
+            const data = await response.json();
+            const result = data.agents && data.agents[0]; // Get first agent from array
             
-            if (window.workspaceManager) {
+            if (result && window.workspaceManager) {
                 const state = window.workspaceManager.getState();
                 if (state) {
                     // Store agent name to path mapping in metadata (for easier removal)
                     if (!state.agentMappings) {
                         state.agentMappings = {};
                     }
-                    state.agentMappings[agentName] = result.path;
+                    const agentPath = `.claude/agents/${result.filename}`;
+                    state.agentMappings[agentName] = agentPath;
                     
                     // Mark the agent as checked in action state
                     state.setActionItemState('agents', agentName, true);
                 }
                 
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile(result.path, result.content);
+                const agentPath = `.claude/agents/${result.filename}`;
+                window.workspaceManager.includeFile(agentPath, result.content);
             }
         } else {
             const error = await response.json();
@@ -397,25 +400,27 @@ async function installMCPInContext(mcpName) {
             }
         }
         
-        const response = await fetch(`/api/actions/mcp-config/${encodeURIComponent(mcpName)}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(currentConfig)
-        });
+        const response = await fetch(`/api/mcps/${encodeURIComponent(mcpName)}`);
         
         if (response.ok) {
-            const result = await response.json();
+            const data = await response.json();
+            const result = data.mcps && data.mcps[0]; // Get first MCP from array
             
-            if (window.workspaceManager) {
+            if (result && result.config && window.workspaceManager) {
                 const state = window.workspaceManager.getState();
-                if (state && !result.was_removed) {
+                if (state) {
                     // Mark the MCP as checked in action state
                     state.setActionItemState('mcps', mcpName, true);
                 }
+                
+                // Ensure mcpServers exists and add the new MCP
+                if (!currentConfig.mcpServers) {
+                    currentConfig.mcpServers = {};
+                }
+                currentConfig.mcpServers[mcpName] = result.config;
+                
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile(result.path, result.content);
+                window.workspaceManager.includeFile('.mcp.json', JSON.stringify(currentConfig, null, 2));
             }
         } else {
             const error = await response.json();
@@ -428,32 +433,35 @@ async function installMCPInContext(mcpName) {
 
 async function insertRuleInContext(ruleName) {
     try {
-        const response = await fetch(`/api/actions/rule-content/${encodeURIComponent(ruleName)}`);
+        const response = await fetch(`/api/rules/${encodeURIComponent(ruleName)}`);
         
         if (response.ok) {
-            const result = await response.json();
+            const data = await response.json();
+            const result = data.rules && data.rules[0]; // Get first rule from array
             
-            // Get current CLAUDE.md content from workspace
-            let currentContent = '';
-            if (window.workspaceManager && window.workspaceManager.getState()) {
-                const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
-                if (claudeFile) {
-                    currentContent = claudeFile;
+            if (result && result.content) {
+                // Get current CLAUDE.md content from workspace
+                let currentContent = '';
+                if (window.workspaceManager && window.workspaceManager.getState()) {
+                    const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
+                    if (claudeFile) {
+                        currentContent = claudeFile;
+                    }
                 }
-            }
-            
-            // Add rule content to CLAUDE.md (no toggle behavior for quick start)
-            const ruleContent = result.content.trim();
-            const newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
-            
-            if (window.workspaceManager) {
-                const state = window.workspaceManager.getState();
-                if (state) {
-                    // Mark the rule as checked in action state
-                    state.setActionItemState('rules', ruleName, true);
+                
+                // Add rule content to CLAUDE.md (no toggle behavior for quick start)
+                const ruleContent = result.content.trim();
+                const newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
+                
+                if (window.workspaceManager) {
+                    const state = window.workspaceManager.getState();
+                    if (state) {
+                        // Mark the rule as checked in action state
+                        state.setActionItemState('rules', ruleName, true);
+                    }
+                    // Use includeFile which properly handles saving and rendering
+                    window.workspaceManager.includeFile('CLAUDE.md', newContent);
                 }
-                // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile('CLAUDE.md', newContent);
             }
         } else {
             const error = await response.json();

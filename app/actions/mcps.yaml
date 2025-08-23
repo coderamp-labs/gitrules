@@ -39,3 +39,8 @@ mcps:
   config:
     type: http
     url: https://mcp.exa.ai/mcp?exa_api_key=${EXA_API_KEY}
+- display_name: GitRules
+  slug: GitRules
+  config:
+    type: http
+    url: https://gitrules.com/mcp

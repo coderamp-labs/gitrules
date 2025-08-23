@@ -1,13 +1,14 @@
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Query
 from app.models.actions import ActionsResponse, Agent, Rule, MCP
 from app.services.actions_loader import actions_loader
 from app.services.mcp_installer import get_agent_content, get_rule_content, create_mcp_config
-from typing import List, Dict, Any
+from app.services.search_service import search_service
+from typing import List, Dict, Any, Optional
 import json
 
-router = APIRouter(prefix="/api/actions", tags=["actions"])
+router = APIRouter(prefix="/api", tags=["actions"])
 
-@router.get("/", response_model=ActionsResponse)
+@router.get("/actions", response_model=ActionsResponse, operation_id="get_all_actions_endpoint")
 async def get_all_actions():
     """Get all available actions (agents, rules, MCPs)"""
     return ActionsResponse(
@@ -16,80 +17,52 @@ async def get_all_actions():
         mcps=actions_loader.get_mcps()
     )
 
-@router.get("/agents", response_model=List[Agent])
+@router.get("/agents", operation_id="get_agents_endpoint")
 async def get_agents():
-    """Get all available agents"""
-    return actions_loader.get_agents()
-
-@router.get("/rules", response_model=List[Rule])
-async def get_rules():
-    """Get all available rules"""
-    return actions_loader.get_rules()
-
-@router.get("/mcps", response_model=List[MCP])
-async def get_mcps():
-    """Get all available MCPs"""
-    return actions_loader.get_mcps()
-
-@router.get("/agent-content/{agent_id}")
-async def get_agent_content_endpoint(agent_id: str):
-    """Get agent content for virtual workspace"""
+    """Get all available agents with tags only"""
     agents = actions_loader.get_agents()
-    # Match by slug first, fallback to name for backward compat
-    agent = next((a for a in agents if (a.slug == agent_id or a.name == agent_id)), None)
-    
-    if not agent:
-        raise HTTPException(status_code=404, detail=f"Agent not found: {agent_id}")
-    
-    # Get content directly from the agent object (already loaded from consolidated file)
-    content = agent.content
-    if not content:
-        raise HTTPException(status_code=500, detail="Agent has no content")
-    
-    return {
-        "filename": agent.filename,
-        "content": content,
-        "path": f".claude/agents/{agent.filename}"
-    }
+    return [
+        {
+            "name": agent.name,
+            "display_name": agent.display_name,
+            "slug": agent.slug,
+            "tags": agent.tags,
+            "filename": agent.filename
+        }
+        for agent in agents
+    ]
 
-@router.get("/rule-content/{rule_id}")
-async def get_rule_content_endpoint(rule_id: str):
-    """Get rule content to append to CLAUDE.md"""
+@router.get("/rules", operation_id="get_rules_endpoint")
+async def get_rules():
+    """Get all available rules with tags only"""
     rules = actions_loader.get_rules()
-    # Match by slug first, fallback to name for backward compat
-    rule = next((r for r in rules if (r.slug == rule_id or r.name == rule_id)), None)
-    
-    if not rule:
-        raise HTTPException(status_code=404, detail=f"Rule not found: {rule_id}")
-    
-    # Get content directly from the rule object (already loaded from consolidated file)
-    content = rule.content
-    if not content:
-        raise HTTPException(status_code=500, detail="Rule has no content")
-    
-    return {
-        "content": content.strip()
-    }
+    return [
+        {
+            "name": rule.name,
+            "display_name": rule.display_name,
+            "slug": rule.slug,
+            "tags": rule.tags,
+            "filename": rule.filename
+        }
+        for rule in rules
+    ]
 
-@router.post("/mcp-config/{mcp_name}")
-async def get_mcp_config_endpoint(mcp_name: str, current_config: Dict[str, Any] = Body(default={})):
-    """Get updated MCP config for virtual workspace"""
+@router.get("/mcps", operation_id="get_mcps_endpoint")
+async def get_mcps():
+    """Get all available MCPs with tags only"""
     mcps = actions_loader.get_mcps()
-    mcp = next((m for m in mcps if m.name == mcp_name), None)
-    
-    if not mcp:
-        raise HTTPException(status_code=404, detail="MCP not found")
-    
-    updated_config, was_removed = create_mcp_config(current_config, mcp.name, mcp.config)
-    
-    return {
-        "filename": ".mcp.json",
-        "content": updated_config,
-        "path": ".mcp.json",
-        "was_removed": was_removed
-    }
+    return [
+        {
+            "name": mcp.name,
+            "tags": mcp.tags if hasattr(mcp, 'tags') else []
+        }
+        for mcp in mcps
+    ]
 
-@router.get("/merged-block")
+
+
+
+@router.get("/merged-block", operation_id="get_merged_actions_block_endpoint")
 async def get_merged_actions_block():
     """Get all actions merged into a single block with metadata for frontend"""
     agents = actions_loader.get_agents()
@@ -126,3 +99,131 @@ async def get_merged_actions_block():
     }
     
     return merged
+
+@router.get("/search/agents", tags=["mcp"], operation_id="search_agents_endpoint")
+async def search_agents(
+    query: str = Query(..., description="Search query"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of results")
+):
+    """Search for agents by name, display_name, or content"""
+    results = search_service.search_agents(query, limit)
+    return {"results": results}
+
+@router.get("/search/rules", tags=["mcp"], operation_id="search_rules_endpoint")
+async def search_rules(
+    query: str = Query(..., description="Search query"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of results")
+):
+    """Search for rules by name, display_name, content, tags, or author"""
+    results = search_service.search_rules(query, limit)
+    return {"results": results}
+
+@router.get("/search/mcps", tags=["mcp"], operation_id="search_mcps_endpoint")
+async def search_mcps(
+    query: str = Query(..., description="Search query"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of results")
+):
+    """Search for MCPs by name or config content"""
+    results = search_service.search_mcps(query, limit)
+    return {"results": results}
+
+@router.get("/search", tags=["mcp"], operation_id="search_all_endpoint")
+async def search_all(
+    query: str = Query(..., description="Search query"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of results per category")
+):
+    """Search across all types (agents, rules, MCPs)"""
+    return search_service.search_all(query, limit)
+
+@router.get("/rules/{rule_ids}", tags=["mcp"], operation_id="get_multiple_rules_content")
+async def get_multiple_rules_content(rule_ids: str):
+    """Get content for multiple rules by comma-separated IDs/slugs"""
+    ids = [id.strip() for id in rule_ids.split(',') if id.strip()]
+    
+    if not ids:
+        raise HTTPException(status_code=400, detail="No rule IDs provided")
+    
+    rules = actions_loader.get_rules()
+    results = []
+    
+    for rule_id in ids:
+        # Match by slug first, fallback to name for backward compat
+        rule = next((r for r in rules if (r.slug == rule_id or r.name == rule_id)), None)
+        
+        if rule:
+            results.append({
+                "id": rule_id,
+                "slug": rule.slug,
+                "name": rule.name,
+                "display_name": rule.display_name,
+                "content": rule.content,
+                "filename": rule.filename
+            })
+        else:
+            results.append({
+                "id": rule_id,
+                "error": f"Rule not found: {rule_id}"
+            })
+    
+    return {"rules": results}
+
+@router.get("/agents/{agent_ids}", tags=["mcp"], operation_id="get_multiple_agents_content")
+async def get_multiple_agents_content(agent_ids: str):
+    """Get content for multiple agents by comma-separated IDs/slugs"""
+    ids = [id.strip() for id in agent_ids.split(',') if id.strip()]
+    
+    if not ids:
+        raise HTTPException(status_code=400, detail="No agent IDs provided")
+    
+    agents = actions_loader.get_agents()
+    results = []
+    
+    for agent_id in ids:
+        # Match by slug first, fallback to name for backward compat
+        agent = next((a for a in agents if (a.slug == agent_id or a.name == agent_id)), None)
+        
+        if agent:
+            results.append({
+                "id": agent_id,
+                "slug": agent.slug,
+                "name": agent.name,
+                "display_name": agent.display_name,
+                "content": agent.content,
+                "filename": agent.filename
+            })
+        else:
+            results.append({
+                "id": agent_id,
+                "error": f"Agent not found: {agent_id}"
+            })
+    
+    return {"agents": results}
+
+@router.get("/mcps/{mcp_ids}", tags=["mcp"], operation_id="get_multiple_mcps_config")
+async def get_multiple_mcps_config(mcp_ids: str):
+    """Get config for multiple MCPs by comma-separated names"""
+    ids = [id.strip() for id in mcp_ids.split(',') if id.strip()]
+    
+    if not ids:
+        raise HTTPException(status_code=400, detail="No MCP IDs provided")
+    
+    mcps = actions_loader.get_mcps()
+    results = []
+    
+    for mcp_id in ids:
+        # Match by name
+        mcp = next((m for m in mcps if m.name == mcp_id), None)
+        
+        if mcp:
+            results.append({
+                "id": mcp_id,
+                "name": mcp.name,
+                "config": mcp.config
+            })
+        else:
+            results.append({
+                "id": mcp_id,
+                "error": f"MCP not found: {mcp_id}"
+            })
+    
+    return {"mcps": results}

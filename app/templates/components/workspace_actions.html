@@ -940,33 +940,12 @@ async function insertIntoContext(type) {
 
 // Remove action from context
 async function removeFromContext(type) {
-    if (window.workspaceManager) {
-        const state = window.workspaceManager.getState();
-        if (!state) return;
-        
-        if (type === 'agents') {
-            // Remove agent files - use proper deleteFile method
-            const agentFiles = Object.keys(state.files).filter(f => 
-                f.startsWith('.gitrules/agents/') || f.startsWith('.claude/agents/')
-            );
-            agentFiles.forEach(file => {
-                // Use workspaceManager.deleteFile which triggers render
-                window.workspaceManager.deleteFile(file);
-            });
-        } else if (type === 'mcps') {
-            // Remove MCP config entirely when toggling off MCPs category
-            if (state.files['.mcp.json']) {
-                window.workspaceManager.deleteFile('.mcp.json');
-            }
-        } else if (type === 'rules') {
-            // Remove CLAUDE.md entirely when toggling off Rules category
-            // (since having an empty CLAUDE.md provides no value)
-            if (state.files['CLAUDE.md']) {
-                window.workspaceManager.deleteFile('CLAUDE.md');
-            }
-        }
-        // No need to manually save/render - deleteFile handles it
-    }
+    // Folding/collapsing categories should NOT remove content
+    // This function should only be used when explicitly removing items
+    // Category folding should only affect UI visibility, not file content
+    
+    // If we need to remove all items of a type in the future, 
+    // it should be a separate explicit action, not tied to UI folding
 }
 
 // Load dropdown data - now just updates the UI state based on what's already rendered
@@ -1053,23 +1032,26 @@ function toggleDropdownItem(element, itemName, type) {
 // Backend integration functions (from previous implementation)
 async function installAgent(agentName) {
     try {
-        const response = await fetch(`/api/actions/agent-content/${encodeURIComponent(agentName)}`);
+        const response = await fetch(`/api/agents/${encodeURIComponent(agentName)}`);
         
         if (response.ok) {
-            const result = await response.json();
+            const data = await response.json();
+            const result = data.agents && data.agents[0]; // Get first agent from array
             
-            if (window.workspaceManager) {
+            if (result && window.workspaceManager) {
                 const state = window.workspaceManager.getState();
                 if (state) {
                     // Store agent name to path mapping in metadata (for easier removal)
-                    state.agentMappings[agentName] = result.path;
+                    const agentPath = `.claude/agents/${result.filename}`;
+                    state.agentMappings[agentName] = agentPath;
                     
                     // Mark the agent as checked in action state
                     state.setActionItemState('agents', agentName, true);
                 }
                 
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile(result.path, result.content);
+                const agentPath = `.claude/agents/${result.filename}`;
+                window.workspaceManager.includeFile(agentPath, result.content);
             }
         }
     } catch (error) {
@@ -1079,40 +1061,38 @@ async function installAgent(agentName) {
 
 async function installMCP(mcpName) {
     try {
-        let currentConfig = {};
-        if (window.workspaceManager && window.workspaceManager.getState()) {
-            const mcpFile = window.workspaceManager.getState().files['.mcp.json'];
-            if (mcpFile) {
-                try {
-                    currentConfig = JSON.parse(mcpFile);
-                } catch (e) {
-                    currentConfig = {};
-                }
-            }
-        }
-        
-        const response = await fetch(`/api/actions/mcp-config/${encodeURIComponent(mcpName)}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(currentConfig)
-        });
+        const response = await fetch(`/api/mcps/${encodeURIComponent(mcpName)}`);
         
         if (response.ok) {
-            const result = await response.json();
+            const data = await response.json();
+            const result = data.mcps && data.mcps[0]; // Get first MCP from array
             
-            if (window.workspaceManager) {
+            if (result && result.config && window.workspaceManager) {
                 const state = window.workspaceManager.getState();
-                if (state && !result.was_removed) {
+                if (state) {
                     // Mark the MCP as checked in action state
                     state.setActionItemState('mcps', mcpName, true);
-                } else if (state && result.was_removed) {
-                    // Mark the MCP as unchecked if it was removed
-                    state.setActionItemState('mcps', mcpName, false);
                 }
+                
+                // Get current MCP config or create new one
+                let currentConfig = {};
+                const mcpFile = window.workspaceManager.getState().files['.mcp.json'];
+                if (mcpFile) {
+                    try {
+                        currentConfig = JSON.parse(mcpFile);
+                    } catch (e) {
+                        currentConfig = {};
+                    }
+                }
+                
+                // Ensure mcpServers exists and add the new MCP
+                if (!currentConfig.mcpServers) {
+                    currentConfig.mcpServers = {};
+                }
+                currentConfig.mcpServers[mcpName] = result.config;
+                
                 // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile(result.path, result.content);
+                window.workspaceManager.includeFile('.mcp.json', JSON.stringify(currentConfig, null, 2));
             }
         }
     } catch (error) {
@@ -1122,25 +1102,28 @@ async function installMCP(mcpName) {
 
 async function installRule(ruleName) {
     try {
-        const response = await fetch(`/api/actions/rule-content/${encodeURIComponent(ruleName)}`);
+        const response = await fetch(`/api/rules/${encodeURIComponent(ruleName)}`);
         
         if (response.ok) {
-            const result = await response.json();
+            const data = await response.json();
+            const result = data.rules && data.rules[0]; // Get first rule from array
             
-            let currentContent = '';
-            if (window.workspaceManager && window.workspaceManager.getState()) {
-                const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
-                if (claudeFile) {
-                    currentContent = claudeFile;
+            if (result && result.content) {
+                let currentContent = '';
+                if (window.workspaceManager && window.workspaceManager.getState()) {
+                    const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
+                    if (claudeFile) {
+                        currentContent = claudeFile;
+                    }
                 }
-            }
-            
-            const ruleContent = result.content.trim();
-            const newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
-            
-            if (window.workspaceManager) {
-                // Use includeFile which properly handles saving and rendering
-                window.workspaceManager.includeFile('CLAUDE.md', newContent);
+                
+                const ruleContent = result.content.trim();
+                const newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
+                
+                if (window.workspaceManager) {
+                    // Use includeFile which properly handles saving and rendering
+                    window.workspaceManager.includeFile('CLAUDE.md', newContent);
+                }
             }
         }
     } catch (error) {
@@ -1188,11 +1171,12 @@ async function removeMCP(mcpName) {
 async function removeRule(ruleName) {
     try {
         // Get the rule content first to know what to remove
-        const response = await fetch(`/api/actions/rule-content/${encodeURIComponent(ruleName)}`);
+        const response = await fetch(`/api/rules/${encodeURIComponent(ruleName)}`);
         
         if (response.ok) {
-            const result = await response.json();
-            const ruleContent = result.content.trim();
+            const data = await response.json();
+            const result = data.rules && data.rules[0]; // Get first rule from array
+            const ruleContent = result ? result.content.trim() : '';
             
             if (window.workspaceManager && window.workspaceManager.getState()) {
                 const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
