@@ -8,62 +8,52 @@
         <!-- <p class="text-black font-medium text-sm">Pick an add-on to start with</p> -->
     </div>
 
-    <!-- Single Box with All Actions -->
-    <div class="bg-white border-2 border-black p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-4">
-        <!-- Agents Section -->
-        <div class="mb-4">
-            <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
-                <span class="text-sm">🤖</span> Agents
-            </div>
-            <div id="agents-container" class="flex flex-wrap gap-2">
-                {% for agent in agents[:4] %}
-                <button class="action-button action-button--primary" onclick="addAgent('{{ agent.slug or agent.name }}')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">{{ agent.display_name or agent.name }}</span>
-                    </div>
+    <!-- Repository Analysis Section -->
+    <div class="pb-4">
+            <div class="flex gap-2">
+                <input 
+                    id="repo-url-input"
+                    type="url" 
+                    placeholder="https://github.com/user/repository"
+                    class="flex-1 px-3 py-1.5 text-sm border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-1px] focus:translate-y-[-1px] transition-all focus:outline-none"
+                />
+                <button 
+                    id="analyze-repo-btn"
+                    onclick="analyzeRepository()"
+                    class="px-4 py-1.5 bg-pink-400 border-2 border-black text-black font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                    🚀 Analyze
                 </button>
-                {% endfor %}
-                {% if not agents %}
-                <!-- Placeholder if no agents available -->
-                <button class="action-button action-button--primary opacity-50 cursor-not-allowed" disabled>
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">No agents available</span>
-                    </div>
-                </button>
-                {% endif %}
             </div>
-        </div>
-        
-        <!-- MCPs Section -->
-        <div class="mb-4">
-            <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
-                <span class="text-sm">🔌</span> MCPs
+            <!-- Loading State -->
+            <div id="analysis-loading" class="hidden mt-2">
+                <div class="bg-yellow-50 border-2 border-yellow-400 p-2 text-center text-sm">
+                    <div class="inline-block animate-spin mr-1">⚙️</div>
+                    <span class="font-bold">Analyzing repository...</span>
+                    <p class="text-sm mt-1">This may take a few moments depending on repository size.</p>
+                </div>
             </div>
-            <div id="mcps-container" class="flex flex-wrap gap-2">
-                {% for mcp in mcps[:4] %}
-                <button class="action-button action-button--secondary" onclick="addMCP('{{ mcp.name }}')">
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">{{ mcp.name }}</span>
-                    </div>
-                </button>
-                {% endfor %}
-                {% if not mcps %}
-                <!-- Placeholder if no MCPs available -->
-                <button class="action-button action-button--secondary opacity-50 cursor-not-allowed" disabled>
-                    <div class="action-button__plus">+</div>
-                    <div class="action-button__content">
-                        <span class="action-button__label">No MCPs available</span>
-                    </div>
-                </button>
-                {% endif %}
+            <!-- Results Display -->
+            <div id="analysis-results" class="hidden mt-2">
+                <div class="bg-cyan-50 border-2 border-cyan-400 p-2">
+                    <h4 class="font-bold text-sm mb-1">Analysis Results:</h4>
+                    <div id="results-content" class="text-xs whitespace-pre-wrap max-h-40 overflow-y-auto"></div>
+                </div>
             </div>
-        </div>
-        
-        <!-- Rules Section -->
-        <div>
+            <!-- Error Display -->
+            <div id="analysis-error" class="hidden mt-2">
+                <div class="bg-red-50 border-2 border-red-400 p-2">
+                    <h4 class="font-bold text-sm mb-1 text-red-700">Error:</h4>
+                    <div id="error-content" class="text-xs text-red-600"></div>
+                </div>
+            </div>
+    </div>
+
+    <!-- Delimiter -->
+    <div class="border-t-2 border-black my-4"></div>
+
+    <!-- Rules Section -->
+    <div class="mb-4">
             <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
                 <span class="text-sm">📋</span> Rules
             </div>
@@ -86,23 +76,50 @@
                 </button>
                 {% endif %}
             </div>
-        </div>
+    </div>
+    
+    <!-- Agents Section -->
+    <div class="pb-4">
+            <div class="text-sm font-black text-black flex items-center gap-1 mb-1">
+                <span class="text-sm">🤖</span> Agents
+            </div>
+            <div id="agents-container" class="flex flex-wrap gap-2">
+                {% for agent in agents[:4] %}
+                <button class="action-button action-button--primary" onclick="addAgent('{{ agent.slug or agent.name }}')">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">{{ agent.display_name or agent.name }}</span>
+                    </div>
+                </button>
+                {% endfor %}
+                {% if not agents %}
+                <!-- Placeholder if no agents available -->
+                <button class="action-button action-button--primary opacity-50 cursor-not-allowed" disabled>
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">No agents available</span>
+                    </div>
+                </button>
+                {% endif %}
+            </div>
     </div>
 
+    <!-- Delimiter -->
+    <div class="border-t-2 border-black my-4"></div>
 
-    <!-- Empty Context Section -->
-    <div class="pt-3">
-        <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
-            <span class="text-sm">📄</span> New rules
-        </h3>
-        <div style="margin: 4px;">
-            <button class="action-button action-button--neutral action-button--full-width action-button--large" onclick="startFromScratch()">
-                <div class="action-button__plus">+</div>
-                <div class="action-button__content">
-                    <span class="action-button__label">Start from scratch</span>
-                </div>
-            </button>
-        </div>
+    <!-- New Rules Section -->
+    <div class="pt-2">
+            <h3 class="text-sm font-black text-black mb-2 flex items-center gap-1">
+                <span class="text-sm">📄</span> New rules
+            </h3>
+            <div>
+                <button class="action-button action-button--neutral action-button--full-width action-button--large" onclick="startFromScratch()">
+                    <div class="action-button__plus">+</div>
+                    <div class="action-button__content">
+                        <span class="action-button__label">Start from scratch</span>
+                    </div>
+                </button>
+            </div>
     </div>
 
     <!-- Back Button (hidden initially) -->
@@ -131,6 +148,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (workspaceSection) {
         workspaceSection.style.display = 'none';
         workspaceSection.style.transition = 'opacity 300ms ease-in-out';
+    }
+    
+    // Add Enter key handler for repo input
+    const repoInput = document.getElementById('repo-url-input');
+    if (repoInput) {
+        repoInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                analyzeRepository();
+            }
+        });
     }
 });
 
@@ -649,5 +676,90 @@ function hideWorkspace() {
             isWorkspaceVisible = false;
         }, 50);
     }, 300);
+}
+
+// Repository Analysis Function
+async function analyzeRepository() {
+    // Get input value
+    const repoUrl = document.getElementById('repo-url-input').value.trim();
+    
+    // Validate required field
+    if (!repoUrl) {
+        alert('Please enter a repository URL');
+        return;
+    }
+    
+    // Default prompt for comprehensive analysis
+    const defaultPrompt = 'Analyze this repository and provide a comprehensive overview including architecture, code quality, security considerations, and improvement suggestions.';
+    
+    // Show loading state
+    const button = document.getElementById('analyze-repo-btn');
+    const loading = document.getElementById('analysis-loading');
+    const results = document.getElementById('analysis-results');
+    const error = document.getElementById('analysis-error');
+    
+    button.disabled = true;
+    loading.classList.remove('hidden');
+    results.classList.add('hidden');
+    error.classList.add('hidden');
+    
+    try {
+        // Update loading message for ingestion
+        loading.querySelector('span.font-bold').textContent = 'Ingesting repository...';
+        loading.querySelector('p.text-sm').textContent = 'Fetching and processing repository content.';
+        
+        // Step 1: Ingest the repository
+        const ingestResponse = await fetch('/api/ingest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                repo_url: repoUrl
+            })
+        });
+        
+        const ingestData = await ingestResponse.json();
+        
+        if (!ingestResponse.ok || !ingestData.success) {
+            throw new Error(ingestData.detail || 'Failed to ingest repository');
+        }
+        
+        // Update loading message for analysis
+        loading.querySelector('span.font-bold').textContent = 'Analyzing with AI...';
+        loading.querySelector('p.text-sm').textContent = `Processing ${Math.round(ingestData.context_size / 1000)}k characters of repository data.`;
+        
+        // Step 2: Analyze the context
+        const analyzeResponse = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                context: ingestData.message,
+                user_prompt: defaultPrompt
+            })
+        });
+        
+        const analyzeData = await analyzeResponse.json();
+        
+        if (analyzeResponse.ok && analyzeData.success) {
+            // Show results
+            document.getElementById('results-content').textContent = analyzeData.analysis;
+            results.classList.remove('hidden');
+        } else {
+            throw new Error(analyzeData.detail || 'Failed to analyze repository');
+        }
+    } catch (err) {
+        // Show error
+        document.getElementById('error-content').textContent = err.message || 'An unexpected error occurred';
+        error.classList.remove('hidden');
+    } finally {
+        // Hide loading state and reset message
+        button.disabled = false;
+        loading.classList.add('hidden');
+        loading.querySelector('span.font-bold').textContent = 'Analyzing repository...';
+        loading.querySelector('p.text-sm').textContent = 'This may take a few moments depending on repository size.';
+    }
 }
 </script>

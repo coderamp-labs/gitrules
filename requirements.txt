@@ -9,3 +9,5 @@ pyyaml==6.0.1
 fastapi-mcp==0.4.0
 fuzzywuzzy
 python-Levenshtein
+gitingest
+httpx
