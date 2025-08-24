@@ -745,9 +745,20 @@ function restoreActionStates() {
     }
 }
 
-// Export for global use
+// Export for global use  
 window.restoreActionStates = restoreActionStates;
 window.loadDropdownData = loadDropdownData;
+// Export functions needed by onclick handlers
+window.toggleDropdownItem = toggleDropdownItem;
+window.toggleRuleset = toggleRuleset;
+window.toggleRulesetItems = toggleRulesetItems;
+// Export install/remove functions needed by toggle functions
+window.installRule = installRule;
+window.removeRule = removeRule;
+window.installAgent = installAgent;
+window.removeAgent = removeAgent;
+window.installMCP = installMCP;
+window.removeMCP = removeMCP;
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', function() {

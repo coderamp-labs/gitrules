@@ -782,39 +782,18 @@ async function analyzeRepository() {
     error.classList.add('hidden');
     
     try {
-        // Update loading message for ingestion
-        loading.querySelector('span.font-bold').textContent = 'Ingesting repository...';
-        loading.querySelector('p.text-sm').textContent = 'Fetching and processing repository content.';
+        // Update loading message
+        loading.querySelector('span.font-bold').textContent = 'Analyzing repository...';
+        loading.querySelector('p.text-sm').textContent = 'Ingesting repository and getting tool recommendations.';
         
-        // Step 1: Ingest the repository
-        const ingestResponse = await fetch('/api/ingest', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                repo_url: repoUrl
-            })
-        });
-        
-        const ingestData = await ingestResponse.json();
-        
-        if (!ingestResponse.ok || !ingestData.success) {
-            throw new Error(ingestData.detail || 'Failed to ingest repository');
-        }
-        
-        // Update loading message for recommendation
-        loading.querySelector('span.font-bold').textContent = 'Getting tool recommendations...';
-        loading.querySelector('p.text-sm').textContent = `Analyzing codebase to recommend rules`;
-        
-        // Step 2: Get tool recommendations
+        // Get tool recommendations (includes ingestion)
         const recommendResponse = await fetch('/api/recommend', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                context: ingestData.message,
+                repo_url: repoUrl,
                 user_prompt: 'Recommend minimal useful tools for this repository'
             })
         });
@@ -851,30 +830,6 @@ async function analyzeRepository() {
             
         } else {
             throw new Error(recommendData.detail || 'Failed to get recommendations');
-        }
-        
-        // Step 3: Also analyze the context for detailed insights
-        loading.querySelector('span.font-bold').textContent = 'Analyzing repository details...';
-        loading.querySelector('p.text-sm').textContent = 'Getting detailed analysis of your codebase.';
-        
-        const analyzeResponse = await fetch('/api/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                context: ingestData.message,
-                user_prompt: defaultPrompt
-            })
-        });
-        
-        const analyzeData = await analyzeResponse.json();
-        
-        if (analyzeResponse.ok && analyzeData.success) {
-            // Append analysis to results
-            const currentResults = document.getElementById('results-content').textContent;
-            document.getElementById('results-content').textContent = 
-                currentResults + '\n\n--- Detailed Analysis ---\n\n' + analyzeData.analysis;
         }
     } catch (err) {
         // Show error

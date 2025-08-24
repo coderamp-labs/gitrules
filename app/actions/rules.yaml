@@ -33,6 +33,8 @@ minimal-code:
   tags: ["simplicity", "code-style"]
   namespace: "development"
   content: |
+    ## Keep Code Minimal
+    
     - Always keep code SUPER minimal
     - Never introduce features not explicitly mentioned
 
@@ -43,6 +45,8 @@ remove-dead-code:
   tags: ["maintenance", "code-style"]
   namespace: "development"
   content: |
+    ## Remove Dead Code
+    
     - Remove dead code immediately rather than maintaining it
     - No backward compatibility or legacy functions
 
@@ -53,6 +57,8 @@ prioritize-functionality:
   tags: ["architecture", "code-style"]
   namespace: "development"
   content: |
+    ## Prioritize Functionality
+    
     - Prioritize functionality over production-ready patterns
     - Focus on user experience and feature completeness
 
@@ -63,6 +69,8 @@ clean-comments:
   tags: ["documentation", "code-style"]
   namespace: "development"
   content: |
+    ## Clean Comments
+    
     - When updating code, don't reference what is changing
     - Avoid keywords like LEGACY, CHANGED, REMOVED
     - Focus on comments that document just the functionality of the code
@@ -98,6 +106,8 @@ fail-fast-principle:
   tags: ["architecture", "errors"]
   namespace: "development"
   content: |
+    ## Fail Fast Principle
+    
     **Core Principle**: We need to intelligently decide when to fail hard and fast to quickly address issues, and when to allow processes to complete in critical services despite failures. Read below carefully and make intelligent decisions on a case-by-case basis.
 
 when-to-fail-fast:
@@ -139,6 +149,8 @@ update-docs:
   tags: ["documentation", "maintenance"]
   namespace: "documentation"
   content: |
+    ## Update Documentation
+    
     - Update any documentation when it's relevant, including CLAUDE.md
 
 use-uv:
@@ -154,3 +166,434 @@ use-uv:
     - Use:
       - `uv venv` to create a virtual environment
       - `uv pip install -r requirements.txt|pyproject.toml` to install dependencies
+
+test-driven-development:
+  display_name: Test-Driven Development
+  type: rule
+  author: QA Team
+  tags: ["testing", "tdd", "quality"]
+  namespace: "development"
+  content: |
+    ## TDD Approach
+    
+    - Write tests BEFORE implementing features
+    - Red-Green-Refactor cycle is mandatory
+    - Each function must have at least 80% test coverage
+    - Mock external dependencies in unit tests
+    - Integration tests for API endpoints
+
+api-design:
+  display_name: API Design Standards
+  type: ruleset
+  author: API Team
+  tags: ["api", "rest", "standards"]
+  namespace: "development"
+  children:
+    - "restful-conventions"
+    - "api-versioning"
+    - "response-formats"
+    - "rate-limiting"
+
+restful-conventions:
+  display_name: RESTful Conventions
+  type: rule
+  author: API Team
+  tags: ["rest", "http", "api"]
+  namespace: "development"
+  content: |
+    ## RESTful Conventions
+    
+    - Use proper HTTP verbs (GET, POST, PUT, PATCH, DELETE)
+    - Resource names should be plural nouns
+    - Use hyphenated-lowercase for multi-word resources
+    - Status codes must be semantically correct
+
+api-versioning:
+  display_name: API Versioning
+  type: rule
+  author: API Team
+  tags: ["versioning", "api", "compatibility"]
+  namespace: "development"
+  content: |
+    ## API Versioning
+    
+    - Version APIs using URL path (e.g., /api/v1/)
+    - Never break backward compatibility within a major version
+    - Deprecation notices at least 3 months in advance
+    - Support at least 2 major versions simultaneously
+
+response-formats:
+  display_name: API Response Formats
+  type: rule
+  author: API Team
+  tags: ["json", "api", "responses"]
+  namespace: "development"
+  content: |
+    ## API Response Formats
+    
+    - All responses must be JSON
+    - Use consistent envelope structure: {data, error, meta}
+    - Include pagination info in meta for list endpoints
+    - Error responses must include error code and message
+
+rate-limiting:
+  display_name: Rate Limiting
+  type: rule
+  author: API Team
+  tags: ["security", "api", "performance"]
+  namespace: "development"
+  content: |
+    ## Rate Limiting
+    
+    - Implement rate limiting on all public endpoints
+    - Return X-RateLimit headers in responses
+    - Use 429 status code when limit exceeded
+    - Different limits for authenticated vs anonymous users
+
+database-optimization:
+  display_name: Database Optimization
+  type: ruleset
+  author: Database Team
+  tags: ["database", "performance", "optimization"]
+  namespace: "development"
+  children:
+    - "query-optimization"
+    - "indexing-strategy"
+    - "connection-pooling"
+
+query-optimization:
+  display_name: Query Optimization
+  type: rule
+  author: Database Team
+  tags: ["sql", "performance", "queries"]
+  namespace: "development"
+  content: |
+    ## Query Optimization
+    
+    - Avoid N+1 queries at all costs
+    - Use eager loading for related data
+    - Batch operations when possible
+    - EXPLAIN ANALYZE complex queries before production
+    - Limit result sets with pagination
+
+indexing-strategy:
+  display_name: Indexing Strategy
+  type: rule
+  author: Database Team
+  tags: ["indexes", "database", "performance"]
+  namespace: "development"
+  content: |
+    ## Indexing Strategy
+    
+    - Index foreign keys and frequently queried columns
+    - Composite indexes for multi-column WHERE clauses
+    - Monitor index usage and remove unused ones
+    - Consider partial indexes for filtered queries
+
+connection-pooling:
+  display_name: Connection Pooling
+  type: rule
+  author: Database Team
+  tags: ["connections", "database", "pooling"]
+  namespace: "development"
+  content: |
+    ## Connection Pooling
+    
+    - Always use connection pooling in production
+    - Set appropriate pool size based on workload
+    - Implement connection timeout and retry logic
+    - Monitor pool metrics for optimization
+
+git-workflow:
+  display_name: Git Workflow
+  type: ruleset
+  author: DevOps Team
+  tags: ["git", "version-control", "workflow"]
+  namespace: "development"
+  children:
+    - "branch-naming"
+    - "commit-conventions"
+    - "pull-request-rules"
+
+branch-naming:
+  display_name: Branch Naming Convention
+  type: rule
+  author: DevOps Team
+  tags: ["git", "branches", "naming"]
+  namespace: "development"
+  content: |
+    ## Branch Naming Convention
+    
+    - feature/description for new features
+    - bugfix/description for bug fixes
+    - hotfix/description for urgent production fixes
+    - chore/description for maintenance tasks
+    - Use kebab-case for descriptions
+
+commit-conventions:
+  display_name: Commit Message Convention
+  type: rule
+  author: DevOps Team
+  tags: ["git", "commits", "conventions"]
+  namespace: "development"
+  content: |
+    ## Conventional Commits
+    
+    - Format: type(scope): subject
+    - Types: feat, fix, docs, style, refactor, test, chore
+    - Subject line max 50 characters
+    - Use imperative mood ("add" not "added")
+    - Reference issue numbers when applicable
+
+pull-request-rules:
+  display_name: Pull Request Rules
+  type: rule
+  author: DevOps Team
+  tags: ["git", "pull-requests", "review"]
+  namespace: "development"
+  content: |
+    ## Pull Request Rules
+    
+    - PRs must have descriptive titles
+    - Include "Closes #123" to auto-close issues
+    - Require at least 2 approvals for main branch
+    - All CI checks must pass before merge
+    - Squash commits when merging
+
+security-practices:
+  display_name: Security Best Practices
+  type: ruleset
+  author: Security Team
+  tags: ["security", "best-practices", "safety"]
+  namespace: "security"
+  children:
+    - "input-validation"
+    - "authentication-rules"
+    - "data-encryption"
+    - "security-headers"
+
+input-validation:
+  display_name: Input Validation
+  type: rule
+  author: Security Team
+  tags: ["validation", "security", "input"]
+  namespace: "security"
+  content: |
+    ## Input Validation
+    
+    - Validate all user inputs on both client and server
+    - Use whitelist validation over blacklist
+    - Sanitize data before database operations
+    - Implement CSRF protection on all forms
+    - Rate limit form submissions
+
+authentication-rules:
+  display_name: Authentication Rules
+  type: rule
+  author: Security Team
+  tags: ["auth", "security", "authentication"]
+  namespace: "security"
+  content: |
+    ## Authentication Rules
+    
+    - Use bcrypt or argon2 for password hashing
+    - Implement JWT with short expiration times
+    - Refresh tokens stored securely
+    - Multi-factor authentication for sensitive operations
+    - Session timeout after inactivity
+
+data-encryption:
+  display_name: Data Encryption
+  type: rule
+  author: Security Team
+  tags: ["encryption", "security", "data"]
+  namespace: "security"
+  content: |
+    ## Data Encryption
+    
+    - Encrypt sensitive data at rest
+    - Use TLS 1.3+ for data in transit
+    - Store encryption keys in secure vaults
+    - Implement field-level encryption for PII
+    - Regular key rotation schedule
+
+security-headers:
+  display_name: Security Headers
+  type: rule
+  author: Security Team
+  tags: ["headers", "security", "http"]
+  namespace: "security"
+  content: |
+    ## Security Headers
+    
+    - Set Content-Security-Policy headers
+    - Enable X-Frame-Options: DENY
+    - Use X-Content-Type-Options: nosniff
+    - Implement Strict-Transport-Security
+    - Set appropriate CORS policies
+
+performance-monitoring:
+  display_name: Performance Monitoring
+  type: ruleset
+  author: DevOps Team
+  tags: ["monitoring", "performance", "observability"]
+  namespace: "operations"
+  children:
+    - "application-metrics"
+    - "logging-standards"
+    - "alerting-rules"
+
+application-metrics:
+  display_name: Application Metrics
+  type: rule
+  author: DevOps Team
+  tags: ["metrics", "monitoring", "apm"]
+  namespace: "operations"
+  content: |
+    ## Application Metrics
+    
+    - Track response times for all endpoints
+    - Monitor error rates and types
+    - Measure database query performance
+    - Track memory and CPU usage
+    - Custom metrics for business logic
+
+logging-standards:
+  display_name: Logging Standards
+  type: rule
+  author: DevOps Team
+  tags: ["logging", "observability", "debugging"]
+  namespace: "operations"
+  content: |
+    ## Structured Logging
+    
+    - Use JSON format for production logs
+    - Include correlation IDs for request tracing
+    - Log levels: ERROR, WARN, INFO, DEBUG
+    - Never log sensitive information
+    - Centralized logging with retention policies
+
+alerting-rules:
+  display_name: Alerting Rules
+  type: rule
+  author: DevOps Team
+  tags: ["alerts", "monitoring", "incidents"]
+  namespace: "operations"
+  content: |
+    ## Alerting Rules
+    
+    - Alert on error rate spikes (>1% threshold)
+    - Response time degradation alerts
+    - Database connection pool exhaustion
+    - Disk space warnings at 80% capacity
+    - Clear escalation paths defined
+
+accessibility-standards:
+  display_name: Accessibility Standards
+  type: rule
+  author: UX Team
+  tags: ["a11y", "accessibility", "wcag"]
+  namespace: "frontend"
+  content: |
+    ## WCAG 2.1 AA Compliance
+    
+    - All images must have alt text
+    - Proper heading hierarchy (h1-h6)
+    - Keyboard navigation support
+    - ARIA labels for interactive elements
+    - Color contrast ratio minimum 4.5:1
+    - Focus indicators visible
+
+code-review-checklist:
+  display_name: Code Review Checklist
+  type: rule
+  author: Engineering Team
+  tags: ["review", "quality", "checklist"]
+  namespace: "development"
+  content: |
+    ## Review Checklist
+    
+    - Code follows style guidelines
+    - Tests are included and passing
+    - Documentation updated if needed
+    - No hardcoded secrets or credentials
+    - Performance implications considered
+    - Error handling is appropriate
+    - Security best practices followed
+
+async-programming:
+  display_name: Async Programming
+  type: rule
+  author: Engineering Team
+  tags: ["async", "concurrency", "performance"]
+  namespace: "development"
+  content: |
+    ## Async Programming
+    
+    - Prefer async/await over callbacks
+    - Handle promise rejections properly
+    - Use concurrent execution when possible
+    - Implement proper timeout handling
+    - Avoid blocking the event loop
+
+containerization:
+  display_name: Containerization
+  type: rule
+  author: DevOps Team
+  tags: ["docker", "containers", "deployment"]
+  namespace: "operations"
+  content: |
+    ## Docker Best Practices
+    
+    - Use multi-stage builds for smaller images
+    - Pin base image versions
+    - Run as non-root user
+    - One process per container
+    - Use .dockerignore file
+    - Layer caching optimization
+
+caching-strategy:
+  display_name: Caching Strategy
+  type: rule
+  author: Engineering Team
+  tags: ["cache", "performance", "optimization"]
+  namespace: "development"
+  content: |
+    ## Caching Strategy
+    
+    - Implement Redis for session storage
+    - Cache expensive computations
+    - Use CDN for static assets
+    - Set appropriate TTL values
+    - Implement cache invalidation strategy
+    - Monitor cache hit rates
+
+dependency-management:
+  display_name: Dependency Management
+  type: rule
+  author: Engineering Team
+  tags: ["dependencies", "packages", "security"]
+  namespace: "development"
+  content: |
+    ## Dependency Management
+    
+    - Pin exact versions in production
+    - Regular dependency audits for vulnerabilities
+    - Update dependencies monthly
+    - Document breaking changes
+    - Use lockfiles for reproducible builds
+
+feature-flags:
+  display_name: Feature Flags
+  type: rule
+  author: Product Team
+  tags: ["features", "deployment", "testing"]
+  namespace: "development"
+  content: |
+    ## Feature Flags
+    
+    - Use feature flags for gradual rollouts
+    - Implement kill switches for critical features
+    - Clean up obsolete flags regularly
+    - A/B testing through feature flags
+    - Environment-specific flag configurations
