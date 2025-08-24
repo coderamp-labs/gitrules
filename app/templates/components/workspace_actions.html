@@ -498,8 +498,10 @@ function filterCategory(categoryType, searchTerm) {
     // Get the data for this category
     const categoryData = serverActions[categoryType] || [];
     
-    // Filter top-level items
+    // Filter top-level items and collect them with scores
     const items = dropdown.querySelectorAll('.dropdown-item:not(.ruleset-children .dropdown-item)');
+    const itemsWithScores = [];
+    
     items.forEach(item => {
         const itemSlug = item.getAttribute('data-rule-slug') || 
                         item.onclick?.toString().match(/toggleDropdownItem\(this,\s*'([^']+)'/)?.[1];
@@ -517,23 +519,94 @@ function filterCategory(categoryType, searchTerm) {
         
         // For rulesets, also check if any children match
         let hasMatchingChildren = false;
+        let childrenMaxScore = 0;
         if (itemData.type === 'ruleset' && itemData.children) {
-            hasMatchingChildren = itemData.children.some(childSlug => {
+            itemData.children.forEach(childSlug => {
                 const childData = rulesBySlug[childSlug];
-                return childData && fuzzyMatch(childData, searchTerm).score > 0;
+                if (childData) {
+                    const childScore = fuzzyMatch(childData, searchTerm).score;
+                    if (childScore > 0) {
+                        hasMatchingChildren = true;
+                        childrenMaxScore = Math.max(childrenMaxScore, childScore);
+                    }
+                }
             });
         }
         
         const shouldShow = itemMatch.score > 0 || hasMatchingChildren;
         
         if (shouldShow) {
-            item.classList.remove('filtered-hidden');
-            if (itemMatch.score > 0) {
-                item.classList.add('search-match');
-            } else {
-                item.classList.remove('search-match');
-            }
+            // Use the higher score between item match and best child match
+            const finalScore = Math.max(itemMatch.score, childrenMaxScore);
+            itemsWithScores.push({
+                element: item,
+                score: finalScore,
+                itemMatch: itemMatch,
+                hasMatchingChildren: hasMatchingChildren,
+                itemSlug: itemSlug,
+                itemData: itemData
+            });
             hasVisibleItems = true;
+        } else {
+            item.classList.add('filtered-hidden');
+            item.classList.remove('search-match');
+        }
+    });
+    
+    // Sort items by relevance score (highest first) and reorder in DOM
+    if (searchTerm && itemsWithScores.length > 0) {
+        itemsWithScores.sort((a, b) => b.score - a.score);
+        
+        // Collect all parent elements with their children containers as units
+        const parentChildUnits = itemsWithScores.map(itemInfo => {
+            const { element, itemMatch, hasMatchingChildren, itemSlug, itemData } = itemInfo;
+            const childrenContainer = document.getElementById(`children-${itemSlug}`);
+            
+            return {
+                parentElement: element,
+                childrenContainer: childrenContainer,
+                itemMatch: itemMatch,
+                hasMatchingChildren: hasMatchingChildren,
+                itemSlug: itemSlug,
+                itemData: itemData
+            };
+        });
+        
+        // Reorder by moving each parent-children unit together
+        const dropdownContainer = dropdown;
+        parentChildUnits.forEach(unit => {
+            const { parentElement, childrenContainer, itemMatch, hasMatchingChildren, itemSlug, itemData } = unit;
+            
+            parentElement.classList.remove('filtered-hidden');
+            if (itemMatch.score > 0) {
+                parentElement.classList.add('search-match');
+            } else {
+                parentElement.classList.remove('search-match');
+            }
+            
+            // Move parent element to end (this maintains relative sorted order)
+            dropdownContainer.appendChild(parentElement);
+            
+            // If there's a children container, move it right after the parent
+            if (childrenContainer) {
+                dropdownContainer.appendChild(childrenContainer);
+                
+                // Filter children if container is visible
+                if (childrenContainer.style.display !== 'none') {
+                    filterRulesetChildren(itemSlug, searchTerm);
+                }
+            }
+        });
+    } else {
+        // No search term, just show/hide without reordering
+        itemsWithScores.forEach(itemInfo => {
+            const { element, itemMatch, hasMatchingChildren, itemSlug, itemData } = itemInfo;
+            element.classList.remove('filtered-hidden');
+            if (itemMatch.score > 0) {
+                element.classList.add('search-match');
+            } else {
+                element.classList.remove('search-match');
+            }
             
             // If it's a ruleset, filter children
             if (itemData.type === 'ruleset' && itemData.children) {
@@ -542,11 +615,8 @@ function filterCategory(categoryType, searchTerm) {
                     filterRulesetChildren(itemSlug, searchTerm);
                 }
             }
-        } else {
-            item.classList.add('filtered-hidden');
-            item.classList.remove('search-match');
-        }
-    });
+        });
+    }
     
     // Hide/show the entire category based on whether it has matches
     if (hasVisibleItems) {
@@ -562,6 +632,8 @@ function filterRulesetChildren(rulesetSlug, searchTerm) {
     if (!childrenContainer) return;
     
     const childItems = childrenContainer.querySelectorAll('.dropdown-item');
+    const childrenWithScores = [];
+    
     childItems.forEach(child => {
         const childSlug = child.getAttribute('data-rule-slug');
         if (!childSlug) return;
@@ -572,13 +644,36 @@ function filterRulesetChildren(rulesetSlug, searchTerm) {
         const matchResult = fuzzyMatch(childData, searchTerm);
         
         if (matchResult.score > 0) {
-            child.classList.remove('filtered-hidden');
-            child.classList.add('search-match');
+            childrenWithScores.push({
+                element: child,
+                score: matchResult.score
+            });
         } else {
             child.classList.add('filtered-hidden');
             child.classList.remove('search-match');
         }
     });
+    
+    // Sort children by relevance score (highest first) and reorder
+    if (searchTerm && childrenWithScores.length > 0) {
+        childrenWithScores.sort((a, b) => b.score - a.score);
+        
+        childrenWithScores.forEach(childInfo => {
+            const { element } = childInfo;
+            element.classList.remove('filtered-hidden');
+            element.classList.add('search-match');
+            
+            // Move element to maintain sorted order
+            childrenContainer.appendChild(element);
+        });
+    } else {
+        // No search term, just show/hide without reordering
+        childrenWithScores.forEach(childInfo => {
+            const { element } = childInfo;
+            element.classList.remove('filtered-hidden');
+            element.classList.add('search-match');
+        });
+    }
 }
 
 // Fuzzy matching function

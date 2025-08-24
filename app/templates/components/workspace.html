@@ -83,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!-- Include separate JavaScript files -->
-<script src="/static/js/workspace_manager.js"></script>
 <script src="/static/js/file_tree.js"></script>
 <script src="/static/js/monaco_editor.js"></script>
 <script src="/static/js/context_manager.js"></script>
@@ -126,12 +125,12 @@ function closeRecommendationsBanner() {
 
 // Initialize workspace when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Create global workspace manager instance
-    const workspaceManager = new WorkspaceManager();
-    window.workspaceManager = workspaceManager;
-    
-    // Initialize the workspace manager
-    workspaceManager.init();
+    // Create global workspace manager instance if not already created
+    if (!window.workspaceManager) {
+        const workspaceManager = new WorkspaceManager();
+        window.workspaceManager = workspaceManager;
+        workspaceManager.init();
+    }
     
     setTimeout(() => {
         initializeWorkspaceEditor();
@@ -139,7 +138,9 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeFileTree();
         
         // Initial render
-        workspaceManager.render();
+        if (window.workspaceManager) {
+            window.workspaceManager.render();
+        }
     }, 100);
 });
 </script>

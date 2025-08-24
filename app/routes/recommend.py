@@ -53,15 +53,17 @@ async def recommend_tools(request: RecommendRequest):
                 status_code=400,
                 detail="Either repo_url or context must be provided"
             )
-        
+        print(f"Getting context for {request.repo_url}")
         # Step 1: Get context (ingest if needed)
         if request.context:
+            print(f"Using provided context")
             context = request.context
         else:
             # Ingest the repository
+            print(f"Ingesting repository {request.repo_url}")
             context = await use_gitingest(request.repo_url)
-        
         context_size = len(context)
+        print(f"Context size: {context_size}")
         
         # Step 2: Build catalog
         catalog = build_tools_catalog()

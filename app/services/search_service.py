@@ -2,17 +2,34 @@ from typing import List, Optional, Dict, Any
 from fuzzywuzzy import fuzz
 from app.models.actions import Agent, Rule, MCP
 from app.services.actions_loader import actions_loader
+import re
+import fnmatch
 
 class SearchService:
     def __init__(self):
         self.actions_loader = actions_loader
     
+    def _is_wildcard_query(self, query: str) -> bool:
+        """Check if query contains wildcard characters"""
+        return '*' in query or '?' in query
+    
+    def _wildcard_match(self, pattern: str, text: str) -> bool:
+        """Check if text matches wildcard pattern"""
+        return fnmatch.fnmatch(text.lower(), pattern.lower())
+    
     def _calculate_relevance(self, query: str, text: str) -> int:
-        """Calculate relevance score for fuzzy matching"""
+        """Calculate relevance score for fuzzy matching with wildcard support"""
         if not text:
             return 0
         query_lower = query.lower()
         text_lower = text.lower()
+        
+        # Handle wildcard queries
+        if self._is_wildcard_query(query):
+            if self._wildcard_match(query, text):
+                return 95  # High score for wildcard matches
+            else:
+                return 0
         
         # Exact match gets highest score
         if query_lower == text_lower:

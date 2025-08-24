@@ -18,9 +18,24 @@ async def get_all_actions():
     )
 
 @router.get("/agents", operation_id="get_agents_endpoint")
-async def get_agents():
-    """Get all available agents with tags only"""
+async def get_agents(
+    after: Optional[str] = Query(None, description="Cursor for pagination (use slug of last item from previous page)"),
+    limit: int = Query(30, ge=1, le=30, description="Maximum number of results (max 30)")
+):
+    """Get available agents with tags only, limited to 30 items"""
     agents = actions_loader.get_agents()
+    
+    # Find starting position if 'after' is provided
+    start_idx = 0
+    if after:
+        for idx, agent in enumerate(agents):
+            if agent.slug == after:
+                start_idx = idx + 1
+                break
+    
+    # Apply limit
+    paginated_agents = agents[start_idx:start_idx + limit]
+    
     return [
         {
             "name": agent.name,
@@ -29,13 +44,28 @@ async def get_agents():
             "tags": agent.tags,
             "filename": agent.filename
         }
-        for agent in agents
+        for agent in paginated_agents
     ]
 
 @router.get("/rules", operation_id="get_rules_endpoint")
-async def get_rules():
-    """Get all available rules with tags only"""
+async def get_rules(
+    after: Optional[str] = Query(None, description="Cursor for pagination (use slug of last item from previous page)"),
+    limit: int = Query(30, ge=1, le=30, description="Maximum number of results (max 30)")
+):
+    """Get available rules with tags only, limited to 30 items"""
     rules = actions_loader.get_rules()
+    
+    # Find starting position if 'after' is provided
+    start_idx = 0
+    if after:
+        for idx, rule in enumerate(rules):
+            if rule.slug == after:
+                start_idx = idx + 1
+                break
+    
+    # Apply limit
+    paginated_rules = rules[start_idx:start_idx + limit]
+    
     return [
         {
             "name": rule.name,
@@ -44,19 +74,34 @@ async def get_rules():
             "tags": rule.tags,
             "filename": rule.filename
         }
-        for rule in rules
+        for rule in paginated_rules
     ]
 
 @router.get("/mcps", operation_id="get_mcps_endpoint")
-async def get_mcps():
-    """Get all available MCPs with tags only"""
+async def get_mcps(
+    after: Optional[str] = Query(None, description="Cursor for pagination (use name of last item from previous page)"),
+    limit: int = Query(30, ge=1, le=30, description="Maximum number of results (max 30)")
+):
+    """Get available MCPs with tags only, limited to 30 items"""
     mcps = actions_loader.get_mcps()
+    
+    # Find starting position if 'after' is provided
+    start_idx = 0
+    if after:
+        for idx, mcp in enumerate(mcps):
+            if mcp.name == after:
+                start_idx = idx + 1
+                break
+    
+    # Apply limit
+    paginated_mcps = mcps[start_idx:start_idx + limit]
+    
     return [
         {
             "name": mcp.name,
             "tags": mcp.tags if hasattr(mcp, 'tags') else []
         }
-        for mcp in mcps
+        for mcp in paginated_mcps
     ]
 
 
@@ -102,37 +147,37 @@ async def get_merged_actions_block():
 
 @router.get("/search/agents", tags=["mcp"], operation_id="search_agents_endpoint")
 async def search_agents(
-    query: str = Query(..., description="Search query"),
+    query: str = Query(..., description="Search query. Supports wildcards: * (any characters) and ? (single character)"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of results")
 ):
-    """Search for agents by name, display_name, or content"""
+    """Search for agents by name, display_name, or content. Supports wildcard patterns with * and ?"""
     results = search_service.search_agents(query, limit)
     return {"results": results}
 
 @router.get("/search/rules", tags=["mcp"], operation_id="search_rules_endpoint")
 async def search_rules(
-    query: str = Query(..., description="Search query"),
+    query: str = Query(..., description="Search query. Supports wildcards: * (any characters) and ? (single character)"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of results")
 ):
-    """Search for rules by name, display_name, content, tags, or author"""
+    """Search for rules by name, display_name, content, tags, or author. Supports wildcard patterns with * and ?"""
     results = search_service.search_rules(query, limit)
     return {"results": results}
 
 @router.get("/search/mcps", tags=["mcp"], operation_id="search_mcps_endpoint")
 async def search_mcps(
-    query: str = Query(..., description="Search query"),
+    query: str = Query(..., description="Search query. Supports wildcards: * (any characters) and ? (single character)"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of results")
 ):
-    """Search for MCPs by name or config content"""
+    """Search for MCPs by name or config content. Supports wildcard patterns with * and ?"""
     results = search_service.search_mcps(query, limit)
     return {"results": results}
 
 @router.get("/search", tags=["mcp"], operation_id="search_all_endpoint")
 async def search_all(
-    query: str = Query(..., description="Search query"),
+    query: str = Query(..., description="Search query. Supports wildcards: * (any characters) and ? (single character)"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of results per category")
 ):
-    """Search across all types (agents, rules, MCPs)"""
+    """Search across all types (agents, rules, MCPs). Supports wildcard patterns with * and ?"""
     return search_service.search_all(query, limit)
 
 @router.get("/rules/{rule_ids}", tags=["mcp"], operation_id="get_multiple_rules_content")
@@ -201,7 +246,7 @@ async def get_multiple_agents_content(agent_ids: str):
 
 @router.get("/mcps/{mcp_ids}", tags=["mcp"], operation_id="get_multiple_mcps_config")
 async def get_multiple_mcps_config(mcp_ids: str):
-    """Get config for multiple MCPs by comma-separated names"""
+    """Get config for multiple MCPs by comma-separated names. These MCPs will need to be installed on the client side (e.g. in `.mcp.json`)"""
     ids = [id.strip() for id in mcp_ids.split(',') if id.strip()]
     
     if not ids:

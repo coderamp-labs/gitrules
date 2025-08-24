@@ -59,7 +59,7 @@
             </div>
             <div id="rules-container" class="flex flex-wrap gap-2">
                 {% for rule in rules[:4] %}
-                <button class="action-button action-button--accent" onclick="addRule('{{ rule.slug or rule.name }}')">
+                <button class="action-button action-button--accent" onclick="addRule('{{ rule.slug or rule.name }}', this)">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
                         <span class="action-button__label">{{ rule.display_name or rule.name }}</span>
@@ -85,7 +85,7 @@
             </div>
             <div id="agents-container" class="flex flex-wrap gap-2">
                 {% for agent in agents[:4] %}
-                <button class="action-button action-button--primary" onclick="addAgent('{{ agent.slug or agent.name }}')">
+                <button class="action-button action-button--primary" onclick="addAgent('{{ agent.slug or agent.name }}', this)">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
                         <span class="action-button__label">{{ agent.display_name or agent.name }}</span>
@@ -135,12 +135,14 @@
 </div>
 
 <script>
-
 // Global state
 let isWorkspaceVisible = false;
 
 // Cache for actions data
 let actionsCache = null;
+
+// Store rules by slug for quick access to ruleset information
+window.rulesBySlug = {{ rules_by_slug | tojson }};
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -159,6 +161,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Make functions globally available
+    window.addAgent = addAgent;
+    window.addRule = addRule;
+    window.addMCP = addMCP;
+    window.startFromScratch = startFromScratch;
+    
+    // Initialize workspace manager if not already initialized
+    if (!window.workspaceManager && typeof WorkspaceManager !== 'undefined') {
+        console.log('Initializing WorkspaceManager from quick actions...');
+        const workspaceManager = new WorkspaceManager();
+        window.workspaceManager = workspaceManager;
+        workspaceManager.init();
+    }
+    
+    console.log('Quick actions initialized. Functions available:', {
+        addAgent: typeof window.addAgent,
+        addRule: typeof window.addRule,
+        addMCP: typeof window.addMCP,
+        startFromScratch: typeof window.startFromScratch,
+        workspaceManager: typeof window.workspaceManager
+    });
+    
+    // Test if functions are callable
+    if (typeof window.addAgent === 'function') {
+        console.log('✅ Quick action functions are ready!');
+    } else {
+        console.error('❌ Quick action functions not available!');
+    }
 });
 
 
@@ -173,7 +204,7 @@ function renderActions(data) {
                 const itemId = agent.slug || agent.name;
                 const displayName = agent.display_name || agent.name;
                 return `
-                    <button class="action-button action-button--primary" onclick="addAgent('${itemId}')">
+                    <button class="action-button action-button--primary" onclick="addAgent('${itemId}', this)">
                         <div class="action-button__plus">+</div>
                         <div class="action-button__content">
                             <span class="action-button__label">${displayName}</span>
@@ -187,7 +218,7 @@ function renderActions(data) {
         const mcpsContainer = document.getElementById('mcps-container');
         if (mcpsContainer && data.mcps) {
             mcpsContainer.innerHTML = data.mcps.slice(0, 4).map(mcp => `
-                <button class="action-button action-button--secondary" onclick="addMCP('${mcp.name}')">
+                <button class="action-button action-button--secondary" onclick="addMCP('${mcp.name}', this)">
                     <div class="action-button__plus">+</div>
                     <div class="action-button__content">
                         <span class="action-button__label">${mcp.name}</span>
@@ -203,7 +234,7 @@ function renderActions(data) {
                 const itemId = rule.slug || rule.name;
                 const displayName = rule.display_name || rule.name;
                 return `
-                    <button class="action-button action-button--accent" onclick="addRule('${itemId}')">
+                    <button class="action-button action-button--accent" onclick="addRule('${itemId}', this)">
                         <div class="action-button__plus">+</div>
                         <div class="action-button__content">
                             <span class="action-button__label">${displayName}</span>
@@ -229,8 +260,11 @@ function renderActions(data) {
 
 // Start from scratch with empty context
 function startFromScratch() {
+    console.log('startFromScratch clicked');
     createNewContextFromScratch();
 }
+// Make it global
+window.startFromScratch = startFromScratch;
 
 
 // Create a new empty context from scratch
@@ -258,20 +292,148 @@ function createNewContextFromScratch() {
 }
 
 // Action functions that use backend data
-function addAgent(name) {
-    createNewContextAndInstallAgent(name);
+function addAgent(name, buttonElement) {
+    console.log('addAgent called with:', name);
+    
+    // Get button element from event target or parameter
+    const button = buttonElement || (window.event && window.event.target.closest('button'));
+    
+    // Add visual feedback
+    if (button) {
+        button.disabled = true;
+        const label = button.querySelector('.action-button__label');
+        const originalText = label.textContent;
+        label.textContent = 'Creating...';
+        
+        // Reset button after timeout in case of error
+        setTimeout(() => {
+            button.disabled = false;
+            label.textContent = originalText;
+        }, 15000);
+    }
+    
+    // Retry mechanism with exponential backoff
+    function tryCreateAgent(retryCount = 0) {
+        if (!window.workspaceManager) {
+            if (retryCount < 10) {
+                console.log(`WorkspaceManager not ready. Retry ${retryCount + 1}/10...`);
+                const delay = Math.min(100 * Math.pow(1.5, retryCount), 2000);
+                setTimeout(() => tryCreateAgent(retryCount + 1), delay);
+                return;
+            } else {
+                console.error('WorkspaceManager not available after retries');
+                if (button) {
+                    button.disabled = false;
+                    const label = button.querySelector('.action-button__label');
+                    label.textContent = 'Error - Try again';
+                }
+                return;
+            }
+        }
+        console.log('WorkspaceManager ready, creating context...');
+        createNewContextAndInstallAgent(name);
+    }
+    
+    tryCreateAgent();
 }
+// Make it global
+window.addAgent = addAgent;
 
-function addRule(name) {
-    createNewContextAndInsertRule(name);
+function addRule(name, buttonElement) {
+    console.log('addRule called with:', name);
+    
+    // Get button element from event target or parameter
+    const button = buttonElement || (window.event && window.event.target.closest('button'));
+    
+    // Add visual feedback
+    if (button) {
+        button.disabled = true;
+        const label = button.querySelector('.action-button__label');
+        const originalText = label.textContent;
+        label.textContent = 'Creating...';
+        
+        // Reset button after timeout in case of error
+        setTimeout(() => {
+            button.disabled = false;
+            label.textContent = originalText;
+        }, 15000);
+    }
+    
+    // Retry mechanism with exponential backoff
+    function tryCreateRule(retryCount = 0) {
+        if (!window.workspaceManager) {
+            if (retryCount < 10) {
+                console.log(`WorkspaceManager not ready. Retry ${retryCount + 1}/10...`);
+                const delay = Math.min(100 * Math.pow(1.5, retryCount), 2000);
+                setTimeout(() => tryCreateRule(retryCount + 1), delay);
+                return;
+            } else {
+                console.error('WorkspaceManager not available after retries');
+                if (button) {
+                    button.disabled = false;
+                    const label = button.querySelector('.action-button__label');
+                    label.textContent = 'Error - Try again';
+                }
+                return;
+            }
+        }
+        console.log('WorkspaceManager ready, creating context...');
+        createNewContextAndInsertRule(name);
+    }
+    
+    tryCreateRule();
 }
+// Make it global
+window.addRule = addRule;
 
-function addMCP(name) {
-    createNewContextAndInstallMCP(name);
+function addMCP(name, buttonElement) {
+    console.log('addMCP called with:', name);
+    // Get button element from event target or parameter
+    const button = buttonElement || (window.event && window.event.target.closest('button'));
+    
+    // Add visual feedback
+    if (button) {
+        button.disabled = true;
+        const label = button.querySelector('.action-button__label');
+        const originalText = label.textContent;
+        label.textContent = 'Creating...';
+        
+        // Reset button after timeout in case of error
+        setTimeout(() => {
+            button.disabled = false;
+            label.textContent = originalText;
+        }, 15000);
+    }
+    
+    // Retry mechanism with exponential backoff
+    function tryCreateMCP(retryCount = 0) {
+        if (!window.workspaceManager) {
+            if (retryCount < 10) {
+                console.log(`WorkspaceManager not ready. Retry ${retryCount + 1}/10...`);
+                const delay = Math.min(100 * Math.pow(1.5, retryCount), 2000);
+                setTimeout(() => tryCreateMCP(retryCount + 1), delay);
+                return;
+            } else {
+                console.error('WorkspaceManager not available after retries');
+                if (button) {
+                    button.disabled = false;
+                    const label = button.querySelector('.action-button__label');
+                    label.textContent = 'Error - Try again';
+                }
+                return;
+            }
+        }
+        console.log('WorkspaceManager ready, creating context...');
+        createNewContextAndInstallMCP(name);
+    }
+    
+    tryCreateMCP();
 }
+// Make it global
+window.addMCP = addMCP;
 
 // New context creation functions that use the same API as workspace
-function createNewContextAndInstallAgent(agentName) {
+async function createNewContextAndInstallAgent(agentName) {
     if (!window.workspaceManager) {
         console.error('WorkspaceManager not available');
         return;
@@ -297,7 +459,7 @@ function createNewContextAndInstallAgent(agentName) {
         }
         
         // Install agent using the same function as workspace sidebar
-        installAgentInContext(agentName);
+        await installAgentInContext(agentName);
         
         // Show workspace with agents section in focus
         showWorkspace('agents', agentName);
@@ -306,7 +468,7 @@ function createNewContextAndInstallAgent(agentName) {
     }
 }
 
-function createNewContextAndInstallMCP(mcpName) {
+async function createNewContextAndInstallMCP(mcpName) {
     if (!window.workspaceManager) {
         console.error('WorkspaceManager not available');
         return;
@@ -332,7 +494,7 @@ function createNewContextAndInstallMCP(mcpName) {
         }
         
         // Install MCP using the same function as workspace sidebar
-        installMCPInContext(mcpName);
+        await installMCPInContext(mcpName);
         
         // Show workspace with MCPs section in focus
         showWorkspace('mcps', mcpName);
@@ -341,7 +503,9 @@ function createNewContextAndInstallMCP(mcpName) {
     }
 }
 
-function createNewContextAndInsertRule(ruleName) {
+async function createNewContextAndInsertRule(ruleName) {
+    console.log('createNewContextAndInsertRule called with:', ruleName);
+    
     if (!window.workspaceManager) {
         console.error('WorkspaceManager not available');
         return;
@@ -352,8 +516,12 @@ function createNewContextAndInsertRule(ruleName) {
     const contextId = `rule-${timestamp}`;
     const contextName = `${ruleName} - ${new Date().toLocaleString()}`;
     
+    console.log('Creating context:', contextId);
+    
     // Create new context
     if (workspaceManager.createContext(contextId, contextName)) {
+        console.log('Context created successfully');
+        
         // Switch to new context
         workspaceManager.switchContext(contextId);
         
@@ -367,9 +535,11 @@ function createNewContextAndInsertRule(ruleName) {
         }
         
         // Insert rule text directly into editor
-        insertRuleInContext(ruleName);
+        console.log('Inserting rule into context...');
+        await insertRuleInContext(ruleName);
         
         // Show workspace with rules section in focus
+        console.log('Showing workspace...');
         showWorkspace('rules', ruleName);
     } else {
         console.error('Failed to create new context');
@@ -459,6 +629,7 @@ async function installMCPInContext(mcpName) {
 }
 
 async function insertRuleInContext(ruleName) {
+    console.log('insertRuleInContext called with:', ruleName);
     try {
         const response = await fetch(`/api/rules/${encodeURIComponent(ruleName)}`);
         
@@ -466,28 +637,55 @@ async function insertRuleInContext(ruleName) {
             const data = await response.json();
             const result = data.rules && data.rules[0]; // Get first rule from array
             
-            if (result && result.content) {
-                // Get current CLAUDE.md content from workspace
-                let currentContent = '';
-                if (window.workspaceManager && window.workspaceManager.getState()) {
-                    const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
-                    if (claudeFile) {
-                        currentContent = claudeFile;
-                    }
-                }
+            if (result) {
+                const state = window.workspaceManager?.getState();
                 
-                // Add rule content to CLAUDE.md (no toggle behavior for quick start)
-                const ruleContent = result.content.trim();
-                const newContent = currentContent + (currentContent ? '\n' : '') + ruleContent;
+                // Check if this is a ruleset by looking at server-side data
+                const rulesBySlug = window.rulesBySlug || {};
+                const ruleData = rulesBySlug[ruleName];
                 
-                if (window.workspaceManager) {
-                    const state = window.workspaceManager.getState();
+                if (ruleData && ruleData.type === 'ruleset' && ruleData.children) {
+                    console.log('Handling ruleset:', ruleName, 'with children:', ruleData.children);
+                    
+                    // For rulesets, install all children
                     if (state) {
-                        // Mark the rule as checked in action state
+                        state.setActionCategoryState('rules', true);
                         state.setActionItemState('rules', ruleName, true);
                     }
-                    // Use includeFile which properly handles saving and rendering
-                    window.workspaceManager.includeFile('CLAUDE.md', newContent);
+                    
+                    // Install each child rule
+                    for (const childSlug of ruleData.children) {
+                        await insertRuleInContext(childSlug);
+                    }
+                } else if (result.content) {
+                    // Handle individual rule with content
+                    // Get current CLAUDE.md content from workspace
+                    let currentContent = '';
+                    if (window.workspaceManager && window.workspaceManager.getState()) {
+                        const claudeFile = window.workspaceManager.getState().files['CLAUDE.md'];
+                        if (claudeFile) {
+                            currentContent = claudeFile;
+                        }
+                    }
+                    
+                    // Add rule content to CLAUDE.md (no toggle behavior for quick start)
+                    const ruleContent = result.content.trim();
+                    const newContent = currentContent + (currentContent ? '\n\n' : '') + ruleContent;
+                    
+                    if (window.workspaceManager) {
+                        if (state) {
+                            // Mark the rule as checked in action state
+                            state.setActionItemState('rules', ruleName, true);
+                        }
+                        // Use includeFile which properly handles saving and rendering
+                        window.workspaceManager.includeFile('CLAUDE.md', newContent);
+                    }
+                } else {
+                    console.warn('Rule has no content:', ruleName);
+                    // Still mark it as checked even if no content
+                    if (state) {
+                        state.setActionItemState('rules', ruleName, true);
+                    }
                 }
             }
         } else {
@@ -501,6 +699,8 @@ async function insertRuleInContext(ruleName) {
 
 // Show workspace with fade transition and focus on specific section
 function showWorkspace(focusSection = null, focusItem = null) {
+    console.log('showWorkspace called with:', focusSection, focusItem);
+    
     const quickActionsSection = document.getElementById('quick-actions-section');
     const workspaceSection = document.querySelector('.workspace-container');
     const backButtonContainer = document.getElementById('back-btn-container');
@@ -510,14 +710,20 @@ function showWorkspace(focusSection = null, focusItem = null) {
         return;
     }
     
+    console.log('Found workspace section:', workspaceSection);
+    console.log('Quick actions section:', quickActionsSection);
+    
     // Fade out quick actions
+    console.log('Setting quick actions opacity to 0');
     quickActionsSection.style.opacity = '0';
     
     setTimeout(() => {
+        console.log('Inside setTimeout - hiding quick actions, showing workspace');
         // Hide quick actions and show workspace
         quickActionsSection.style.display = 'none';
         workspaceSection.style.display = 'block';
         workspaceSection.style.opacity = '0';
+        console.log('Workspace display set to:', workspaceSection.style.display);
         
         // Scroll to workspace to focus on it (ensuring top is visible)
         setTimeout(() => {
@@ -538,14 +744,18 @@ function showWorkspace(focusSection = null, focusItem = null) {
         
         // Fade in workspace
         setTimeout(() => {
+            console.log('Fading in workspace - setting opacity to 1');
             workspaceSection.style.opacity = '1';
             isWorkspaceVisible = true;
+            console.log('Workspace is now visible:', isWorkspaceVisible);
             
             // Clear the editor and set focus
+            console.log('Calling clearEditorAndFocus');
             clearEditorAndFocus();
             
             // Expand the relevant section if specified
             if (focusSection) {
+                console.log('Expanding section:', focusSection);
                 expandWorkspaceSection(focusSection, focusItem);
             }
         }, 50);
