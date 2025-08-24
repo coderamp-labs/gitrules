@@ -805,7 +805,7 @@ async function analyzeRepository() {
         
         // Update loading message for recommendation
         loading.querySelector('span.font-bold').textContent = 'Getting tool recommendations...';
-        loading.querySelector('p.text-sm').textContent = `Analyzing ${Math.round(ingestData.context_size / 1000)}k characters to recommend tools.`;
+        loading.querySelector('p.text-sm').textContent = `Analyzing codebase to recommend rules`;
         
         // Step 2: Get tool recommendations
         const recommendResponse = await fetch('/api/recommend', {
