@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from app.routes import install, actions, smart_ingest_route
+from app.routes import install, actions, smart_ingest_route, recommend
 from app.services.actions_loader import actions_loader
 from api_analytics.fastapi import Analytics
 from fastapi_mcp import FastApiMCP
@@ -29,6 +29,7 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 app.include_router(install.router)
 app.include_router(actions.router)
 app.include_router(smart_ingest_route.router)
+app.include_router(recommend.router)
 
 @app.get("/favicon.ico", operation_id="get_favicon")
 async def favicon():

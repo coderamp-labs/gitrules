@@ -1054,6 +1054,10 @@ async function installAgent(agentName) {
             if (result && window.workspaceManager) {
                 const state = window.workspaceManager.getState();
                 if (state) {
+                    // Ensure agentMappings exists
+                    if (!state.agentMappings) {
+                        state.agentMappings = {};
+                    }
                     // Store agent name to path mapping in metadata (for easier removal)
                     const agentPath = `.claude/agents/${result.filename}`;
                     state.agentMappings[agentName] = agentPath;

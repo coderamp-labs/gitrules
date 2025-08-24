@@ -2,6 +2,25 @@
 {% include 'components/ActionButton.html' %}
 
 <div class="workspace-container" style="display: none;">
+    <!-- Recommendations Banner -->
+    <div id="recommendations-banner" class="mb-4 bg-cyan-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4" style="display: none;">
+        <div class="flex justify-between items-start">
+            <div class="flex-1">
+                <h3 class="text-sm font-black mb-2 flex items-center gap-2">
+                    <span>✨</span> AI Recommended Tools for Your Repository
+                </h3>
+                <div id="recommendations-content" class="text-sm">
+                    <!-- Content will be populated dynamically -->
+                </div>
+            </div>
+            <button onclick="closeRecommendationsBanner()" 
+                    class="ml-4 w-6 h-6 flex items-center justify-center bg-white border-2 border-black text-black font-bold hover:bg-gray-100 transition-colors"
+                    title="Close">
+                ×
+            </button>
+        </div>
+    </div>
+    
     <div class="workspace-inner">
         <!-- Tabs container -->
         <div class="flex justify-start items-end mb-0">
@@ -72,6 +91,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Initialize workspace -->
 <script>
+// Show recommendations banner
+function showRecommendationsBanner() {
+    const banner = document.getElementById('recommendations-banner');
+    const content = document.getElementById('recommendations-content');
+    
+    if (banner && content && window.currentRecommendations) {
+        const reco = window.currentRecommendations;
+        let html = '<div class="flex flex-wrap gap-4">';
+        
+        if (reco.rules && reco.rules.length > 0) {
+            html += '<div><span class="font-bold">📋 Rules:</span> ' + reco.rules.join(', ') + '</div>';
+        }
+        if (reco.agents && reco.agents.length > 0) {
+            html += '<div><span class="font-bold">🤖 Agents:</span> ' + reco.agents.join(', ') + '</div>';
+        }
+        if (reco.mcps && reco.mcps.length > 0) {
+            html += '<div><span class="font-bold">🔌 MCPs:</span> ' + reco.mcps.join(', ') + '</div>';
+        }
+        
+        html += '</div>';
+        content.innerHTML = html;
+        banner.style.display = 'block';
+    }
+}
+
+// Close recommendations banner
+function closeRecommendationsBanner() {
+    const banner = document.getElementById('recommendations-banner');
+    if (banner) {
+        banner.style.display = 'none';
+    }
+}
+
 // Initialize workspace when page loads
 document.addEventListener('DOMContentLoaded', function() {
     // Create global workspace manager instance

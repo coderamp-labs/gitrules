@@ -678,6 +678,84 @@ function hideWorkspace() {
     }, 300);
 }
 
+// Create workspace with recommended tools
+async function createWorkspaceWithRecommendations(preselect) {
+    if (!window.workspaceManager) {
+        console.error('WorkspaceManager not available');
+        return;
+    }
+    
+    // Store recommendations for display
+    window.currentRecommendations = preselect;
+    
+    // Generate unique context ID
+    const timestamp = Date.now();
+    const contextId = `reco-${timestamp}`;
+    const contextName = `Recommendations - ${new Date().toLocaleString()}`;
+    
+    // Create new context
+    if (workspaceManager.createContext(contextId, contextName)) {
+        // Switch to new context
+        workspaceManager.switchContext(contextId);
+        
+        // Get the state
+        const state = workspaceManager.getState();
+        if (state) {
+            // Process rules
+            if (preselect.rules && preselect.rules.length > 0) {
+                state.setActionCategoryState('rules', true);
+                for (const ruleSlug of preselect.rules) {
+                    state.setActionItemState('rules', ruleSlug, true);
+                    // Insert the rule
+                    await insertRuleInContext(ruleSlug);
+                }
+            }
+            
+            // Process agents
+            if (preselect.agents && preselect.agents.length > 0) {
+                state.setActionCategoryState('agents', true);
+                for (const agentSlug of preselect.agents) {
+                    state.setActionItemState('agents', agentSlug, true);
+                    // Install the agent
+                    await installAgentInContext(agentSlug);
+                }
+            }
+            
+            // Process MCPs
+            if (preselect.mcps && preselect.mcps.length > 0) {
+                state.setActionCategoryState('mcps', true);
+                for (const mcpSlug of preselect.mcps) {
+                    state.setActionItemState('mcps', mcpSlug, true);
+                    // Install the MCP
+                    await installMCPInContext(mcpSlug);
+                }
+            }
+        }
+        
+        // Show workspace with a slight delay to ensure everything is loaded
+        setTimeout(() => {
+            showWorkspace();
+            // Show the recommendations banner
+            if (window.showRecommendationsBanner) {
+                showRecommendationsBanner();
+            }
+            // Scroll to actions panel
+            const workspaceActions = document.querySelector('.workspace-actions');
+            if (workspaceActions) {
+                const rect = workspaceActions.getBoundingClientRect();
+                const currentScrollTop = window.pageYOffset;
+                const actionsTop = currentScrollTop + rect.top;
+                const navbarHeight = 64;
+                const buffer = 20;
+                const targetScrollTop = Math.max(0, actionsTop - navbarHeight - buffer);
+                window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+            }
+        }, 500);
+    } else {
+        console.error('Failed to create recommendation context');
+    }
+}
+
 // Repository Analysis Function
 async function analyzeRepository() {
     // Get input value
@@ -725,11 +803,60 @@ async function analyzeRepository() {
             throw new Error(ingestData.detail || 'Failed to ingest repository');
         }
         
-        // Update loading message for analysis
-        loading.querySelector('span.font-bold').textContent = 'Analyzing with AI...';
-        loading.querySelector('p.text-sm').textContent = `Processing ${Math.round(ingestData.context_size / 1000)}k characters of repository data.`;
+        // Update loading message for recommendation
+        loading.querySelector('span.font-bold').textContent = 'Getting tool recommendations...';
+        loading.querySelector('p.text-sm').textContent = `Analyzing ${Math.round(ingestData.context_size / 1000)}k characters to recommend tools.`;
         
-        // Step 2: Analyze the context
+        // Step 2: Get tool recommendations
+        const recommendResponse = await fetch('/api/recommend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                context: ingestData.message,
+                user_prompt: 'Recommend minimal useful tools for this repository'
+            })
+        });
+        
+        const recommendData = await recommendResponse.json();
+        
+        if (recommendResponse.ok && recommendData.success) {
+            // Show recommendation results
+            const preselect = recommendData.preselect;
+            const totalTools = preselect.rules.length + preselect.agents.length + preselect.mcps.length;
+            
+            let resultText = `✅ Recommended ${totalTools} tools for your repository:\n\n`;
+            
+            if (preselect.rules.length > 0) {
+                resultText += `📋 Rules: ${preselect.rules.join(', ')}\n`;
+            }
+            if (preselect.agents.length > 0) {
+                resultText += `🤖 Agents: ${preselect.agents.join(', ')}\n`;
+            }
+            if (preselect.mcps.length > 0) {
+                resultText += `🔌 MCPs: ${preselect.mcps.join(', ')}\n`;
+            }
+            
+            resultText += '\n🎯 Creating workspace with these tools...';
+            document.getElementById('results-content').textContent = resultText;
+            results.classList.remove('hidden');
+            
+            // Create workspace with recommendations
+            await createWorkspaceWithRecommendations(preselect);
+            
+            // Update message after workspace creation
+            resultText += '\n✨ Workspace ready! Tools have been pre-selected for you.';
+            document.getElementById('results-content').textContent = resultText;
+            
+        } else {
+            throw new Error(recommendData.detail || 'Failed to get recommendations');
+        }
+        
+        // Step 3: Also analyze the context for detailed insights
+        loading.querySelector('span.font-bold').textContent = 'Analyzing repository details...';
+        loading.querySelector('p.text-sm').textContent = 'Getting detailed analysis of your codebase.';
+        
         const analyzeResponse = await fetch('/api/analyze', {
             method: 'POST',
             headers: {
@@ -744,11 +871,10 @@ async function analyzeRepository() {
         const analyzeData = await analyzeResponse.json();
         
         if (analyzeResponse.ok && analyzeData.success) {
-            // Show results
-            document.getElementById('results-content').textContent = analyzeData.analysis;
-            results.classList.remove('hidden');
-        } else {
-            throw new Error(analyzeData.detail || 'Failed to analyze repository');
+            // Append analysis to results
+            const currentResults = document.getElementById('results-content').textContent;
+            document.getElementById('results-content').textContent = 
+                currentResults + '\n\n--- Detailed Analysis ---\n\n' + analyzeData.analysis;
         }
     } catch (err) {
         // Show error
