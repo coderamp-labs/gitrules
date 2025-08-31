@@ -31,9 +31,7 @@
     {% include 'components/navbar.html' %}
     
     <main class="flex-1 w-full">
-        <div class="max-w-none mx-auto px-4 py-20">
-            {% block content %}{% endblock %}
-        </div>
+        {% block content %}{% endblock %}
     </main>
     
     {% include 'components/footer.html' %}

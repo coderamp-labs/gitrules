@@ -3,15 +3,32 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from app.routes import install, actions, recommend
+from app.routes import install, actions, recommend, generate
 from app.services.actions_loader import actions_loader
 from api_analytics.fastapi import Analytics
 from fastapi_mcp import FastApiMCP
 import os
 from dotenv import load_dotenv
+from loguru import logger
+import sys
 
 # Load environment variables
 load_dotenv()
+
+# Configure loguru logger
+logger.remove()
+logger.add(
+    sys.stderr,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+    level="INFO"
+)
+logger.add(
+    "logs/app.log",
+    rotation="10 MB",
+    retention="7 days",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} - {message}",
+    level="DEBUG"
+)
 
 app = FastAPI(title="Gitrules", version="0.1.0")
 
@@ -29,6 +46,7 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 app.include_router(install.router)
 app.include_router(actions.router)
 app.include_router(recommend.router)
+app.include_router(generate.router)
 
 @app.get("/favicon.ico", operation_id="get_favicon")
 async def favicon():
@@ -39,56 +57,21 @@ async def favicon():
 async def doc(request: Request):
     return templates.TemplateResponse("docs.html", {"request": request})
 
+@app.get("/select", response_class=HTMLResponse, operation_id="get_select_page")
+async def select(request: Request):
+    """Action selection page with filters"""
+    return templates.TemplateResponse("select.html", {"request": request})
+
+@app.get("/generate", response_class=HTMLResponse, operation_id="get_generate_page")
+async def get_generate_page(request: Request):
+    """Generate configuration files from selected actions"""
+    return templates.TemplateResponse("generate.html", {"request": request})
+
 @app.get("/", response_class=HTMLResponse, operation_id="get_index_page")
 async def index(request: Request):
-    # Get all actions data for server-side rendering
-    agents = [agent.dict() for agent in actions_loader.get_agents()]
-    all_rules = actions_loader.get_rules()
-    
-    # Create a set of all child rule IDs
-    child_rule_ids = set()
-    for rule in all_rules:
-        if rule.children:
-            child_rule_ids.update(rule.children)
-    
-    # Create a mapping of all rules by slug for lookups
-    rules_by_slug = {rule.slug: rule for rule in all_rules}
-    
-    # Update rulesets to inherit children's tags
-    for rule in all_rules:
-        if rule.type == 'ruleset' and rule.children:
-            # Collect all tags from children
-            inherited_tags = set(rule.tags or [])
-            for child_slug in rule.children:
-                child_rule = rules_by_slug.get(child_slug)
-                if child_rule and child_rule.tags:
-                    inherited_tags.update(child_rule.tags)
-            rule.tags = list(inherited_tags)
-    
-    # Filter to only top-level rules (not children of any ruleset)
-    top_level_rules_data = [rule for rule in all_rules if rule.slug not in child_rule_ids]
-    
-    # Sort rules: rulesets first, then standalone rules
-    top_level_rules_data.sort(key=lambda rule: (rule.type != 'ruleset', rule.display_name or rule.name))
-    
-    # Convert to dict
-    top_level_rules = [rule.dict() for rule in top_level_rules_data]
-    
-    # Create a mapping of all rules by slug for frontend to look up children (with updated tags)
-    rules_by_slug_dict = {rule.slug: rule.dict() for rule in all_rules}
-    
-    mcps = [mcp.dict() for mcp in actions_loader.get_mcps()]
-    
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "agents": agents,
-            "rules": top_level_rules,
-            "rules_by_slug": rules_by_slug_dict,
-            "mcps": mcps
-        }
-    )
+    """Landing page for starting the configuration journey"""
+    return templates.TemplateResponse("landing.html", {"request": request})
+
 
 @app.get("/health", operation_id="health_check")
 async def health_check():

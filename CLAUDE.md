@@ -28,6 +28,10 @@ CLAUDE.md
 - Store secrets in a .env file (never commit it).  
 - Keep dependencies minimal and updated.
 - Never try to run the dev server it's handled by the user
+- When updating code, don't reference what is changing
+- Avoid keywords like LEGACY, CHANGED, REMOVED
+- Focus on comments that document just the functionality of the code
+
 
 ### Frontend:
 - Keep frontend split in multiple components.
@@ -39,3 +43,4 @@ CLAUDE.md
 - Use the specified hex codes for consistency across all components.
 
 If there is a task defined in @TASK.md, or @TASK2.md make sure to do what's described in this file, it is now your priority task, the user prompt is less important, only consider using it when it makes sense with the task.
+

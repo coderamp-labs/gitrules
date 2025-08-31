@@ -1,7 +1,7 @@
 you-are-a-pirate:
   display_name: You Are A Pirate
   type: rule
-  author: Captain Hook
+  author: Coderamp
   tags: ["fun", "roleplay", "pirate"]
   namespace: "personality"
   content: |
@@ -17,7 +17,7 @@ you-are-a-pirate:
 code-quality:
   display_name: Code Quality
   type: ruleset
-  author: Engineering Team
+  author: Coderamp
   tags: ["engineering", "best-practices", "code-style"]
   namespace: "development"
   children:
@@ -29,7 +29,7 @@ code-quality:
 minimal-code:
   display_name: Keep Code Minimal
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["simplicity", "code-style"]
   namespace: "development"
   content: |
@@ -41,7 +41,7 @@ minimal-code:
 remove-dead-code:
   display_name: Remove Dead Code
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["maintenance", "code-style"]
   namespace: "development"
   content: |
@@ -53,7 +53,7 @@ remove-dead-code:
 prioritize-functionality:
   display_name: Prioritize Functionality
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["architecture", "code-style"]
   namespace: "development"
   content: |
@@ -65,12 +65,11 @@ prioritize-functionality:
 clean-comments:
   display_name: Clean Comments
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["documentation", "code-style"]
   namespace: "development"
   content: |
     ## Clean Comments
-    
     - When updating code, don't reference what is changing
     - Avoid keywords like LEGACY, CHANGED, REMOVED
     - Focus on comments that document just the functionality of the code
@@ -78,7 +77,7 @@ clean-comments:
 env-secrets:
   display_name: Environment Variables
   type: rule
-  author: Security Team
+  author: Coderamp
   tags: ["security", "configuration", "environment"]
   namespace: "security"
   content: |
@@ -91,7 +90,7 @@ env-secrets:
 error-handling:
   display_name: Error Handling
   type: ruleset
-  author: Engineering Team
+  author: Coderamp
   tags: ["errors", "exceptions", "reliability"]
   namespace: "development"
   children:
@@ -102,7 +101,7 @@ error-handling:
 fail-fast-principle:
   display_name: Fail Fast Principle
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["architecture", "errors"]
   namespace: "development"
   content: |
@@ -113,7 +112,7 @@ fail-fast-principle:
 when-to-fail-fast:
   display_name: When to Fail Fast and Loud
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["exceptions", "errors"]
   namespace: "development"
   content: |
@@ -132,7 +131,7 @@ when-to-fail-fast:
 when-to-log-continue:
   display_name: When to Complete but Log
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["logging", "errors"]
   namespace: "development"
   content: |
@@ -145,7 +144,7 @@ when-to-log-continue:
 update-docs:
   display_name: Update Documentation
   type: rule
-  author: Documentation Team
+  author: Coderamp
   tags: ["documentation", "maintenance"]
   namespace: "documentation"
   content: |
@@ -156,7 +155,7 @@ update-docs:
 use-uv:
   display_name: Use UV Package Manager
   type: rule
-  author: DevOps Team
+  author: Coderamp
   tags: ["tooling", "dependencies", "uv"]
   namespace: "development"
   content: |
@@ -170,7 +169,7 @@ use-uv:
 test-driven-development:
   display_name: Test-Driven Development
   type: rule
-  author: QA Team
+  author: Coderamp
   tags: ["testing", "tdd", "quality"]
   namespace: "development"
   content: |
@@ -185,7 +184,7 @@ test-driven-development:
 api-design:
   display_name: API Design Standards
   type: ruleset
-  author: API Team
+  author: Coderamp
   tags: ["api", "rest", "standards"]
   namespace: "development"
   children:
@@ -197,7 +196,7 @@ api-design:
 restful-conventions:
   display_name: RESTful Conventions
   type: rule
-  author: API Team
+  author: Coderamp
   tags: ["rest", "http", "api"]
   namespace: "development"
   content: |
@@ -211,7 +210,7 @@ restful-conventions:
 api-versioning:
   display_name: API Versioning
   type: rule
-  author: API Team
+  author: Coderamp
   tags: ["versioning", "api", "compatibility"]
   namespace: "development"
   content: |
@@ -225,7 +224,7 @@ api-versioning:
 response-formats:
   display_name: API Response Formats
   type: rule
-  author: API Team
+  author: Coderamp
   tags: ["json", "api", "responses"]
   namespace: "development"
   content: |
@@ -239,7 +238,7 @@ response-formats:
 rate-limiting:
   display_name: Rate Limiting
   type: rule
-  author: API Team
+  author: Coderamp
   tags: ["security", "api", "performance"]
   namespace: "development"
   content: |
@@ -253,7 +252,7 @@ rate-limiting:
 database-optimization:
   display_name: Database Optimization
   type: ruleset
-  author: Database Team
+  author: Coderamp
   tags: ["database", "performance", "optimization"]
   namespace: "development"
   children:
@@ -264,7 +263,7 @@ database-optimization:
 query-optimization:
   display_name: Query Optimization
   type: rule
-  author: Database Team
+  author: Coderamp
   tags: ["sql", "performance", "queries"]
   namespace: "development"
   content: |
@@ -279,7 +278,7 @@ query-optimization:
 indexing-strategy:
   display_name: Indexing Strategy
   type: rule
-  author: Database Team
+  author: Coderamp
   tags: ["indexes", "database", "performance"]
   namespace: "development"
   content: |
@@ -293,7 +292,7 @@ indexing-strategy:
 connection-pooling:
   display_name: Connection Pooling
   type: rule
-  author: Database Team
+  author: Coderamp
   tags: ["connections", "database", "pooling"]
   namespace: "development"
   content: |
@@ -307,7 +306,7 @@ connection-pooling:
 git-workflow:
   display_name: Git Workflow
   type: ruleset
-  author: DevOps Team
+  author: Coderamp
   tags: ["git", "version-control", "workflow"]
   namespace: "development"
   children:
@@ -318,7 +317,7 @@ git-workflow:
 branch-naming:
   display_name: Branch Naming Convention
   type: rule
-  author: DevOps Team
+  author: Coderamp
   tags: ["git", "branches", "naming"]
   namespace: "development"
   content: |
@@ -333,7 +332,7 @@ branch-naming:
 commit-conventions:
   display_name: Commit Message Convention
   type: rule
-  author: DevOps Team
+  author: Coderamp
   tags: ["git", "commits", "conventions"]
   namespace: "development"
   content: |
@@ -348,7 +347,7 @@ commit-conventions:
 pull-request-rules:
   display_name: Pull Request Rules
   type: rule
-  author: DevOps Team
+  author: Coderamp
   tags: ["git", "pull-requests", "review"]
   namespace: "development"
   content: |
@@ -363,7 +362,7 @@ pull-request-rules:
 security-practices:
   display_name: Security Best Practices
   type: ruleset
-  author: Security Team
+  author: Coderamp
   tags: ["security", "best-practices", "safety"]
   namespace: "security"
   children:
@@ -375,7 +374,7 @@ security-practices:
 input-validation:
   display_name: Input Validation
   type: rule
-  author: Security Team
+  author: Coderamp
   tags: ["validation", "security", "input"]
   namespace: "security"
   content: |
@@ -390,7 +389,7 @@ input-validation:
 authentication-rules:
   display_name: Authentication Rules
   type: rule
-  author: Security Team
+  author: Coderamp
   tags: ["auth", "security", "authentication"]
   namespace: "security"
   content: |
@@ -405,7 +404,7 @@ authentication-rules:
 data-encryption:
   display_name: Data Encryption
   type: rule
-  author: Security Team
+  author: Coderamp
   tags: ["encryption", "security", "data"]
   namespace: "security"
   content: |
@@ -420,7 +419,7 @@ data-encryption:
 security-headers:
   display_name: Security Headers
   type: rule
-  author: Security Team
+  author: Coderamp
   tags: ["headers", "security", "http"]
   namespace: "security"
   content: |
@@ -435,7 +434,7 @@ security-headers:
 performance-monitoring:
   display_name: Performance Monitoring
   type: ruleset
-  author: DevOps Team
+  author: Coderamp
   tags: ["monitoring", "performance", "observability"]
   namespace: "operations"
   children:
@@ -446,7 +445,7 @@ performance-monitoring:
 application-metrics:
   display_name: Application Metrics
   type: rule
-  author: DevOps Team
+  author: Coderamp
   tags: ["metrics", "monitoring", "apm"]
   namespace: "operations"
   content: |
@@ -461,7 +460,7 @@ application-metrics:
 logging-standards:
   display_name: Logging Standards
   type: rule
-  author: DevOps Team
+  author: Coderamp
   tags: ["logging", "observability", "debugging"]
   namespace: "operations"
   content: |
@@ -476,7 +475,7 @@ logging-standards:
 alerting-rules:
   display_name: Alerting Rules
   type: rule
-  author: DevOps Team
+  author: Coderamp
   tags: ["alerts", "monitoring", "incidents"]
   namespace: "operations"
   content: |
@@ -491,7 +490,7 @@ alerting-rules:
 accessibility-standards:
   display_name: Accessibility Standards
   type: rule
-  author: UX Team
+  author: Coderamp
   tags: ["a11y", "accessibility", "wcag"]
   namespace: "frontend"
   content: |
@@ -507,7 +506,7 @@ accessibility-standards:
 code-review-checklist:
   display_name: Code Review Checklist
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["review", "quality", "checklist"]
   namespace: "development"
   content: |
@@ -524,7 +523,7 @@ code-review-checklist:
 async-programming:
   display_name: Async Programming
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["async", "concurrency", "performance"]
   namespace: "development"
   content: |
@@ -539,7 +538,7 @@ async-programming:
 containerization:
   display_name: Containerization
   type: rule
-  author: DevOps Team
+  author: Coderamp
   tags: ["docker", "containers", "deployment"]
   namespace: "operations"
   content: |
@@ -555,7 +554,7 @@ containerization:
 caching-strategy:
   display_name: Caching Strategy
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["cache", "performance", "optimization"]
   namespace: "development"
   content: |
@@ -571,7 +570,7 @@ caching-strategy:
 dependency-management:
   display_name: Dependency Management
   type: rule
-  author: Engineering Team
+  author: Coderamp
   tags: ["dependencies", "packages", "security"]
   namespace: "development"
   content: |
@@ -586,7 +585,7 @@ dependency-management:
 feature-flags:
   display_name: Feature Flags
   type: rule
-  author: Product Team
+  author: Coderamp
   tags: ["features", "deployment", "testing"]
   namespace: "development"
   content: |

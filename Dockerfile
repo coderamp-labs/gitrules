@@ -1,7 +1,7 @@
 FROM python:3.13-slim
 
-# Install git (required for gitingest)
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+# Install git and curl (required for gitingest)
+RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

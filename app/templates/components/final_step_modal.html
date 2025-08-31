@@ -1,0 +1,366 @@
+<!-- Final Step Modal -->
+<div id="final-step-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="p-4 border-b-2 border-black bg-cyan-50">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-black">Generate Your Configuration</h2>
+                <button onclick="closeFinalStep()" class="w-8 h-8 flex items-center justify-center bg-white border-2 border-black text-black font-bold hover:bg-gray-100 transition-colors">
+                    ×
+                </button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <!-- Summary Section -->
+            <div class="mb-6">
+                <h3 class="text-lg font-black mb-3">📋 Summary of Selected Tools</h3>
+                <div id="selected-summary" class="space-y-3">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Output Format Selection -->
+            <div class="mb-6">
+                <h3 class="text-lg font-black mb-3">🎯 Choose Output Format</h3>
+                <div class="flex flex-wrap gap-3">
+                    <label class="flex items-center gap-2 p-3 bg-pink-50 border-2 border-black cursor-pointer hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                        <input type="radio" name="output-format" value="claude" checked class="w-4 h-4">
+                        <span class="font-bold">Claude (CLAUDE.md)</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 bg-gray-100 border-2 border-gray-400 cursor-not-allowed opacity-50">
+                        <input type="radio" name="output-format" value="cursor" disabled class="w-4 h-4">
+                        <span class="font-medium text-gray-500">Cursor (coming soon)</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 bg-gray-100 border-2 border-gray-400 cursor-not-allowed opacity-50">
+                        <input type="radio" name="output-format" value="agents" disabled class="w-4 h-4">
+                        <span class="font-medium text-gray-500">AGENTS.md (coming soon)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- File Preview Section -->
+            <div class="mb-6">
+                <h3 class="text-lg font-black mb-3">👁️ File Preview</h3>
+                <div id="file-preview-tabs" class="flex gap-2 mb-3 flex-wrap">
+                    <!-- Tabs will be populated dynamically -->
+                </div>
+                <div id="file-preview-content" class="bg-gray-50 border-2 border-black p-4 font-mono text-sm overflow-x-auto max-h-96 overflow-y-auto">
+                    <!-- Preview content will be shown here -->
+                </div>
+            </div>
+
+            <!-- Patch Preview Section -->
+            <div class="mb-6">
+                <h3 class="text-lg font-black mb-3">🔧 Patch Preview</h3>
+                <div class="bg-yellow-50 border-2 border-black p-3 text-sm">
+                    <p class="mb-2">The following patch file will be generated for easy application to your repository:</p>
+                    <code class="block bg-white border border-black p-2 font-mono text-xs">git apply gitrules-config.patch</code>
+                </div>
+                <div id="patch-preview" class="bg-gray-50 border-2 border-black p-4 font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto mt-2">
+                    <!-- Patch content will be shown here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t-2 border-black bg-cyan-50">
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeFinalStep()" class="px-6 py-2 bg-white border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                    Back
+                </button>
+                <button onclick="downloadFiles()" class="px-6 py-2 bg-pink-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                    💾 Download Files
+                </button>
+                <button onclick="applyConfiguration()" class="px-6 py-2 bg-cyan-400 border-2 border-black text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                    ✅ Apply Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show final step modal
+function showFinalStep() {
+    const modal = document.getElementById('final-step-modal');
+    if (!modal) return;
+    
+    // Generate summary and previews
+    generateSummary();
+    generateFilePreviews();
+    generatePatchPreview();
+    
+    // Show modal
+    modal.style.display = 'flex';
+}
+
+// Close final step modal
+function closeFinalStep() {
+    const modal = document.getElementById('final-step-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Generate summary of selected tools
+function generateSummary() {
+    const summaryContainer = document.getElementById('selected-summary');
+    if (!summaryContainer || !window.workspaceManager) return;
+    
+    const state = window.workspaceManager.getState();
+    if (!state) return;
+    
+    let summaryHTML = '';
+    
+    // MCPs summary
+    const selectedMCPs = Object.keys(state.actionStates.mcps.items).filter(item => state.actionStates.mcps.items[item]);
+    if (selectedMCPs.length > 0) {
+        summaryHTML += `
+            <div class="bg-yellow-50 border-2 border-black p-3">
+                <h4 class="font-bold mb-2">🔌 MCPs (${selectedMCPs.length})</h4>
+                <ul class="list-disc list-inside text-sm">
+                    ${selectedMCPs.map(mcp => `<li>${mcp}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Rules summary
+    const selectedRules = Object.keys(state.actionStates.rules.items).filter(item => state.actionStates.rules.items[item]);
+    if (selectedRules.length > 0) {
+        summaryHTML += `
+            <div class="bg-pink-50 border-2 border-black p-3">
+                <h4 class="font-bold mb-2">📋 Rules (${selectedRules.length})</h4>
+                <ul class="list-disc list-inside text-sm">
+                    ${selectedRules.map(rule => `<li>${rule}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Agents summary
+    const selectedAgents = Object.keys(state.actionStates.agents.items).filter(item => state.actionStates.agents.items[item]);
+    if (selectedAgents.length > 0) {
+        summaryHTML += `
+            <div class="bg-cyan-50 border-2 border-black p-3">
+                <h4 class="font-bold mb-2">🤖 Agents (${selectedAgents.length})</h4>
+                <ul class="list-disc list-inside text-sm">
+                    ${selectedAgents.map(agent => `<li>${agent}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    if (summaryHTML === '') {
+        summaryHTML = '<p class="text-gray-500">No tools selected yet. Please select some tools from the workspace.</p>';
+    }
+    
+    summaryContainer.innerHTML = summaryHTML;
+}
+
+// Generate file previews
+function generateFilePreviews() {
+    const tabsContainer = document.getElementById('file-preview-tabs');
+    const contentContainer = document.getElementById('file-preview-content');
+    
+    if (!tabsContainer || !contentContainer || !window.workspaceManager) return;
+    
+    const state = window.workspaceManager.getState();
+    if (!state || !state.files) return;
+    
+    const files = Object.entries(state.files);
+    if (files.length === 0) {
+        tabsContainer.innerHTML = '<span class="text-gray-500">No files to preview</span>';
+        contentContainer.innerHTML = '<span class="text-gray-500">No content available</span>';
+        return;
+    }
+    
+    // Create tabs
+    let tabsHTML = '';
+    let firstFile = true;
+    files.forEach(([path, content]) => {
+        const fileName = path.split('/').pop();
+        tabsHTML += `
+            <button 
+                class="px-3 py-1 border-2 border-black ${firstFile ? 'bg-cyan-400 font-bold' : 'bg-white'} hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                onclick="switchPreviewTab(this, '${path}')"
+                data-file-path="${path}"
+            >
+                ${fileName}
+            </button>
+        `;
+        firstFile = false;
+    });
+    tabsContainer.innerHTML = tabsHTML;
+    
+    // Show first file content
+    if (files.length > 0) {
+        showFileContent(files[0][0]);
+    }
+}
+
+// Switch preview tab
+function switchPreviewTab(button, filePath) {
+    // Update tab styles
+    const tabs = button.parentElement.querySelectorAll('button');
+    tabs.forEach(tab => {
+        tab.classList.remove('bg-cyan-400', 'font-bold');
+        tab.classList.add('bg-white');
+    });
+    button.classList.remove('bg-white');
+    button.classList.add('bg-cyan-400', 'font-bold');
+    
+    // Show file content
+    showFileContent(filePath);
+}
+
+// Show file content in preview
+function showFileContent(filePath) {
+    const contentContainer = document.getElementById('file-preview-content');
+    if (!contentContainer || !window.workspaceManager) return;
+    
+    const state = window.workspaceManager.getState();
+    if (!state || !state.files[filePath]) return;
+    
+    const content = state.files[filePath];
+    // Escape HTML and preserve formatting
+    const escapedContent = content
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    
+    contentContainer.innerHTML = `<pre>${escapedContent}</pre>`;
+}
+
+// Generate patch preview
+function generatePatchPreview() {
+    const patchContainer = document.getElementById('patch-preview');
+    if (!patchContainer || !window.workspaceManager) return;
+    
+    const state = window.workspaceManager.getState();
+    if (!state || !state.files) return;
+    
+    let patchContent = '';
+    
+    // Generate patch for each file
+    Object.entries(state.files).forEach(([path, content]) => {
+        // Create a proper git diff format
+        patchContent += `diff --git a/${path} b/${path}\n`;
+        patchContent += `new file mode 100644\n`;
+        patchContent += `index 0000000..0000000\n`;
+        patchContent += `--- /dev/null\n`;
+        patchContent += `+++ b/${path}\n`;
+        
+        // Add file content with + prefix for each line
+        const lines = content.split('\n');
+        patchContent += `@@ -0,0 +1,${lines.length} @@\n`;
+        lines.forEach(line => {
+            patchContent += `+${line}\n`;
+        });
+        patchContent += '\n';
+    });
+    
+    if (patchContent === '') {
+        patchContent = 'No changes to apply';
+    }
+    
+    // Escape HTML
+    const escapedPatch = patchContent
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    
+    patchContainer.innerHTML = `<pre>${escapedPatch}</pre>`;
+}
+
+// Download files
+function downloadFiles() {
+    if (!window.workspaceManager) return;
+    
+    const state = window.workspaceManager.getState();
+    if (!state || !state.files) return;
+    
+    // Create a zip file or download individually
+    Object.entries(state.files).forEach(([path, content]) => {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = path.replace(/\//g, '_'); // Replace slashes for filename
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+    
+    // Also download the patch file
+    const patchContent = generatePatchContent();
+    if (patchContent) {
+        const blob = new Blob([patchContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'gitrules-config.patch';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+}
+
+// Generate patch content
+function generatePatchContent() {
+    if (!window.workspaceManager) return '';
+    
+    const state = window.workspaceManager.getState();
+    if (!state || !state.files) return '';
+    
+    let patchContent = '';
+    
+    // Generate patch for each file
+    Object.entries(state.files).forEach(([path, content]) => {
+        patchContent += `diff --git a/${path} b/${path}\n`;
+        patchContent += `new file mode 100644\n`;
+        patchContent += `index 0000000..0000000\n`;
+        patchContent += `--- /dev/null\n`;
+        patchContent += `+++ b/${path}\n`;
+        
+        const lines = content.split('\n');
+        patchContent += `@@ -0,0 +1,${lines.length} @@\n`;
+        lines.forEach(line => {
+            patchContent += `+${line}\n`;
+        });
+        patchContent += '\n';
+    });
+    
+    return patchContent;
+}
+
+// Apply configuration (copy to clipboard)
+function applyConfiguration() {
+    const patchContent = generatePatchContent();
+    if (!patchContent) {
+        alert('No configuration to apply');
+        return;
+    }
+    
+    // Copy patch to clipboard
+    navigator.clipboard.writeText(patchContent).then(() => {
+        alert('Patch copied to clipboard! You can now paste and apply it using: git apply');
+    }).catch(err => {
+        console.error('Failed to copy patch:', err);
+        alert('Failed to copy patch to clipboard. Please download the files instead.');
+    });
+}
+
+// Make functions globally available
+window.showFinalStep = showFinalStep;
+window.closeFinalStep = closeFinalStep;
+window.switchPreviewTab = switchPreviewTab;
+window.downloadFiles = downloadFiles;
+window.applyConfiguration = applyConfiguration;
+</script>
