@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     await loadActionDetails();
     generateFiles();
-    displaySummary();
+    await displaySummary();
     displayFilePreviews();
     displayPatchPreview();
 });
@@ -257,91 +257,79 @@ function generateFiles() {
     // This function could be used for client-side generation if needed
 }
 
-function displaySummary() {
+async function displaySummary() {
     const container = document.getElementById('selectedSummary');
     
-    // Group actions by type
-    const grouped = {
-        agents: [],
-        rules: [],
-        rulesets: [],
-        mcps: [],
-        packs: []
-    };
-    
-    // Parse the generated files to extract action types
-    if (generatedFiles['CLAUDE.md']) {
-        // Count rules and rulesets
-        const claudeContent = generatedFiles['CLAUDE.md'];
-        const ruleMatches = claudeContent.match(/## .+/g) || [];
-        grouped.rules = ruleMatches;
+    if (!selectedActions || selectedActions.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">No tools selected</p>';
+        return;
     }
     
-    if (generatedFiles['AGENTS.md']) {
-        // Count agents from AGENTS.md content
-        const agentsContent = generatedFiles['AGENTS.md'];
-        const agentMatches = agentsContent.match(/^## .+$/gm) || [];
-        grouped.agents = agentMatches;
-    } else if (generatedFiles['.claude/agents']) {
-        // Fallback: Count individual agent files
-        grouped.agents = Object.keys(generatedFiles).filter(f => f.startsWith('.claude/agents/'));
+    try {
+        // Fetch details for all selected actions
+        const response = await fetch('/api/actions?limit=100');
+        const data = await response.json();
+        const allActions = data.actions || [];
+        
+        // Filter to get only selected actions
+        const selectedActionDetails = allActions.filter(action => 
+            selectedActions.includes(action.id)
+        );
+        
+        // Group actions by type
+        const grouped = {
+            agents: [],
+            rules: [],
+            rulesets: [],
+            mcps: [],
+            packs: []
+        };
+        
+        selectedActionDetails.forEach(action => {
+            if (grouped[action.action_type + 's']) {
+                grouped[action.action_type + 's'].push(action);
+            } else if (action.action_type === 'ruleset') {
+                grouped.rulesets.push(action);
+            } else if (action.action_type === 'pack') {
+                grouped.packs.push(action);
+            }
+        });
+        
+        let html = '';
+        
+        // Display each category
+        Object.entries(grouped).forEach(([type, items]) => {
+            if (items.length === 0) return;
+            
+            const typeColors = {
+                agents: { bg: 'bg-cyan-50', icon: '🤖' },
+                rules: { bg: 'bg-pink-50', icon: '📋' },
+                rulesets: { bg: 'bg-pink-50', icon: '📚' },
+                mcps: { bg: 'bg-yellow-50', icon: '🔌' },
+                packs: { bg: 'bg-purple-50', icon: '📦' }
+            };
+            
+            const config = typeColors[type] || { bg: 'bg-gray-50', icon: '⚙️' };
+            const displayName = type.charAt(0).toUpperCase() + type.slice(1);
+            
+            html += `
+                <div class="${config.bg} border-2 border-black p-3 mb-3">
+                    <h4 class="font-bold mb-2">${config.icon} ${displayName} (${items.length})</h4>
+                    <ul class="text-sm space-y-1">
+                        ${items.slice(0, 8).map(item => 
+                            `<li>• ${item.display_name || item.name}</li>`
+                        ).join('')}
+                        ${items.length > 8 ? `<li class="text-gray-500">... and ${items.length - 8} more</li>` : ''}
+                    </ul>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html || '<p class="text-gray-500">No tools selected</p>';
+    } catch (error) {
+        console.error('Error loading action details:', error);
+        container.innerHTML = '<p class="text-red-500">Error loading selected tools</p>';
     }
-    
-    if (generatedFiles['.mcp.json']) {
-        // Count MCPs
-        try {
-            const mcpConfig = JSON.parse(generatedFiles['.mcp.json']);
-            grouped.mcps = Object.keys(mcpConfig.mcpServers || {});
-        } catch (e) {
-            console.error('Error parsing MCP config:', e);
-        }
-    }
-    
-    let html = '';
-    
-    if (grouped.agents.length > 0) {
-        html += `
-            <div class="bg-cyan-50 border-2 border-black p-3">
-                <h4 class="font-bold mb-2">🤖 Agents (${grouped.agents.length})</h4>
-                <ul class="text-sm space-y-1">
-                    ${grouped.agents.map(a => {
-                        if (typeof a === 'string') {
-                            // If it's a header match from AGENTS.md (like "## Agent Name")
-                            return `<li>• ${a.replace('## ', '')}</li>`;
-                        } else {
-                            // If it's a file path (fallback for individual files)
-                            return `<li>• ${a.split('/').pop().replace('.yaml', '').replace('.md', '')}</li>`;
-                        }
-                    }).join('')}
-                </ul>
-            </div>
-        `;
-    }
-    
-    if (grouped.rules.length > 0) {
-        html += `
-            <div class="bg-pink-50 border-2 border-black p-3">
-                <h4 class="font-bold mb-2">📋 Rules (${grouped.rules.length})</h4>
-                <ul class="text-sm space-y-1">
-                    ${grouped.rules.slice(0, 5).map(r => `<li>• ${r.replace('## ', '')}</li>`).join('')}
-                    ${grouped.rules.length > 5 ? `<li class="text-gray-500">... and ${grouped.rules.length - 5} more</li>` : ''}
-                </ul>
-            </div>
-        `;
-    }
-    
-    if (grouped.mcps.length > 0) {
-        html += `
-            <div class="bg-yellow-50 border-2 border-black p-3">
-                <h4 class="font-bold mb-2">🔌 MCPs (${grouped.mcps.length})</h4>
-                <ul class="text-sm space-y-1">
-                    ${grouped.mcps.map(m => `<li>• ${m}</li>`).join('')}
-                </ul>
-            </div>
-        `;
-    }
-    
-    container.innerHTML = html || '<p class="text-gray-500">No tools selected</p>';
 }
 
 function displayFilePreviews() {
