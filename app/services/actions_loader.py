@@ -123,9 +123,11 @@ class ActionsLoader:
                         action = Action(
                             id=name,
                             name=name,
+                            display_name=mcp_data.get('display_name'),
                             action_type=ActionType.MCP,
                             tags=mcp_data.get('tags', []),
-                            config=mcp_data.get('config', {})
+                            config=mcp_data.get('config', {}),
+                            description=mcp_data.get('description')
                         )
                         self.actions.append(action)
                         
@@ -133,7 +135,8 @@ class ActionsLoader:
                         self.mcps.append(MCP(
                             name=name,
                             config=mcp_data.get('config', {}),
-                            tags=mcp_data.get('tags', [])
+                            tags=mcp_data.get('tags', []),
+                            description=mcp_data.get('description')
                         ))
         else:
             self.mcps = []
@@ -259,7 +262,8 @@ class ActionsLoader:
                 'display_name': action.display_name,
                 'slug': action.id,
                 'config': action.config,
-                'tags': action.tags
+                'tags': action.tags,
+                'description': action.description
             }
         return None
 

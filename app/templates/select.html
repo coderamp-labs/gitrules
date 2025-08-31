@@ -238,17 +238,92 @@ function setupFilters() {
     });
 }
 
+function fuzzyMatch(searchTerm, text) {
+    if (!searchTerm || !text) return 0;
+    
+    searchTerm = searchTerm.toLowerCase();
+    text = text.toLowerCase();
+    
+    // Exact match gets highest score
+    if (text.includes(searchTerm)) {
+        return text === searchTerm ? 100 : 80;
+    }
+    
+    // Word boundary matches
+    const words = text.split(/\s+/);
+    for (const word of words) {
+        if (word.startsWith(searchTerm)) return 60;
+        if (word.includes(searchTerm)) return 40;
+    }
+    
+    // Character sequence matching (fuzzy)
+    let score = 0;
+    let searchIndex = 0;
+    let consecutiveMatches = 0;
+    
+    for (let i = 0; i < text.length && searchIndex < searchTerm.length; i++) {
+        if (text[i] === searchTerm[searchIndex]) {
+            searchIndex++;
+            consecutiveMatches++;
+            score += consecutiveMatches * 2; // Bonus for consecutive matches
+        } else {
+            consecutiveMatches = 0;
+        }
+    }
+    
+    // Bonus if all characters were found
+    if (searchIndex === searchTerm.length) {
+        score += 20;
+    }
+    
+    return Math.min(score, 80); // Cap at 80 to keep exact matches higher
+}
+
+function getSearchScore(action, searchTerm) {
+    if (!searchTerm) return 100;
+    
+    let maxScore = 0;
+    
+    // Search in name and display_name
+    maxScore = Math.max(maxScore, fuzzyMatch(searchTerm, action.name));
+    if (action.display_name) {
+        maxScore = Math.max(maxScore, fuzzyMatch(searchTerm, action.display_name));
+    }
+    
+    // Search in content/description
+    if (action.content) {
+        maxScore = Math.max(maxScore, fuzzyMatch(searchTerm, action.content) * 0.8);
+    }
+    if (action.description) {
+        maxScore = Math.max(maxScore, fuzzyMatch(searchTerm, action.description) * 0.8);
+    }
+    
+    // Search in tags
+    if (action.tags && Array.isArray(action.tags)) {
+        for (const tag of action.tags) {
+            maxScore = Math.max(maxScore, fuzzyMatch(searchTerm, tag) * 0.6);
+        }
+    }
+    
+    return maxScore;
+}
+
 function applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     const selectedTypes = Array.from(document.querySelectorAll('.type-filter:checked')).map(cb => cb.value);
     const selectedTags = Array.from(document.querySelectorAll('.tag-filter:checked')).map(cb => cb.value);
     
-    filteredActions = allActions.filter(action => {
-        // Search filter
-        if (searchTerm && !action.name.toLowerCase().includes(searchTerm) && 
-            (!action.display_name || !action.display_name.toLowerCase().includes(searchTerm))) {
-            return false;
-        }
+    let actionsWithScores = allActions.map(action => ({
+        action,
+        searchScore: getSearchScore(action, searchTerm)
+    }));
+    
+    // Filter by search (use threshold for fuzzy matching)
+    const searchThreshold = searchTerm ? 15 : 0;
+    actionsWithScores = actionsWithScores.filter(item => item.searchScore >= searchThreshold);
+    
+    filteredActions = actionsWithScores.filter(item => {
+        const action = item.action;
         
         // Type filter
         if (selectedTypes.length > 0 && !selectedTypes.includes(action.action_type)) {
@@ -263,7 +338,9 @@ function applyFilters() {
         }
         
         return true;
-    });
+    })
+    .sort((a, b) => b.searchScore - a.searchScore) // Sort by search relevance
+    .map(item => item.action); // Extract just the actions
     
     currentOffset = 0;
     renderActions();
@@ -347,6 +424,32 @@ function createActionCard(action) {
         'pack': '📦'
     };
     
+    // Generate description based on action type
+    let description = '';
+    if (action.action_type === 'rule' && action.content) {
+        // For rules, show first ~80 characters of content, cleaned up
+        const cleanContent = action.content
+            .replace(/^#+\s*/gm, '') // Remove markdown headers
+            .replace(/\n+/g, ' ')    // Replace newlines with spaces
+            .replace(/\s+/g, ' ')    // Normalize whitespace
+            .trim();
+        description = cleanContent.length > 80 
+            ? cleanContent.substring(0, 80).trim() + '...'
+            : cleanContent;
+    } else if (action.action_type === 'agent' && action.content) {
+        // For agents, extract description from YAML frontmatter
+        const descMatch = action.content.match(/description:\s*([^\n]+)/);
+        if (descMatch) {
+            description = descMatch[1].trim();
+            if (description.length > 80) {
+                description = description.substring(0, 80).trim() + '...';
+            }
+        }
+    } else if (action.action_type === 'mcp') {
+        // For MCPs, use description from YAML data
+        description = action.description || `${action.name} integration and tools`;
+    }
+
     card.innerHTML = `
         <div class="space-y-3">
             <div class="flex items-center gap-3">
@@ -355,6 +458,7 @@ function createActionCard(action) {
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="text-base font-black text-black truncate">${action.display_name || action.name}</h3>
+                    ${description ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">${description}</p>` : ''}
                 </div>
             </div>
             <div class="flex items-center justify-between">

@@ -1,6 +1,7 @@
 mcps:
 - display_name: Github
   slug: GitHub
+  description: GitHub API integration for repositories, issues, and pull requests
   config:
     type: http
     url: https://api.githubcopilot.com/mcp
@@ -8,11 +9,13 @@ mcps:
       Authorization: Bearer ${GITHUB_TOKEN}
 - display_name: Firecrawl
   slug: Firecrawl
+  description: Web scraping and content extraction from websites
   config:
     type: sse
     url: https://mcp.firecrawl.dev/${FIRECRAWL_API_KEY}/sse
 - display_name: Playwright
   slug: Playwright
+  description: Browser automation and web testing framework
   config:
     type: stdio
     command: npx
@@ -20,6 +23,7 @@ mcps:
     - '@playwright/mcp@latest'
 - display_name: Supabase
   slug: Supabase
+  description: Backend-as-a-service with database and authentication
   config:
     command: npx
     args:
@@ -29,6 +33,7 @@ mcps:
     - ${SUPABASE_ACCESS_TOKEN}
 - display_name: Context7
   slug: Context7
+  description: AI-powered context understanding and processing
   config:
     type: http
     url: https://mcp.context7.com/mcp/
@@ -36,11 +41,13 @@ mcps:
       "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
 - display_name: Exa Search
   slug: ExaSearch
+  description: Advanced search and information retrieval
   config:
     type: http
     url: https://mcp.exa.ai/mcp?exa_api_key=${EXA_API_KEY}
 - display_name: GitRules
   slug: GitRules
+  description: Git workflow automation and rule enforcement
   config:
     type: http
     url: https://gitrules.com/mcp

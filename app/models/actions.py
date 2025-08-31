@@ -22,6 +22,7 @@ class Action(BaseModel):
     children: Optional[List[str]] = None  # For rulesets and packs
     filename: Optional[str] = None  # For agents/rules
     namespace: Optional[str] = None  # For rules
+    description: Optional[str] = None  # For MCPs, packs, etc.
 
 class Agent(BaseModel):
     name: str  # For backward compatibility
@@ -47,6 +48,7 @@ class MCP(BaseModel):
     name: str
     config: Dict[str, Any]  # JSON configuration from mcps.json
     tags: Optional[List[str]] = None
+    description: Optional[str] = None
 
 class Pack(BaseModel):
     """A pack is a collection of other actions"""
