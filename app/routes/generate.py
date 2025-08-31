@@ -122,31 +122,20 @@ def generate_patch(files: Dict[str, str], source: str = "scratch", repo_url: str
     # Add a comment header explaining the patch
     if source == "repo" and repo_url:
         patch_lines.append(f"# Gitrules configuration patch generated from repository: {repo_url}")
-        patch_lines.append("# Apply with: git apply <this-patch>")
-        use_git_format = True
+        patch_lines.append("# Apply with: patch -p0 < <this-patch>")
     elif source == "template":
         patch_lines.append("# Gitrules configuration patch generated from template")
         patch_lines.append("# Apply with: patch -p0 < <this-patch>")
-        use_git_format = False
     else:
         patch_lines.append("# Gitrules configuration patch generated from scratch")
         patch_lines.append("# Apply with: patch -p0 < <this-patch>")
-        use_git_format = False
     
     patch_lines.append("")
     
     for filepath, content in files.items():
-        if use_git_format:
-            # Git format
-            patch_lines.append(f"diff --git a/{filepath} b/{filepath}")
-            patch_lines.append("new file mode 100644")
-            patch_lines.append("index 0000000..1234567")
-            patch_lines.append("--- /dev/null")
-            patch_lines.append(f"+++ b/{filepath}")
-        else:
-            # Standard patch format
-            patch_lines.append(f"--- /dev/null")
-            patch_lines.append(f"+++ {filepath}")
+        # Standard patch format
+        patch_lines.append(f"--- /dev/null")
+        patch_lines.append(f"+++ {filepath}")
         
         lines = content.split('\n')
         if lines and lines[-1] == '':

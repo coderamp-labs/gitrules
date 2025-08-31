@@ -56,7 +56,7 @@
                 <h3 class="text-lg font-black mb-3">🔧 Patch Preview</h3>
                 <div class="bg-yellow-50 border-2 border-black p-3 text-sm">
                     <p class="mb-2">The following patch file will be generated for easy application to your repository:</p>
-                    <code class="block bg-white border border-black p-2 font-mono text-xs">git apply gitrules-config.patch</code>
+                    <code class="block bg-white border border-black p-2 font-mono text-xs">patch -p0 &lt; gitrules-config.patch</code>
                 </div>
                 <div id="patch-preview" class="bg-gray-50 border-2 border-black p-4 font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto mt-2">
                     <!-- Patch content will be shown here -->
@@ -248,12 +248,9 @@ function generatePatchPreview() {
     
     // Generate patch for each file
     Object.entries(state.files).forEach(([path, content]) => {
-        // Create a proper git diff format
-        patchContent += `diff --git a/${path} b/${path}\n`;
-        patchContent += `new file mode 100644\n`;
-        patchContent += `index 0000000..0000000\n`;
+        // Create a proper patch format
         patchContent += `--- /dev/null\n`;
-        patchContent += `+++ b/${path}\n`;
+        patchContent += `+++ ${path}\n`;
         
         // Add file content with + prefix for each line
         const lines = content.split('\n');
@@ -323,11 +320,8 @@ function generatePatchContent() {
     
     // Generate patch for each file
     Object.entries(state.files).forEach(([path, content]) => {
-        patchContent += `diff --git a/${path} b/${path}\n`;
-        patchContent += `new file mode 100644\n`;
-        patchContent += `index 0000000..0000000\n`;
         patchContent += `--- /dev/null\n`;
-        patchContent += `+++ b/${path}\n`;
+        patchContent += `+++ ${path}\n`;
         
         const lines = content.split('\n');
         patchContent += `@@ -0,0 +1,${lines.length} @@\n`;
@@ -350,7 +344,7 @@ function applyConfiguration() {
     
     // Copy patch to clipboard
     navigator.clipboard.writeText(patchContent).then(() => {
-        alert('Patch copied to clipboard! You can now paste and apply it using: git apply');
+        alert('Patch copied to clipboard! You can now paste and apply it using: patch -p0');
     }).catch(err => {
         console.error('Failed to copy patch:', err);
         alert('Failed to copy patch to clipboard. Please download the files instead.');

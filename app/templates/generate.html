@@ -58,7 +58,7 @@
 }
 </style>
 
-<div class="min-h-screen bg-cyan-50 -mt-20 pt-20 page-content">
+<div class="bg-cyan-50 -mt-20 pt-20 flex flex-col min-h-screen page-content">
     <!-- Header -->
     <div class="bg-cyan-50 border-b-2 border-black shadow-[0_4px_0px_0px_rgba(0,0,0,1)] sticky top-0 z-10">
         <div class="container mx-auto px-4 py-4">
@@ -74,11 +74,11 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-6">
+    <div class="container mx-auto px-4 py-6 flex-1 overflow-auto">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left Column: Summary -->
             <div class="lg:col-span-1">
-                <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 sticky top-24">
+                <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4">
                     <h3 class="text-xl font-black text-black mb-4">📋 Selected Tools</h3>
                     <div id="selectedSummary" class="space-y-3">
                         <!-- Will be populated dynamically -->
@@ -415,11 +415,7 @@ function displayPatchPreview() {
     const commandElement = document.getElementById('patchCommand');
     
     // Update command based on source
-    if (sourceInfo.source === 'repo') {
-        commandElement.innerHTML = 'git apply &lt;&lt; \'EOF\'<br/>[patch content]<br/>EOF';
-    } else {
-        commandElement.innerHTML = 'patch -p0 &lt;&lt; \'EOF\'<br/>[patch content]<br/>EOF';
-    }
+    commandElement.innerHTML = 'patch -p0 &lt;&lt; \'EOF\'<br/>[patch content]<br/>EOF';
     
     if (!patchContent) {
         container.innerHTML = '<div class="text-gray-500">No patch generated</div>';
@@ -545,19 +541,11 @@ function copyPatch() {
     let contentToCopy;
     let message;
     
-    if (isFromRepo) {
-        // For repo source: git apply with inline patch
-        contentToCopy = `git apply << 'EOF'
+    // Use patch for all sources
+    contentToCopy = `patch -p0 << 'EOF'
 ${patchContent}
 EOF`;
-        message = 'Git patch command copied to clipboard! Paste and run directly in your terminal';
-    } else {
-        // For template/scratch: patch with inline content
-        contentToCopy = `patch -p0 << 'EOF'
-${patchContent}
-EOF`;
-        message = 'Patch command copied to clipboard! Paste and run directly in your terminal';
-    }
+    message = 'Patch command copied to clipboard! Paste and run directly in your terminal';
     
     navigator.clipboard.writeText(contentToCopy).then(() => {
         showNotification(message);
@@ -589,17 +577,15 @@ EOF`;
 
 function applyConfiguration() {
     // Show instructions for applying
-    const isFromRepo = sourceInfo.source === 'repo';
-    const command = isFromRepo ? 'git apply gitrules-config.patch' : 'patch -p0 < gitrules-config.patch';
-    const reviewStep = isFromRepo ? 'git status' : 'ls -la';
-    const commitStep = isFromRepo ? 'git commit -am "Add Gitrules configuration"' : '';
+    const command = 'patch -p0 < gitrules-config.patch';
+    const reviewStep = 'ls -la';
     
     const instructions = `
 To apply this configuration to your repository:
 
 1. Save the patch file as 'gitrules-config.patch'
 2. Run: ${command}
-3. Review the changes with: ${reviewStep}${commitStep ? '\n4. Commit when ready: ' + commitStep : ''}
+3. Review the changes with: ${reviewStep}
     `;
     
     alert(instructions);
