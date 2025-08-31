@@ -213,7 +213,7 @@ async function loadActionDetails() {
         const selectedFormats = getSelectedFormats();
         
         // Fetch details for all selected actions and formats
-        const response = await fetch('/api/v2/generate', {
+        const response = await fetch('/api/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

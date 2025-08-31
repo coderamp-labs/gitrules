@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 import json
 from app.services.actions_loader import actions_loader
 
-router = APIRouter(prefix="/api/v2", tags=["generate"])
+router = APIRouter(prefix="/api", tags=["generate"])
 
 class GenerateRequest(BaseModel):
     action_ids: List[str]
