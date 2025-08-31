@@ -481,11 +481,6 @@ async function downloadZip() {
             zip.file(path, content);
         });
         
-        // Also add the patch file if it exists
-        if (patchContent) {
-            zip.file('gitrules-config.patch', patchContent);
-        }
-        
         // Generate the ZIP file
         const zipBlob = await zip.generateAsync({ type: 'blob' });
         
