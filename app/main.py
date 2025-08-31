@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from app.routes import install, actions, recommend, generate
+from app.routes import actions, recommend, generate
 from app.services.actions_loader import actions_loader
 from api_analytics.fastapi import Analytics
 from fastapi_mcp import FastApiMCP
@@ -43,7 +43,6 @@ static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Include routers
-app.include_router(install.router)
 app.include_router(actions.router)
 app.include_router(recommend.router)
 app.include_router(generate.router)

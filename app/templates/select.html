@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadActions() {
     try {
-        const response = await fetch('/api/v2/actions?limit=100');
+        const response = await fetch('/api/actions?limit=100');
         const data = await response.json();
         allActions = data.actions;
         filteredActions = [...allActions];
