@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-cyan-50 -mt-20 pt-20">
+    <div class="w-full flex sm:flex-row flex-col justify-center sm:items-center relative mb-12">
+        <h1 class="landing-page-title">
+            <span class="block">Rules for</span>
+            <span class="block">coding agents</span>
+        </h1>
+        <!-- Decorative logos positioned relative to the centered content -->
+        <img src="/static/logo_blue.png" alt="Lightning" class="absolute flex-shrink-0 w-12 h-12 object-cover rotate-12 left-1/2 -translate-x-80 -translate-y-16 no-drag">
+        <img src="/static/logo_pink.png" alt="Lightning" class="absolute flex-shrink-0 w-12 h-12 object-cover -rotate-12 left-1/2 translate-x-80 translate-y-16 no-drag">
+    </div>
+
+    <div class="max-w-4xl mx-auto p-4">
+        <!-- Start Options -->
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- Start from Repo -->
+            <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
+                 onclick="startFromRepo()">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-cyan-400 border-2 border-black flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">📂</span>
+                    </div>
+                    <h3 class="text-xl font-black mb-2">Start from Repository</h3>
+                    <p class="text-black font-medium mb-4">Import settings from an existing repository</p>
+                    <div id="repoInput" class="hidden mt-4" onclick="event.stopPropagation()">
+                        <input type="text" 
+                               id="repoUrl" 
+                               placeholder="https://github.com/user/repository"
+                               class="w-full px-3 py-2 text-sm border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-1px] focus:translate-y-[-1px] transition-all focus:outline-none mb-2"
+                               onclick="event.stopPropagation()">
+                        <button onclick="event.stopPropagation(); analyzeRepositoryFromLanding()" 
+                                id="analyze-repo-landing-btn"
+                                class="w-full bg-cyan-400 border-2 border-black text-black font-bold py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                            🚀 Analyze Repository
+                        </button>
+                        
+                        <!-- Loading State -->
+                        <div id="repo-loading" class="hidden mt-2">
+                            <div class="bg-yellow-50 border-2 border-yellow-400 p-2 text-center text-sm">
+                                <div class="inline-block animate-spin mr-1">⚙️</div>
+                                <span class="font-bold">Analyzing repository...</span>
+                                <p class="text-sm mt-1">Getting tool recommendations for your repository.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Display -->
+                        <div id="repo-results" class="hidden mt-2" onclick="event.stopPropagation()">
+                            <div class="bg-cyan-50 border-2 border-cyan-400 p-2">
+                                <h4 class="font-bold text-sm mb-1">Analysis Complete!</h4>
+                                <div id="repo-results-content" class="text-xs whitespace-pre-wrap"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Display -->
+                        <div id="repo-error" class="hidden mt-2">
+                            <div class="bg-red-50 border-2 border-red-400 p-2">
+                                <h4 class="font-bold text-sm mb-1 text-red-700">Error:</h4>
+                                <div id="repo-error-content" class="text-xs text-red-600"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Start from Template -->
+            <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
+                 onclick="startFromTemplate()">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-pink-400 border-2 border-black flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">📋</span>
+                    </div>
+                    <h3 class="text-xl font-black mb-2">Use Template</h3>
+                    <p class="text-black font-medium mb-4">Start with a pre-configured template</p>
+                    <div id="templateSelect" class="hidden mt-4" onclick="event.stopPropagation()">
+                        <select id="templateChoice" 
+                                class="w-full px-3 py-2 text-sm border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-1px] focus:translate-y-[-1px] transition-all focus:outline-none mb-2"
+                                onclick="event.stopPropagation()">
+                            <option value="">Select a template</option>
+                            <option value="web-dev">Web Development</option>
+                            <option value="data-science">Data Science</option>
+                            <option value="backend">Backend Services</option>
+                            <option value="mobile">Mobile Development</option>
+                        </select>
+                        <button onclick="event.stopPropagation(); loadTemplate()" 
+                                class="w-full bg-pink-400 border-2 border-black text-black font-bold py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                            🎯 Use Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Start from Scratch -->
+            <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
+                 onclick="startFromScratch()">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-white border-2 border-black flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">✨</span>
+                    </div>
+                    <h3 class="text-xl font-black mb-2">Start Fresh</h3>
+                    <p class="text-black font-medium">Build your configuration from scratch</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedMode = null;
+
+function startFromRepo() {
+    // Hide other options
+    document.getElementById('templateSelect').classList.add('hidden');
+    
+    // Toggle repo input
+    const repoInput = document.getElementById('repoInput');
+    if (repoInput.classList.contains('hidden')) {
+        repoInput.classList.remove('hidden');
+        selectedMode = 'repo';
+    } else {
+        repoInput.classList.add('hidden');
+        selectedMode = null;
+    }
+}
+
+function startFromTemplate() {
+    // Hide other options
+    document.getElementById('repoInput').classList.add('hidden');
+    
+    // Toggle template select
+    const templateSelect = document.getElementById('templateSelect');
+    if (templateSelect.classList.contains('hidden')) {
+        templateSelect.classList.remove('hidden');
+        selectedMode = 'template';
+    } else {
+        templateSelect.classList.add('hidden');
+        selectedMode = null;
+    }
+}
+
+function startFromScratch() {
+    // Go directly to the selection page
+    window.location.href = '/select?mode=scratch';
+}
+
+let repositoryRecommendations = null;
+
+// Repository Analysis Function for Landing Page
+async function analyzeRepositoryFromLanding() {
+    // Get input value
+    const repoUrl = document.getElementById('repoUrl').value.trim();
+    
+    // Validate required field
+    if (!repoUrl) {
+        alert('Please enter a repository URL');
+        return;
+    }
+    
+    // Show loading state
+    const button = document.getElementById('analyze-repo-landing-btn');
+    const loading = document.getElementById('repo-loading');
+    const results = document.getElementById('repo-results');
+    const error = document.getElementById('repo-error');
+    
+    button.disabled = true;
+    loading.classList.remove('hidden');
+    results.classList.add('hidden');
+    error.classList.add('hidden');
+    
+    try {
+        // Get tool recommendations (includes ingestion)
+        const recommendResponse = await fetch('/api/recommend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                repo_url: repoUrl,
+                user_prompt: 'Recommend minimal useful tools for this repository'
+            })
+        });
+        
+        const recommendData = await recommendResponse.json();
+        
+        if (recommendResponse.ok && recommendData.success) {
+            // Store recommendations and auto-proceed to next page
+            repositoryRecommendations = recommendData.preselect;
+            
+            // Show brief confirmation then redirect
+            const totalTools = repositoryRecommendations.rules.length + repositoryRecommendations.agents.length + repositoryRecommendations.mcps.length;
+            document.getElementById('repo-results-content').textContent = `✅ Found ${totalTools} recommended tools for your repository!`;
+            results.classList.remove('hidden');
+            
+            // Auto-proceed after 1 second
+            setTimeout(() => {
+                proceedToSelection();
+            }, 1000);
+            
+        } else {
+            throw new Error(recommendData.detail || 'Failed to get recommendations');
+        }
+    } catch (err) {
+        // Show error
+        document.getElementById('repo-error-content').textContent = err.message || 'An unexpected error occurred';
+        error.classList.remove('hidden');
+    } finally {
+        // Hide loading state
+        button.disabled = false;
+        loading.classList.add('hidden');
+    }
+}
+
+function proceedToSelection() {
+    // Store recommendations and redirect to selection page
+    if (repositoryRecommendations) {
+        sessionStorage.setItem('repositoryRecommendations', JSON.stringify(repositoryRecommendations));
+    }
+    window.location.href = '/select?mode=repo';
+}
+
+function loadTemplate() {
+    const template = document.getElementById('templateChoice').value;
+    if (!template) {
+        alert('Please select a template');
+        return;
+    }
+    
+    // Store template choice and redirect to selection page
+    sessionStorage.setItem('template', template);
+    window.location.href = '/select?mode=template';
+}
+</script>
+{% endblock %}

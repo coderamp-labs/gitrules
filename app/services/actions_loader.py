@@ -1,14 +1,17 @@
 import yaml
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pathlib import Path
-from app.models.actions import Agent, Rule, MCP
+from app.models.actions import Agent, Rule, MCP, Pack, Action, ActionType
 
 class ActionsLoader:
     def __init__(self):
         self.actions_dir = Path(__file__).parent.parent / "actions"
+        self.actions: List[Action] = []
+        # Keep legacy lists for backward compatibility
         self.agents: List[Agent] = []
         self.rules: List[Rule] = []
         self.mcps: List[MCP] = []
+        self.packs: List[Pack] = []
         self.load_all()
     
     def load_all(self):
@@ -16,6 +19,7 @@ class ActionsLoader:
         self.load_agents()
         self.load_rules()
         self.load_mcps()
+        self.load_packs()
     
     def load_agents(self):
         """Load all agents from agents.yaml"""
@@ -24,16 +28,29 @@ class ActionsLoader:
             with open(agents_file, 'r') as f:
                 data = yaml.safe_load(f)
                 if data and 'agents' in data:
-                    self.agents = [
-                        Agent(
-                            name=agent.get('slug', ''),  # Use slug as name for backward compat
-                            filename=f"{agent.get('slug', '')}.yaml",  # Virtual filename
-                            display_name=agent.get('display_name'),
-                            slug=agent.get('slug'),
-                            content=agent.get('content')
+                    for agent_data in data['agents']:
+                        slug = agent_data.get('slug', '')
+                        # Create Action object
+                        action = Action(
+                            id=slug,
+                            name=slug,
+                            display_name=agent_data.get('display_name'),
+                            action_type=ActionType.AGENT,
+                            tags=agent_data.get('tags', []),
+                            content=agent_data.get('content'),
+                            filename=f"{slug}.yaml"
                         )
-                        for agent in data['agents']
-                    ]
+                        self.actions.append(action)
+                        
+                        # Also create legacy Agent for backward compatibility
+                        self.agents.append(Agent(
+                            name=slug,
+                            filename=f"{slug}.yaml",
+                            display_name=agent_data.get('display_name'),
+                            slug=slug,
+                            content=agent_data.get('content'),
+                            tags=agent_data.get('tags', [])
+                        ))
         else:
             self.agents = []
     
@@ -66,6 +83,22 @@ class ActionsLoader:
                     for slug, rule_data in data.items():
                         rule = self._parse_rule(slug, rule_data)
                         self.rules.append(rule)
+                        
+                        # Create Action object
+                        rule_type = ActionType.RULESET if rule_data.get('type') == 'ruleset' else ActionType.RULE
+                        action = Action(
+                            id=slug,
+                            name=slug,
+                            display_name=rule_data.get('display_name'),
+                            action_type=rule_type,
+                            tags=rule_data.get('tags'),
+                            content=rule_data.get('content'),
+                            author=rule_data.get('author'),
+                            children=rule_data.get('children'),
+                            filename=f"{slug}.yaml",
+                            namespace=rule_data.get('namespace')
+                        )
+                        self.actions.append(action)
         else:
             self.rules = []
     
@@ -76,13 +109,24 @@ class ActionsLoader:
             with open(mcps_file, 'r') as f:
                 data = yaml.safe_load(f)
                 if data and 'mcps' in data:
-                    self.mcps = [
-                        MCP(
-                            name=mcp.get('slug', ''),
-                            config=mcp.get('config', {})
+                    for mcp_data in data['mcps']:
+                        name = mcp_data.get('slug', '')
+                        # Create Action object
+                        action = Action(
+                            id=name,
+                            name=name,
+                            action_type=ActionType.MCP,
+                            tags=mcp_data.get('tags', []),
+                            config=mcp_data.get('config', {})
                         )
-                        for mcp in data['mcps']
-                    ]
+                        self.actions.append(action)
+                        
+                        # Also create legacy MCP for backward compatibility
+                        self.mcps.append(MCP(
+                            name=name,
+                            config=mcp_data.get('config', {}),
+                            tags=mcp_data.get('tags', [])
+                        ))
         else:
             self.mcps = []
     
@@ -113,6 +157,62 @@ class ActionsLoader:
     def get_rule_by_slug(self, slug: str) -> Rule:
         """Get a specific rule by slug"""
         return next((r for r in self.rules if r.slug == slug), None)
+    
+    def load_packs(self):
+        """Load all packs from packs.yaml"""
+        packs_file = self.actions_dir / "packs.yaml"
+        if packs_file.exists():
+            with open(packs_file, 'r') as f:
+                data = yaml.safe_load(f)
+                if data and 'packs' in data:
+                    for pack_data in data['packs']:
+                        pack_id = pack_data.get('id', '')
+                        # Create Action object
+                        action = Action(
+                            id=pack_id,
+                            name=pack_data.get('name', ''),
+                            display_name=pack_data.get('display_name'),
+                            action_type=ActionType.PACK,
+                            tags=pack_data.get('tags', []),
+                            children=pack_data.get('actions', [])
+                        )
+                        self.actions.append(action)
+                        
+                        # Also create Pack for backward compatibility
+                        self.packs.append(Pack(
+                            id=pack_id,
+                            name=pack_data.get('name', ''),
+                            display_name=pack_data.get('display_name'),
+                            tags=pack_data.get('tags', []),
+                            description=pack_data.get('description'),
+                            actions=pack_data.get('actions', [])
+                        ))
+        else:
+            self.packs = []
+    
+    def get_packs(self) -> List[Pack]:
+        """Get all packs"""
+        return self.packs
+    
+    def get_actions(self, action_type: Optional[ActionType] = None, tags: Optional[List[str]] = None, 
+                   limit: int = 30, offset: int = 0) -> List[Action]:
+        """Get all actions with optional filtering"""
+        filtered = self.actions
+        
+        # Filter by action type
+        if action_type:
+            filtered = [a for a in filtered if a.action_type == action_type]
+        
+        # Filter by tags
+        if tags:
+            filtered = [a for a in filtered if a.tags and any(tag in a.tags for tag in tags)]
+        
+        # Apply pagination
+        return filtered[offset:offset + limit]
+    
+    def get_action_by_id(self, action_id: str) -> Optional[Action]:
+        """Get a specific action by ID"""
+        return next((a for a in self.actions if a.id == action_id), None)
 
 # Create singleton instance
 actions_loader = ActionsLoader()

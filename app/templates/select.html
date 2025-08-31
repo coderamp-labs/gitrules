@@ -1,0 +1,641 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Tailwind JIT: Classes used dynamically in JavaScript -->
+<!-- bg-cyan-400 border-cyan-600 bg-red-100 -->
+<style>
+.page-content {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+</style>
+
+<div class="min-h-screen bg-cyan-50 -mt-20 pt-20 page-content">
+    <!-- Header -->
+    <div class="bg-cyan-50 border-b-2 border-black shadow-[0_4px_0px_0px_rgba(0,0,0,1)] sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-black text-black">Select Your Actions</h1>
+                    <p class="text-black font-medium">Choose the tools and configurations for your project</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-black text-black">
+                        <span id="selectedCount">0</span> selected
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex gap-6">
+            <!-- Filters Sidebar -->
+            <div class="w-64 flex-shrink-0">
+                <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 sticky top-20">
+                    <h3 class="text-xl font-black text-black mb-4">Filters</h3>
+                    
+                    <!-- Search -->
+                    <div class="mb-4">
+                        <input type="text" 
+                               id="searchInput"
+                               placeholder="Search actions..."
+                               class="w-full px-3 py-2 text-sm border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-1px] focus:translate-y-[-1px] transition-all focus:outline-none">
+                    </div>
+
+                    <!-- Action Type Filter -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-black text-black mb-2">Type</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center font-medium">
+                                <input type="checkbox" value="agent" class="type-filter mr-2 border-2 border-black">
+                                <span class="text-black">🤖 Agents</span>
+                            </label>
+                            <label class="flex items-center font-medium">
+                                <input type="checkbox" value="rule" class="type-filter mr-2 border-2 border-black">
+                                <span class="text-black">📋 Rules</span>
+                            </label>
+                            <label class="flex items-center font-medium">
+                                <input type="checkbox" value="ruleset" class="type-filter mr-2 border-2 border-black">
+                                <span class="text-black">📚 Rulesets</span>
+                            </label>
+                            <label class="flex items-center font-medium">
+                                <input type="checkbox" value="mcp" class="type-filter mr-2 border-2 border-black">
+                                <span class="text-black">🔌 MCPs</span>
+                            </label>
+                            <label class="flex items-center font-medium">
+                                <input type="checkbox" value="pack" class="type-filter mr-2 border-2 border-black">
+                                <span class="text-black">📦 Packs</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Selected Tags -->
+                    <div class="mb-4" id="selectedTagsSection" style="display: none;">
+                        <label class="block text-sm font-black text-black mb-2">Selected Tags</label>
+                        <div id="selectedTagsContainer" class="flex flex-wrap gap-1">
+                            <!-- Selected tags will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Tags Filter -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-black text-black mb-2">Tags</label>
+                        <div id="tagsFilter" class="space-y-2 max-h-64 overflow-y-auto">
+                            <!-- Tags will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Clear Filters -->
+                    <button onclick="clearFilters()" 
+                            class="w-full bg-white border-2 border-black text-black font-bold py-2 text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                        Clear all filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Actions Grid -->
+            <div class="flex-1">
+                <div id="actionsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <!-- Actions will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Detail Modal -->
+<div id="actionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-2xl w-full max-h-[80vh] overflow-hidden">
+        <div class="p-6 border-b-2 border-black">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 id="modalTitle" class="text-2xl font-black text-black"></h2>
+                    <div id="modalTags" class="flex gap-2 mt-2"></div>
+                </div>
+                <button onclick="closeModal()" class="bg-white border-2 border-black w-8 h-8 flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                    <span class="text-black font-black">×</span>
+                </button>
+            </div>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+            <div id="modalContent"></div>
+        </div>
+        <div class="p-6 border-t-2 border-black bg-cyan-50">
+            <button id="modalSelectBtn" onclick="toggleActionSelection()" 
+                    class="w-full bg-cyan-400 border-2 border-black text-black font-bold px-4 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                Select
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Fixed Next Button -->
+<button onclick="proceedToNext()" 
+        class="fixed bottom-6 right-6 bg-cyan-400 border-2 border-black text-black font-bold px-6 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all z-40">
+    Next →
+</button>
+
+<script>
+let allActions = [];
+let filteredActions = [];
+let selectedActions = new Set();
+window.selectedActions = selectedActions; // Make it globally accessible
+let currentActionId = null;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadActions();
+    setupFilters();
+    
+    // Check for mode from landing page
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    if (mode === 'repo') {
+        const recommendations = sessionStorage.getItem('repositoryRecommendations');
+        if (recommendations) {
+            loadRepoRecommendations(JSON.parse(recommendations));
+        }
+    } else if (mode === 'template') {
+        const template = sessionStorage.getItem('template');
+        if (template) {
+            loadTemplateActions(template);
+        }
+    }
+});
+
+async function loadActions() {
+    try {
+        const response = await fetch('/api/v2/actions?limit=100');
+        const data = await response.json();
+        allActions = data.actions;
+        filteredActions = [...allActions];
+        
+        // Extract unique tags
+        const tags = new Set();
+        allActions.forEach(action => {
+            if (action.tags) {
+                action.tags.forEach(tag => tags.add(tag));
+            }
+        });
+        
+        // Populate tags filter
+        const tagsFilter = document.getElementById('tagsFilter');
+        Array.from(tags).sort().forEach(tag => {
+            const label = document.createElement('label');
+            label.className = 'flex items-center font-medium';
+            label.innerHTML = `
+                <input type="checkbox" value="${tag}" class="tag-filter mr-2 border-2 border-black">
+                <span class="text-black text-xs">${tag}</span>
+            `;
+            tagsFilter.appendChild(label);
+        });
+        
+        renderActions();
+    } catch (error) {
+        console.error('Failed to load actions:', error);
+    }
+}
+
+function setupFilters() {
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    
+    // Type filters
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('type-filter') || e.target.classList.contains('tag-filter')) {
+            applyFilters();
+            if (e.target.classList.contains('tag-filter')) {
+                updateSelectedTagsDisplay();
+            }
+        }
+    });
+}
+
+function applyFilters() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const selectedTypes = Array.from(document.querySelectorAll('.type-filter:checked')).map(cb => cb.value);
+    const selectedTags = Array.from(document.querySelectorAll('.tag-filter:checked')).map(cb => cb.value);
+    
+    filteredActions = allActions.filter(action => {
+        // Search filter
+        if (searchTerm && !action.name.toLowerCase().includes(searchTerm) && 
+            (!action.display_name || !action.display_name.toLowerCase().includes(searchTerm))) {
+            return false;
+        }
+        
+        // Type filter
+        if (selectedTypes.length > 0 && !selectedTypes.includes(action.action_type)) {
+            return false;
+        }
+        
+        // Tag filter
+        if (selectedTags.length > 0) {
+            if (!action.tags || !action.tags.some(tag => selectedTags.includes(tag))) {
+                return false;
+            }
+        }
+        
+        return true;
+    });
+    
+    currentOffset = 0;
+    renderActions();
+}
+
+function renderActions() {
+    const container = document.getElementById('actionsGrid');
+    container.innerHTML = '';
+    
+    filteredActions.forEach(action => {
+        const cardElement = createActionCard(action);
+        container.appendChild(cardElement);
+    });
+}
+
+function createActionCard(action) {
+    const isSelected = selectedActions.has(action.id);
+    
+    const typeColors = {
+        'agent': {
+            bg: '#22D3EE',
+            lightBg: 'bg-cyan-200',
+            borderClass: 'border-cyan-500',
+            tagBg: 'bg-cyan-50',
+            tagBorder: 'border-cyan-400',
+            badgeBg: 'bg-cyan-300'
+        },
+        'rule': {
+            bg: '#F472B6',
+            lightBg: 'bg-pink-200', 
+            borderClass: 'border-pink-500',
+            tagBg: 'bg-pink-50',
+            tagBorder: 'border-pink-400',
+            badgeBg: 'bg-pink-300'
+        },
+        'ruleset': {
+            bg: '#F472B6',
+            lightBg: 'bg-pink-200',
+            borderClass: 'border-pink-500', 
+            tagBg: 'bg-pink-50',
+            tagBorder: 'border-pink-400',
+            badgeBg: 'bg-pink-300'
+        },
+        'mcp': {
+            bg: '#FDE047',
+            lightBg: 'bg-yellow-200',
+            borderClass: 'border-yellow-500',
+            tagBg: 'bg-yellow-50', 
+            tagBorder: 'border-yellow-400',
+            badgeBg: 'bg-yellow-300'
+        },
+        'pack': {
+            bg: '#C084FC',
+            lightBg: 'bg-purple-200',
+            borderClass: 'border-purple-500',
+            tagBg: 'bg-purple-50',
+            tagBorder: 'border-purple-400', 
+            badgeBg: 'bg-purple-300'
+        }
+    };
+    
+    const colors = typeColors[action.action_type] || typeColors.agent;
+    
+    const card = document.createElement('div');
+    card.setAttribute('data-action-id', action.id);
+    card.className = `p-4 border-2 transition-all cursor-pointer ${
+        isSelected ? `${colors.lightBg} ${colors.borderClass} border-2` : 'bg-white border-black hover:bg-cyan-50'
+    } shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px]`;
+    
+    card.onclick = () => toggleQuickSelection(action.id);
+    card.oncontextmenu = (e) => {
+        e.preventDefault();
+        showActionDetails(action);
+    };
+    
+    const typeIcons = {
+        'agent': '🤖',
+        'rule': '📋',
+        'ruleset': '📚',
+        'mcp': '🔌',
+        'pack': '📦'
+    };
+    
+    card.innerHTML = `
+        <div class="space-y-3">
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0 w-10 h-10 border-2 border-black flex items-center justify-center" style="background-color: ${colors.bg}">
+                    <span class="text-lg">${typeIcons[action.action_type] || '⚙️'}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-black text-black truncate">${action.display_name || action.name}</h3>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="inline-flex px-2 py-1 text-xs font-bold border border-black ${isSelected ? colors.badgeBg : 'bg-gray-100'} text-black uppercase">
+                    ${action.action_type}
+                </span>
+            </div>
+            ${action.tags && action.tags.length > 0 ? `
+                <div class="flex flex-wrap gap-1">
+                    ${action.tags.slice(0, 3).map(tag => `
+                        <span onclick="event.stopPropagation(); applyTagFilter('${tag}')" class="text-xs ${isSelected ? `bg-white ${colors.tagBorder}` : 'bg-cyan-50 border-gray-300'} border px-1.5 py-0.5 text-black cursor-pointer hover:bg-cyan-100 transition-colors">${tag}</span>
+                    `).join('')}
+                    ${action.tags.length > 3 ? `<span class="text-xs font-medium text-gray-600">+${action.tags.length - 3}</span>` : ''}
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    return card;
+}
+
+function showActionDetails(action) {
+    currentActionId = action.id;
+    
+    document.getElementById('modalTitle').textContent = action.display_name || action.name;
+    
+    // Tags
+    const modalTags = document.getElementById('modalTags');
+    modalTags.innerHTML = '';
+    if (action.tags && action.tags.length > 0) {
+        action.tags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded';
+            span.textContent = tag;
+            modalTags.appendChild(span);
+        });
+    }
+    
+    // Content
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <h4 class="font-semibold mb-2">Type</h4>
+                <p>${action.action_type}</p>
+            </div>
+            ${action.author ? `
+                <div>
+                    <h4 class="font-semibold mb-2">Author</h4>
+                    <p>${action.author}</p>
+                </div>
+            ` : ''}
+            ${action.content ? `
+                <div>
+                    <h4 class="font-semibold mb-2">Content</h4>
+                    <pre class="bg-gray-100 p-3 rounded text-sm overflow-x-auto">${action.content}</pre>
+                </div>
+            ` : ''}
+            ${action.config ? `
+                <div>
+                    <h4 class="font-semibold mb-2">Configuration</h4>
+                    <pre class="bg-gray-100 p-3 rounded text-sm overflow-x-auto">${JSON.stringify(action.config, null, 2)}</pre>
+                </div>
+            ` : ''}
+            ${action.children && action.children.length > 0 ? `
+                <div>
+                    <h4 class="font-semibold mb-2">Includes</h4>
+                    <ul class="list-disc list-inside">
+                        ${action.children.map(child => `<li>${child}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    // Update select button
+    const selectBtn = document.getElementById('modalSelectBtn');
+    if (selectedActions.has(action.id)) {
+        selectBtn.textContent = 'Deselect';
+        selectBtn.className = 'w-full bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition-colors';
+    } else {
+        selectBtn.textContent = 'Select';
+        selectBtn.className = 'w-full bg-cyan-400 text-white px-4 py-2 rounded-lg hover:bg-cyan-500 transition-colors';
+    }
+    
+    document.getElementById('actionModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('actionModal').classList.add('hidden');
+    currentActionId = null;
+}
+
+function toggleQuickSelection(actionId) {
+    if (selectedActions.has(actionId)) {
+        selectedActions.delete(actionId);
+    } else {
+        selectedActions.add(actionId);
+    }
+    
+    updateSelectedCount();
+    renderActions(); // Re-render to update selection state
+}
+
+function toggleActionSelection() {
+    if (!currentActionId) return;
+    
+    if (selectedActions.has(currentActionId)) {
+        selectedActions.delete(currentActionId);
+    } else {
+        selectedActions.add(currentActionId);
+    }
+    
+    updateSelectedCount();
+    renderActions(); // Re-render to update selection state
+    closeModal();
+}
+
+function updateSelectedCount() {
+    document.getElementById('selectedCount').textContent = selectedActions.size;
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.querySelectorAll('.type-filter').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.tag-filter').forEach(cb => cb.checked = false);
+    applyFilters();
+    updateSelectedTagsDisplay();
+}
+
+function applyTagFilter(tagName) {
+    // Find the checkbox for this tag
+    const tagCheckbox = document.querySelector(`.tag-filter[value="${tagName}"]`);
+    if (tagCheckbox) {
+        // Always add the tag (check the checkbox) instead of toggling
+        tagCheckbox.checked = true;
+        // Apply filters to update the display
+        applyFilters();
+        // Update selected tags display
+        updateSelectedTagsDisplay();
+        
+        // Scroll to the filters section to show the applied filter
+        const filtersSection = document.querySelector('#tagsFilter');
+        if (filtersSection) {
+            filtersSection.scrollTop = tagCheckbox.offsetTop - filtersSection.offsetTop;
+        }
+    }
+}
+
+function updateSelectedTagsDisplay() {
+    const selectedTags = Array.from(document.querySelectorAll('.tag-filter:checked')).map(cb => cb.value);
+    const selectedTagsContainer = document.getElementById('selectedTagsContainer');
+    const selectedTagsSection = document.getElementById('selectedTagsSection');
+    
+    if (selectedTags.length === 0) {
+        selectedTagsSection.style.display = 'none';
+        return;
+    }
+    
+    selectedTagsSection.style.display = 'block';
+    selectedTagsContainer.innerHTML = '';
+    
+    selectedTags.forEach(tagName => {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'inline-flex items-center gap-1 px-2 py-1 text-xs font-bold bg-cyan-400 border border-black text-black';
+        tagElement.innerHTML = `
+            ${tagName}
+            <button onclick="removeSelectedTag('${tagName}')" class="ml-1 w-4 h-4 flex items-center justify-center hover:bg-black hover:text-cyan-400 transition-colors">
+                ×
+            </button>
+        `;
+        selectedTagsContainer.appendChild(tagElement);
+    });
+}
+
+function removeSelectedTag(tagName) {
+    const tagCheckbox = document.querySelector(`.tag-filter[value="${tagName}"]`);
+    if (tagCheckbox) {
+        tagCheckbox.checked = false;
+        applyFilters();
+        updateSelectedTagsDisplay();
+    }
+}
+
+
+async function loadRepoRecommendations(recommendations) {
+    console.log('Loading repository recommendations:', recommendations);
+    
+    // Wait for actions to be loaded first
+    await new Promise(resolve => {
+        const checkLoaded = () => {
+            if (allActions.length > 0) {
+                resolve();
+            } else {
+                setTimeout(checkLoaded, 100);
+            }
+        };
+        checkLoaded();
+    });
+    
+    // Pre-select recommended actions
+    const recommendedIds = [
+        ...(recommendations.agents || []),
+        ...(recommendations.rules || []),
+        ...(recommendations.mcps || [])
+    ];
+    
+    recommendedIds.forEach(id => {
+        selectedActions.add(id);
+    });
+    
+    updateSelectedCount();
+    renderActions(); // Re-render to show selections
+    
+    // Show notification about pre-selected items
+    if (recommendedIds.length > 0) {
+        showNotification(`🎯 Pre-selected ${recommendedIds.length} recommended tools for your repository`);
+    }
+}
+
+async function loadTemplateActions(template) {
+    // TODO: Implement loading template actions
+    console.log('Loading template:', template);
+}
+
+function proceedToNext() {
+    if (selectedActions.size === 0) {
+        alert('Please select at least one action');
+        return;
+    }
+    
+    // Store selected actions and proceed
+    sessionStorage.setItem('selectedActions', JSON.stringify(Array.from(selectedActions)));
+    
+    // Add fade-out transition before navigation
+    const pageContent = document.querySelector('.page-content');
+    pageContent.classList.add('fade-out');
+    
+    // Navigate after fade-out completes
+    setTimeout(() => {
+        // TODO: Navigate to the next step
+        alert('Next step will be implemented soon. Selected actions: ' + Array.from(selectedActions).join(', '));
+    }, 300); // Match the fade-out duration
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+
+// Close modal on background click
+document.getElementById('actionModal').addEventListener('click', (e) => {
+    if (e.target.id === 'actionModal') {
+        closeModal();
+    }
+});
+
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-20 right-4 bg-cyan-50 border-2 border-cyan-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 z-50 max-w-sm';
+    notification.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-black">${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-black hover:text-gray-700">×</button>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
+
+
+{% endblock %}
