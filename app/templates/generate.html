@@ -1,0 +1,625 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- JSZip library for creating ZIP files -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+.page-content {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tab-button {
+    position: relative;
+    z-index: 10;
+}
+
+.tab-button.active {
+    z-index: 20;
+}
+
+.file-preview {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.patch-preview {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.patch-add {
+    background-color: #e6ffed;
+    color: #24292e;
+}
+
+.patch-remove {
+    background-color: #ffeef0;
+    color: #24292e;
+}
+
+.patch-header {
+    background-color: #f6f8fa;
+    color: #24292e;
+    font-weight: bold;
+}
+</style>
+
+<div class="min-h-screen bg-cyan-50 -mt-20 pt-20 page-content">
+    <!-- Header -->
+    <div class="bg-cyan-50 border-b-2 border-black shadow-[0_4px_0px_0px_rgba(0,0,0,1)] sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-black text-black">Generate Your Configuration</h1>
+                    <p class="text-black font-medium">Review and download your customized setup</p>
+                </div>
+                <button onclick="goBack()" class="bg-white border-2 border-black text-black font-bold px-4 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                    ← Back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 sticky top-24">
+                    <h3 class="text-xl font-black text-black mb-4">📋 Selected Tools</h3>
+                    <div id="selectedSummary" class="space-y-3">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                    
+                    <!-- Format Selection -->
+                    <div class="mt-6 pt-4 border-t-2 border-black">
+                        <h4 class="text-lg font-black text-black mb-3">🎯 Output Formats</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-2 border-2 border-black bg-pink-50 cursor-pointer hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                                <input type="checkbox" name="format" value="claude" checked class="mr-2" onchange="updateGeneratedFiles()">
+                                <span class="font-bold">Claude (CLAUDE.md)</span>
+                            </label>
+                            <label class="flex items-center p-2 border-2 border-black bg-cyan-50 cursor-pointer hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                                <input type="checkbox" name="format" value="cursor" class="mr-2" onchange="updateGeneratedFiles()">
+                                <span class="font-bold">Cursor (.cursorrules)</span>
+                            </label>
+                            <label class="flex items-center p-2 border-2 border-black bg-pink-50 cursor-pointer hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                                <input type="checkbox" name="format" value="agents" class="mr-2" onchange="updateGeneratedFiles()">
+                                <span class="font-bold">AGENTS.md</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Preview -->
+            <div class="lg:col-span-2">
+                <!-- File Preview -->
+                <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-6">
+                    <div class="border-b-2 border-black">
+                        <div class="flex justify-between items-center">
+                            <div id="fileTabs" class="flex -mb-[2px]">
+                                <!-- Tabs will be populated dynamically -->
+                            </div>
+                            <button id="copyCurrentFileBtn" onclick="copyCurrentFile()" 
+                                    class="bg-cyan-400 border-2 border-black text-black font-bold px-3 py-1 text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all mr-2 mb-2">
+                                📋 Copy File
+                            </button>
+                        </div>
+                    </div>
+                    <div id="filePreview" class="p-4 max-h-96 overflow-auto file-preview">
+                        <!-- File content will be shown here -->
+                    </div>
+                </div>
+
+                <!-- Patch Preview -->
+                <div class="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="p-4 border-b-2 border-black bg-yellow-50">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-black text-black mb-2">🔧 Configuration Patch</h3>
+                                <p class="text-sm text-black">Apply this patch to your repository:</p>
+                                <code id="patchCommand" class="block mt-2 bg-white border border-black p-2 font-mono text-xs">patch -p0 &lt; gitrules-config.patch</code>
+                            </div>
+                            <button onclick="copyPatch()" class="bg-cyan-400 border-2 border-black text-black font-bold px-3 py-1 text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                                📋 Copy Patch
+                            </button>
+                        </div>
+                    </div>
+                    <div id="patchPreview" class="p-4 max-h-64 overflow-auto patch-preview">
+                        <!-- Patch content will be shown here -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex gap-3 justify-end">
+                    <button onclick="downloadZip()" class="bg-white border-2 border-black text-black font-bold px-6 py-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                        📦 Download ZIP
+                    </button>
+                    <button onclick="copyPrompt()" class="bg-pink-400 border-2 border-black text-black font-bold px-6 py-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all">
+                        📋 Copy Prompt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedActions = [];
+let generatedFiles = {};
+let patchContent = '';
+let currentActiveFile = null;
+
+let sourceInfo = {
+    source: 'scratch',
+    repo_url: null
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', async () => {
+    // Get selected actions from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const actionsParam = urlParams.get('actions');
+    
+    if (!actionsParam) {
+        alert('No actions selected');
+        window.location.href = '/select';
+        return;
+    }
+    
+    selectedActions = actionsParam.split(',');
+    
+    // Determine source info from session storage
+    const repoRecommendations = sessionStorage.getItem('repositoryRecommendations');
+    const template = sessionStorage.getItem('template');
+    
+    if (repoRecommendations) {
+        sourceInfo.source = 'repo';
+        // Try to get repo URL from session storage
+        const storedRepoUrl = sessionStorage.getItem('lastAnalyzedRepoUrl');
+        if (storedRepoUrl) {
+            sourceInfo.repo_url = storedRepoUrl;
+        }
+    } else if (template) {
+        sourceInfo.source = 'template';
+    } else {
+        sourceInfo.source = 'scratch';
+    }
+    
+    await loadActionDetails();
+    generateFiles();
+    displaySummary();
+    displayFilePreviews();
+    displayPatchPreview();
+});
+
+async function loadActionDetails() {
+    try {
+        // Get selected formats
+        const selectedFormats = getSelectedFormats();
+        
+        // Fetch details for all selected actions and formats
+        const response = await fetch('/api/v2/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action_ids: selectedActions,
+                formats: selectedFormats,
+                source: sourceInfo.source,
+                repo_url: sourceInfo.repo_url
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to generate configuration');
+        }
+        
+        const data = await response.json();
+        generatedFiles = data.files || {};
+        patchContent = data.patch || '';
+        sourceInfo.source = data.source || sourceInfo.source;
+    } catch (error) {
+        console.error('Error loading action details:', error);
+        alert('Failed to generate configuration. Please try again.');
+        window.location.href = '/select';
+    }
+}
+
+function getSelectedFormats() {
+    const checkboxes = document.querySelectorAll('input[name="format"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+async function updateGeneratedFiles() {
+    await loadActionDetails();
+    displayFilePreviews();
+    displayPatchPreview();
+}
+
+function generateFiles() {
+    // Files are generated by the backend
+    // This function could be used for client-side generation if needed
+}
+
+function displaySummary() {
+    const container = document.getElementById('selectedSummary');
+    
+    // Group actions by type
+    const grouped = {
+        agents: [],
+        rules: [],
+        rulesets: [],
+        mcps: [],
+        packs: []
+    };
+    
+    // Parse the generated files to extract action types
+    if (generatedFiles['CLAUDE.md']) {
+        // Count rules and rulesets
+        const claudeContent = generatedFiles['CLAUDE.md'];
+        const ruleMatches = claudeContent.match(/## .+/g) || [];
+        grouped.rules = ruleMatches;
+    }
+    
+    if (generatedFiles['AGENTS.md']) {
+        // Count agents from AGENTS.md content
+        const agentsContent = generatedFiles['AGENTS.md'];
+        const agentMatches = agentsContent.match(/^## .+$/gm) || [];
+        grouped.agents = agentMatches;
+    } else if (generatedFiles['.claude/agents']) {
+        // Fallback: Count individual agent files
+        grouped.agents = Object.keys(generatedFiles).filter(f => f.startsWith('.claude/agents/'));
+    }
+    
+    if (generatedFiles['.mcp.json']) {
+        // Count MCPs
+        try {
+            const mcpConfig = JSON.parse(generatedFiles['.mcp.json']);
+            grouped.mcps = Object.keys(mcpConfig.mcpServers || {});
+        } catch (e) {
+            console.error('Error parsing MCP config:', e);
+        }
+    }
+    
+    let html = '';
+    
+    if (grouped.agents.length > 0) {
+        html += `
+            <div class="bg-cyan-50 border-2 border-black p-3">
+                <h4 class="font-bold mb-2">🤖 Agents (${grouped.agents.length})</h4>
+                <ul class="text-sm space-y-1">
+                    ${grouped.agents.map(a => {
+                        if (typeof a === 'string') {
+                            // If it's a header match from AGENTS.md (like "## Agent Name")
+                            return `<li>• ${a.replace('## ', '')}</li>`;
+                        } else {
+                            // If it's a file path (fallback for individual files)
+                            return `<li>• ${a.split('/').pop().replace('.yaml', '').replace('.md', '')}</li>`;
+                        }
+                    }).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    if (grouped.rules.length > 0) {
+        html += `
+            <div class="bg-pink-50 border-2 border-black p-3">
+                <h4 class="font-bold mb-2">📋 Rules (${grouped.rules.length})</h4>
+                <ul class="text-sm space-y-1">
+                    ${grouped.rules.slice(0, 5).map(r => `<li>• ${r.replace('## ', '')}</li>`).join('')}
+                    ${grouped.rules.length > 5 ? `<li class="text-gray-500">... and ${grouped.rules.length - 5} more</li>` : ''}
+                </ul>
+            </div>
+        `;
+    }
+    
+    if (grouped.mcps.length > 0) {
+        html += `
+            <div class="bg-yellow-50 border-2 border-black p-3">
+                <h4 class="font-bold mb-2">🔌 MCPs (${grouped.mcps.length})</h4>
+                <ul class="text-sm space-y-1">
+                    ${grouped.mcps.map(m => `<li>• ${m}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html || '<p class="text-gray-500">No tools selected</p>';
+}
+
+function displayFilePreviews() {
+    const tabsContainer = document.getElementById('fileTabs');
+    const previewContainer = document.getElementById('filePreview');
+    
+    const files = Object.entries(generatedFiles);
+    if (files.length === 0) {
+        tabsContainer.innerHTML = '<div class="px-4 py-2 text-gray-500">No files generated</div>';
+        previewContainer.innerHTML = '<div class="text-gray-500">No content available</div>';
+        return;
+    }
+    
+    let tabsHTML = '';
+    files.forEach(([path, content], index) => {
+        const fileName = path.split('/').pop();
+        const isActive = index === 0;
+        tabsHTML += `
+            <button 
+                class="tab-button px-4 py-2 border-2 border-black ${isActive ? 'bg-cyan-400 font-bold border-b-cyan-400' : 'bg-white border-b-0'} hover:bg-cyan-50 transition-all"
+                onclick="switchFileTab(this, '${path}')"
+                data-file-path="${path}"
+            >
+                ${fileName}
+            </button>
+        `;
+    });
+    
+    tabsContainer.innerHTML = tabsHTML;
+    
+    // Show first file
+    if (files.length > 0) {
+        currentActiveFile = files[0][0];
+        displayFileContent(files[0][0]);
+    }
+}
+
+function switchFileTab(button, filePath) {
+    // Update tab styles
+    document.querySelectorAll('.tab-button').forEach(tab => {
+        tab.classList.remove('bg-cyan-400', 'font-bold', 'border-b-cyan-400');
+        tab.classList.add('bg-white', 'border-b-0');
+    });
+    button.classList.remove('bg-white', 'border-b-0');
+    button.classList.add('bg-cyan-400', 'font-bold', 'border-b-cyan-400');
+    
+    // Update current active file
+    currentActiveFile = filePath;
+    
+    // Display file content
+    displayFileContent(filePath);
+}
+
+function displayFileContent(filePath) {
+    const container = document.getElementById('filePreview');
+    const content = generatedFiles[filePath] || '';
+    
+    // Escape HTML and preserve formatting
+    const escapedContent = content
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    
+    container.innerHTML = `<pre class="whitespace-pre-wrap">${escapedContent}</pre>`;
+}
+
+function displayPatchPreview() {
+    const container = document.getElementById('patchPreview');
+    const commandElement = document.getElementById('patchCommand');
+    
+    // Update command based on source
+    if (sourceInfo.source === 'repo') {
+        commandElement.innerHTML = 'git apply &lt;&lt; \'EOF\'<br/>[patch content]<br/>EOF';
+    } else {
+        commandElement.innerHTML = 'patch -p0 &lt;&lt; \'EOF\'<br/>[patch content]<br/>EOF';
+    }
+    
+    if (!patchContent) {
+        container.innerHTML = '<div class="text-gray-500">No patch generated</div>';
+        return;
+    }
+    
+    // Format patch with syntax highlighting
+    const lines = patchContent.split('\n');
+    const formattedLines = lines.map(line => {
+        if (line.startsWith('+') && !line.startsWith('+++')) {
+            return `<div class="patch-add">${escapeHtml(line)}</div>`;
+        } else if (line.startsWith('-') && !line.startsWith('---')) {
+            return `<div class="patch-remove">${escapeHtml(line)}</div>`;
+        } else if (line.startsWith('@@') || line.startsWith('diff') || line.startsWith('index')) {
+            return `<div class="patch-header">${escapeHtml(line)}</div>`;
+        } else {
+            return `<div>${escapeHtml(line)}</div>`;
+        }
+    });
+    
+    container.innerHTML = formattedLines.join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function goBack() {
+    window.history.back();
+}
+
+function copyCurrentFile() {
+    if (!currentActiveFile || !generatedFiles[currentActiveFile]) {
+        alert('No file selected to copy');
+        return;
+    }
+    
+    const content = generatedFiles[currentActiveFile];
+    
+    navigator.clipboard.writeText(content).then(() => {
+        const filename = currentActiveFile.split('/').pop();
+        showNotification(`File "${filename}" copied to clipboard!`);
+    }).catch(err => {
+        console.error('Failed to copy file:', err);
+        alert('Failed to copy file to clipboard');
+    });
+}
+
+async function downloadZip() {
+    if (!generatedFiles || Object.keys(generatedFiles).length === 0) {
+        alert('No files to download');
+        return;
+    }
+    
+    try {
+        // Create a new JSZip instance
+        const zip = new JSZip();
+        
+        // Add each file to the ZIP
+        Object.entries(generatedFiles).forEach(([path, content]) => {
+            zip.file(path, content);
+        });
+        
+        // Also add the patch file if it exists
+        if (patchContent) {
+            zip.file('gitrules-config.patch', patchContent);
+        }
+        
+        // Generate the ZIP file
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        
+        // Create download link
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'gitrules-config.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showNotification('ZIP file downloaded successfully!');
+    } catch (error) {
+        console.error('Failed to create ZIP:', error);
+        alert('Failed to create ZIP file');
+    }
+}
+
+function copyPrompt() {
+    if (!generatedFiles || Object.keys(generatedFiles).length === 0) {
+        alert('No files to copy');
+        return;
+    }
+    
+    let prompt = "Insert the following content in the relevant files, merging them and cleaning them up as needed.\n\n";
+    
+    for (const [filePath, content] of Object.entries(generatedFiles)) {
+        prompt += `--- ${filePath}\n`;
+        prompt += "```\n";
+        prompt += content;
+        prompt += "\n```\n";
+    }
+    
+    navigator.clipboard.writeText(prompt).then(() => {
+        showNotification('Prompt with file contents copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy prompt:', err);
+        alert('Failed to copy prompt to clipboard');
+    });
+}
+
+function copyPatch() {
+    if (!patchContent) {
+        alert('No patch available to copy');
+        return;
+    }
+    
+    // Copy the patch with command - format depends on source
+    const isFromRepo = sourceInfo.source === 'repo';
+    
+    let contentToCopy;
+    let message;
+    
+    if (isFromRepo) {
+        // For repo source: git apply with inline patch
+        contentToCopy = `git apply << 'EOF'
+${patchContent}
+EOF`;
+        message = 'Git patch command copied to clipboard! Paste and run directly in your terminal';
+    } else {
+        // For template/scratch: patch with inline content
+        contentToCopy = `patch -p0 << 'EOF'
+${patchContent}
+EOF`;
+        message = 'Patch command copied to clipboard! Paste and run directly in your terminal';
+    }
+    
+    navigator.clipboard.writeText(contentToCopy).then(() => {
+        showNotification(message);
+    }).catch(err => {
+        console.error('Failed to copy patch:', err);
+        
+        // Fallback: try copying as text file creation commands
+        if (generatedFiles && Object.keys(generatedFiles).length > 0) {
+            let fallbackCommand = '# Gitrules Configuration - Create files manually\n\n';
+            
+            for (const [filePath, content] of Object.entries(generatedFiles)) {
+                fallbackCommand += `# Create ${filePath}\n`;
+                fallbackCommand += `mkdir -p "$(dirname "${filePath}")"\n`;
+                fallbackCommand += `cat > "${filePath}" << 'EOF'\n`;
+                fallbackCommand += content;
+                fallbackCommand += `\nEOF\n\n`;
+            }
+            
+            navigator.clipboard.writeText(fallbackCommand).then(() => {
+                showNotification('File creation commands copied to clipboard as fallback');
+            }).catch(() => {
+                alert('Failed to copy to clipboard');
+            });
+        } else {
+            alert('Failed to copy patch to clipboard');
+        }
+    });
+}
+
+function applyConfiguration() {
+    // Show instructions for applying
+    const isFromRepo = sourceInfo.source === 'repo';
+    const command = isFromRepo ? 'git apply gitrules-config.patch' : 'patch -p0 < gitrules-config.patch';
+    const reviewStep = isFromRepo ? 'git status' : 'ls -la';
+    const commitStep = isFromRepo ? 'git commit -am "Add Gitrules configuration"' : '';
+    
+    const instructions = `
+To apply this configuration to your repository:
+
+1. Save the patch file as 'gitrules-config.patch'
+2. Run: ${command}
+3. Review the changes with: ${reviewStep}${commitStep ? '\n4. Commit when ready: ' + commitStep : ''}
+    `;
+    
+    alert(instructions);
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed bottom-6 right-6 bg-cyan-50 border-2 border-cyan-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 z-50';
+    notification.innerHTML = `
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-bold text-black">${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+
+{% endblock %}

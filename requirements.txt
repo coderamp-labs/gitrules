@@ -11,3 +11,4 @@ fuzzywuzzy
 python-Levenshtein
 gitingest
 httpx
+loguru==0.7.2

@@ -6,7 +6,7 @@ import httpx
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 import os
-from gitingest import ingest_async
+from loguru import logger
 
 # Load environment variables from .env file
 load_dotenv()
@@ -14,7 +14,7 @@ load_dotenv()
 
 async def use_gitingest(url: str, context_size: int = 50000) -> str:
     """
-    Ingest a repository using gitingest and trim to specified token size.
+    Ingest a repository using gitingest.com API and trim to specified token size.
     
     Args:
         url: Repository URL to ingest
@@ -23,24 +23,52 @@ async def use_gitingest(url: str, context_size: int = 50000) -> str:
     Returns:
         String containing the repository context, trimmed to specified size
     """
-    # Ingest the repository
-    summary, tree, content = await ingest_async(
-        url,
-        max_file_size=512000,
-        include_patterns=None,
-        exclude_patterns=None
-    )
-    
-    # Combine into single context
-    full_context = f"{summary}\n\n{tree}\n\n{content}"
+    logger.info(f"Ingesting repository from {url}")
+    # Query gitingest.com API instead of local package
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        try:
+            # Call gitingest.com API
+            response = await client.post(
+                "https://gitingest.com/api/ingest",
+                json={
+                    "input_text": url,
+                    "max_file_size": 102400,
+                    "pattern_type": "exclude",
+                    "pattern": "",
+                    "token": ""
+                },
+                headers={
+                    "Content-Type": "application/json"
+                }
+            )
+            response.raise_for_status()
+            
+            # Parse response - assuming it returns the full context
+            data = response.json()
+            full_context = data.get("content", "")
+            
+            # If the API returns structured data, combine it
+            if isinstance(data, dict) and "summary" in data:
+                summary = data.get("summary", "")
+                tree = data.get("tree", "")
+                content = data.get("content", "")
+                full_context = f"{summary}\n\n{tree}\n\n{content}"
+            
+        except httpx.HTTPError as e:
+            logger.error(f"Failed to ingest repository from gitingest.com: {str(e)}")
+            raise Exception(f"Failed to ingest repository from gitingest.com: {str(e)}")
     
     # Approximate token count (roughly 4 chars per token)
     # Trim to specified context size
     max_chars = context_size * 4
+    original_length = len(full_context)
     if len(full_context) > max_chars:
         full_context = full_context[:max_chars]
         # Add ellipsis to indicate truncation
         full_context += "\n\n... (context truncated)"
+        logger.info(f"Context truncated from {original_length} to {len(full_context)} characters")
+    else:
+        logger.info(f"Repository context ingested: {len(full_context)} characters")
     
     return full_context
 
@@ -133,6 +161,8 @@ Be specific and provide actionable recommendations."""
             
     except httpx.HTTPStatusError as e:
         error_detail = e.response.text if e.response else str(e)
+        logger.error(f"OpenAI API error: {e.response.status_code} - {error_detail}")
         raise Exception(f"OpenAI API error: {e.response.status_code} - {error_detail}")
     except Exception as e:
+        logger.error(f"Failed to send context to OpenAI: {str(e)}")
         raise Exception(f"Failed to send context to OpenAI: {str(e)}")

@@ -70,7 +70,6 @@ clean-comments:
   namespace: "development"
   content: |
     ## Clean Comments
-    
     - When updating code, don't reference what is changing
     - Avoid keywords like LEGACY, CHANGED, REMOVED
     - Focus on comments that document just the functionality of the code

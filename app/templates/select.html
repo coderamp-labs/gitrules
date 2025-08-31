@@ -450,26 +450,82 @@ function closeModal() {
 
 function toggleQuickSelection(actionId) {
     if (selectedActions.has(actionId)) {
-        selectedActions.delete(actionId);
+        removeActionFromSelection(actionId);
     } else {
-        selectedActions.add(actionId);
+        addActionToSelection(actionId);
     }
     
     updateSelectedCount();
     renderActions(); // Re-render to update selection state
 }
 
+function addActionToSelection(actionId) {
+    const action = allActions.find(a => a.id === actionId);
+    if (!action) return;
+    
+    selectedActions.add(actionId);
+    
+    // If it's a ruleset, select all contained rules
+    if (action.action_type === 'ruleset' && action.children) {
+        action.children.forEach(childId => {
+            selectedActions.add(childId);
+        });
+    }
+    
+    // If it's a rule, check if we should select parent rulesets
+    if (action.action_type === 'rule') {
+        handleRuleSelection(actionId);
+    }
+}
+
+function removeActionFromSelection(actionId) {
+    const action = allActions.find(a => a.id === actionId);
+    if (!action) return;
+    
+    selectedActions.delete(actionId);
+    
+    // If it's a rule, check if we need to deselect parent rulesets
+    if (action.action_type === 'rule') {
+        handleRuleDeselection(actionId);
+    }
+    
+    // If it's a ruleset, deselect all contained rules
+    if (action.action_type === 'ruleset' && action.children) {
+        action.children.forEach(childId => {
+            selectedActions.delete(childId);
+        });
+    }
+}
+
+function handleRuleSelection(ruleId) {
+    // Find all rulesets that contain this rule
+    const parentRulesets = allActions.filter(a => 
+        a.action_type === 'ruleset' && a.children && a.children.includes(ruleId)
+    );
+    
+    // For each parent ruleset, check if all its children are now selected
+    parentRulesets.forEach(ruleset => {
+        if (ruleset.children && ruleset.children.every(childId => selectedActions.has(childId))) {
+            // All children are selected, so select the ruleset too
+            selectedActions.add(ruleset.id);
+        }
+    });
+}
+
+function handleRuleDeselection(ruleId) {
+    // Find all rulesets that contain this rule and deselect them
+    allActions
+        .filter(a => a.action_type === 'ruleset' && a.children && a.children.includes(ruleId))
+        .forEach(ruleset => {
+            selectedActions.delete(ruleset.id);
+        });
+}
+
 function toggleActionSelection() {
     if (!currentActionId) return;
     
-    if (selectedActions.has(currentActionId)) {
-        selectedActions.delete(currentActionId);
-    } else {
-        selectedActions.add(currentActionId);
-    }
-    
-    updateSelectedCount();
-    renderActions(); // Re-render to update selection state
+    // Use the same logic as toggleQuickSelection
+    toggleQuickSelection(currentActionId);
     closeModal();
 }
 
@@ -555,7 +611,7 @@ async function loadRepoRecommendations(recommendations) {
         checkLoaded();
     });
     
-    // Pre-select recommended actions
+    // Pre-select recommended actions using centralized logic
     const recommendedIds = [
         ...(recommendations.agents || []),
         ...(recommendations.rules || []),
@@ -563,7 +619,7 @@ async function loadRepoRecommendations(recommendations) {
     ];
     
     recommendedIds.forEach(id => {
-        selectedActions.add(id);
+        addActionToSelection(id);
     });
     
     updateSelectedCount();
@@ -595,8 +651,8 @@ function proceedToNext() {
     
     // Navigate after fade-out completes
     setTimeout(() => {
-        // TODO: Navigate to the next step
-        alert('Next step will be implemented soon. Selected actions: ' + Array.from(selectedActions).join(', '));
+        // Navigate to the generate page with selected actions
+        window.location.href = `/generate?actions=${Array.from(selectedActions).join(',')}`;
     }, 300); // Match the fade-out duration
 }
 

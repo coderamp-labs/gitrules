@@ -3,15 +3,32 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from app.routes import install, actions, recommend
+from app.routes import install, actions, recommend, generate
 from app.services.actions_loader import actions_loader
 from api_analytics.fastapi import Analytics
 from fastapi_mcp import FastApiMCP
 import os
 from dotenv import load_dotenv
+from loguru import logger
+import sys
 
 # Load environment variables
 load_dotenv()
+
+# Configure loguru logger
+logger.remove()
+logger.add(
+    sys.stderr,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+    level="INFO"
+)
+logger.add(
+    "logs/app.log",
+    rotation="10 MB",
+    retention="7 days",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} - {message}",
+    level="DEBUG"
+)
 
 app = FastAPI(title="Gitrules", version="0.1.0")
 
@@ -29,6 +46,7 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 app.include_router(install.router)
 app.include_router(actions.router)
 app.include_router(recommend.router)
+app.include_router(generate.router)
 
 @app.get("/favicon.ico", operation_id="get_favicon")
 async def favicon():
@@ -43,6 +61,11 @@ async def doc(request: Request):
 async def select(request: Request):
     """Action selection page with filters"""
     return templates.TemplateResponse("select.html", {"request": request})
+
+@app.get("/generate", response_class=HTMLResponse, operation_id="get_generate_page")
+async def get_generate_page(request: Request):
+    """Generate configuration files from selected actions"""
+    return templates.TemplateResponse("generate.html", {"request": request})
 
 @app.get("/", response_class=HTMLResponse, operation_id="get_index_page")
 async def index(request: Request):

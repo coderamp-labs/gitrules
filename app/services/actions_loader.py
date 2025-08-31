@@ -2,6 +2,7 @@ import yaml
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 from app.models.actions import Agent, Rule, MCP, Pack, Action, ActionType
+from loguru import logger
 
 class ActionsLoader:
     def __init__(self):
@@ -12,6 +13,7 @@ class ActionsLoader:
         self.rules: List[Rule] = []
         self.mcps: List[MCP] = []
         self.packs: List[Pack] = []
+        logger.info(f"Loading actions from {self.actions_dir}")
         self.load_all()
     
     def load_all(self):
@@ -25,33 +27,39 @@ class ActionsLoader:
         """Load all agents from agents.yaml"""
         agents_file = self.actions_dir / "agents.yaml"
         if agents_file.exists():
-            with open(agents_file, 'r') as f:
-                data = yaml.safe_load(f)
-                if data and 'agents' in data:
-                    for agent_data in data['agents']:
-                        slug = agent_data.get('slug', '')
-                        # Create Action object
-                        action = Action(
-                            id=slug,
-                            name=slug,
-                            display_name=agent_data.get('display_name'),
-                            action_type=ActionType.AGENT,
-                            tags=agent_data.get('tags', []),
-                            content=agent_data.get('content'),
-                            filename=f"{slug}.yaml"
-                        )
-                        self.actions.append(action)
-                        
-                        # Also create legacy Agent for backward compatibility
-                        self.agents.append(Agent(
-                            name=slug,
-                            filename=f"{slug}.yaml",
-                            display_name=agent_data.get('display_name'),
-                            slug=slug,
-                            content=agent_data.get('content'),
-                            tags=agent_data.get('tags', [])
-                        ))
+            try:
+                with open(agents_file, 'r') as f:
+                    data = yaml.safe_load(f)
+                    if data and 'agents' in data:
+                        logger.info(f"Loading {len(data['agents'])} agents")
+                        for agent_data in data['agents']:
+                            slug = agent_data.get('slug', '')
+                            # Create Action object
+                            action = Action(
+                                id=slug,
+                                name=slug,
+                                display_name=agent_data.get('display_name'),
+                                action_type=ActionType.AGENT,
+                                tags=agent_data.get('tags', []),
+                                content=agent_data.get('content'),
+                                filename=f"{slug}.md"
+                            )
+                            self.actions.append(action)
+                            
+                            # Also create legacy Agent for backward compatibility
+                            self.agents.append(Agent(
+                                name=slug,
+                                filename=f"{slug}.md",
+                                display_name=agent_data.get('display_name'),
+                                slug=slug,
+                                content=agent_data.get('content'),
+                                tags=agent_data.get('tags', [])
+                            ))
+            except Exception as e:
+                logger.error(f"Error loading agents from {agents_file}: {e}")
+                self.agents = []
         else:
+            logger.warning(f"Agents file not found: {agents_file}")
             self.agents = []
     
     def _parse_rule(self, slug: str, rule_data: Dict[str, Any]) -> Rule:
@@ -213,6 +221,47 @@ class ActionsLoader:
     def get_action_by_id(self, action_id: str) -> Optional[Action]:
         """Get a specific action by ID"""
         return next((a for a in self.actions if a.id == action_id), None)
+    
+    def get_agent(self, action_id: str) -> Optional[Dict[str, Any]]:
+        """Get agent data by ID for legacy compatibility"""
+        action = self.get_action_by_id(action_id)
+        if action and action.action_type == ActionType.AGENT:
+            return {
+                'name': action.name,
+                'display_name': action.display_name,
+                'slug': action.id,
+                'filename': action.filename,
+                'content': action.content,
+                'tags': action.tags
+            }
+        return None
+    
+    def get_rule(self, action_id: str) -> Optional[Dict[str, Any]]:
+        """Get rule data by ID for legacy compatibility"""
+        action = self.get_action_by_id(action_id)
+        if action and action.action_type in [ActionType.RULE, ActionType.RULESET]:
+            return {
+                'name': action.name,
+                'display_name': action.display_name,
+                'slug': action.id,
+                'content': action.content,
+                'tags': action.tags,
+                'type': action.action_type.value.lower()
+            }
+        return None
+    
+    def get_mcp(self, action_id: str) -> Optional[Dict[str, Any]]:
+        """Get MCP data by ID for legacy compatibility"""
+        action = self.get_action_by_id(action_id)
+        if action and action.action_type == ActionType.MCP:
+            return {
+                'name': action.name,
+                'display_name': action.display_name,
+                'slug': action.id,
+                'config': action.config,
+                'tags': action.tags
+            }
+        return None
 
 # Create singleton instance
 actions_loader = ActionsLoader()

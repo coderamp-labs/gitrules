@@ -184,8 +184,9 @@ async function analyzeRepositoryFromLanding() {
         const recommendData = await recommendResponse.json();
         
         if (recommendResponse.ok && recommendData.success) {
-            // Store recommendations and auto-proceed to next page
+            // Store recommendations and repo URL for later use
             repositoryRecommendations = recommendData.preselect;
+            sessionStorage.setItem('lastAnalyzedRepoUrl', repoUrl);
             
             // Show brief confirmation then redirect
             const totalTools = repositoryRecommendations.rules.length + repositoryRecommendations.agents.length + repositoryRecommendations.mcps.length;
